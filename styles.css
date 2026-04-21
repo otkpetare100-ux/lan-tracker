@@ -375,3 +375,10 @@ body {
   .header h1 { font-size: 1.5rem; }
   .champ-item img { width: 32px; height: 32px; }
 }
+
+/* ---- Champion winrate colors ---- */
+.champ-games { font-size: 0.62rem; color: var(--text-muted); }
+.champ-wr { font-size: 0.65rem; font-weight: 600; }
+.champ-wr.good { color: var(--wr-good); }
+.champ-wr.ok   { color: var(--wr-ok); }
+.champ-wr.bad  { color: var(--wr-bad); }
