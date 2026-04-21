@@ -14,7 +14,6 @@ const ENDPOINTS = {
 const DDRAGON_VERSION = '14.10.1';
 
 async function riotFetch(url) {
-  // Pasa la URL como parametro sin encodear — el proxy la recibe limpia
   const proxyUrl = BASE_PROXY + '?url=' + url;
   const res = await fetch(proxyUrl);
   if (!res.ok) {
@@ -65,7 +64,8 @@ const POSITION_LABELS = {
   '':      '—',
 };
 
-async function getMatchHistory(puuid) {
+// Carga el historial bajo demanda (cuando el usuario hace click)
+async function fetchMatchHistory(puuid) {
   try {
     const matchIds = await getMatchIds(puuid);
     if (!matchIds || matchIds.length === 0) return { matches: [], streak: 0, mainPosition: '—' };
@@ -113,11 +113,11 @@ async function getMatchHistory(puuid) {
   }
 }
 
+// Carga rapida — sin historial
 async function fetchAccountSnapshot(gameName, tagLine) {
   const account  = await getAccountByRiotId(gameName, tagLine);
   const summoner = await getSummonerByPuuid(account.puuid);
   const ranked   = await getRankedEntriesByPuuid(account.puuid);
-  const history  = await getMatchHistory(account.puuid);
 
   const soloQ = ranked.find(r => r.queueType === 'RANKED_SOLO_5x5') || null;
   const flex  = ranked.find(r => r.queueType === 'RANKED_FLEX_SR')  || null;
@@ -130,10 +130,10 @@ async function fetchAccountSnapshot(gameName, tagLine) {
     summonerLevel: summoner.summonerLevel,
     soloQ,
     flex,
-    matches:       history.matches,
-    streak:        history.streak,
-    mainPosition:  history.mainPosition,
-    addedAt:       Date.now(),
-    updatedAt:     Date.now(),
+    matches:      [],
+    streak:       0,
+    mainPosition: '—',
+    addedAt:      Date.now(),
+    updatedAt:    Date.now(),
   };
 }

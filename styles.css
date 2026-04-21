@@ -232,3 +232,55 @@ body {
 .top-1 { border-color: #C89B3C; box-shadow: 0 0 10px rgba(200,155,60,0.15); }
 .top-2 { border-color: #A8A9AD; box-shadow: 0 0 10px rgba(168,169,173,0.1); }
 .top-3 { border-color: #CD7F32; box-shadow: 0 0 10px rgba(205,127,50,0.1); }
+
+/* ---- History section ---- */
+.history-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #16233A;
+}
+
+.history-toggle-btn {
+  background: none;
+  border: 1px solid #1A2840;
+  border-radius: 4px;
+  padding: 4px 12px;
+  color: var(--text-muted);
+  font-family: 'Barlow', sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.history-toggle-btn:hover { color: var(--gold); border-color: var(--gold-dark); }
+.history-toggle-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.history-arrow { font-size: 0.65rem; }
+
+.history-content {
+  margin-top: 8px;
+  overflow-x: auto;
+}
+
+.match-history {
+  display: flex;
+  gap: 5px;
+  padding-bottom: 2px;
+}
+
+.match-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; min-width: 52px; padding: 6px 4px;
+  border-radius: 5px; border: 1px solid transparent; flex-shrink: 0;
+}
+.match-win  { background: rgba(0,198,94,0.07);  border-color: rgba(0,198,94,0.15); }
+.match-loss { background: rgba(224,82,82,0.07); border-color: rgba(224,82,82,0.15); }
+
+.match-champ { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #1E2D4A; }
+.dot-win  { width: 7px; height: 7px; border-radius: 50%; background: var(--wr-good); }
+.dot-loss { width: 7px; height: 7px; border-radius: 50%; background: var(--wr-bad); }
+.match-champ-name { font-size: 0.58rem; color: #8A9BB5; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50px; }
+.match-kda  { font-size: 0.6rem; color: #E8E0D0; font-weight: 500; }
+.match-dur  { font-size: 0.56rem; color: var(--text-dim); }
+.match-empty { font-size: 0.75rem; color: var(--text-dim); padding: 8px 0; }

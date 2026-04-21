@@ -78,15 +78,17 @@ function formatDuration(seconds) {
 
 function buildStreakHTML(streak) {
   if (!streak || streak === 0) return '';
-  const isWin  = streak > 0;
-  const count  = Math.abs(streak);
-  const cls    = isWin ? 'streak-win' : 'streak-loss';
-  const label  = isWin ? count + 'V seguidas' : count + 'D seguidas';
+  const isWin = streak > 0;
+  const count = Math.abs(streak);
+  const cls   = isWin ? 'streak-win' : 'streak-loss';
+  const label = isWin ? count + 'V seguidas' : count + 'D seguidas';
   return '<span class="streak-badge ' + cls + '">' + label + '</span>';
 }
 
 function buildMatchHistoryHTML(matches) {
-  if (!matches || matches.length === 0) return '';
+  if (!matches || matches.length === 0) {
+    return '<div class="match-empty">Sin partidas registradas</div>';
+  }
   const items = matches.map(function(m) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
@@ -125,6 +127,12 @@ function buildCardHTML(acc, position) {
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
+  const hasHistory = acc.matches && acc.matches.length > 0;
+  const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
+    '<span class="history-btn-text">Ver historial</span>' +
+    '<span class="history-arrow">▾</span>' +
+  '</button>';
+
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
       (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
@@ -152,7 +160,12 @@ function buildCardHTML(acc, position) {
       '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
     '</div>' +
   '</div>' +
-  buildMatchHistoryHTML(acc.matches);
+  '<div class="history-section">' +
+    historyBtn +
+    '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
+      buildMatchHistoryHTML(acc.matches) +
+    '</div>' +
+  '</div>';
 }
 
 function renderAccounts(accounts) {
