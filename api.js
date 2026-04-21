@@ -40,7 +40,7 @@ async function getRankedEntriesByPuuid(puuid) {
 
 async function getMatchIds(puuid) {
   // Ultimas 10 partidas de SoloQ (queue=420)
-  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=10`;
+  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=5`;
   return riotFetch(url);
 }
 
