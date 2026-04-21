@@ -10,29 +10,7 @@ const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
 
-// Render inicial
 renderAccounts(accounts);
-
-/* ---- Lógica de Negocio (Rachas) ---- */
-
-/**
- * Calcula la racha basándose en el historial de partidas
- */
-function calculateStreak(matches) {
-  if (!matches || matches.length === 0) return 0;
-  
-  let streak = 0;
-  const firstMatchWin = matches[0].win;
-  
-  for (let match of matches) {
-    if (match.win === firstMatchWin) {
-      streak += (firstMatchWin ? 1 : -1);
-    } else {
-      break;
-    }
-  }
-  return streak;
-}
 
 /* ---- Auto-refresh ---- */
 setInterval(() => {
@@ -48,7 +26,7 @@ async function handleSearch() {
 
   const parts = raw.split('#');
   if (parts.length !== 2 || !parts[0] || !parts[1]) {
-    showError('Formato invalido. Usa Nombre#TAG (ej: Pepitoflow#LAN1)');
+    showError('Formato invalido. Usa Nombre#TAG  (ej: Pepitoflow#LAN1)');
     return;
   }
 
@@ -57,11 +35,7 @@ async function handleSearch() {
   searchBtn.textContent = '...';
 
   try {
-    const entry = await fetchAccountSnapshot(gameName, tagLine);
-    
-    // Calcular racha antes de añadir
-    entry.streak = calculateStreak(entry.matches);
-    
+    const entry  = await fetchAccountSnapshot(gameName, tagLine);
     const result = addAccount(accounts, entry);
 
     if (!result.added) {
@@ -96,10 +70,6 @@ async function handleRefresh(puuid, silent = false) {
 
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
-    
-    // Calcular racha en la actualización
-    updated.streak = calculateStreak(updated.matches);
-    
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     saveAccounts(accounts);
     renderAccounts(accounts);
