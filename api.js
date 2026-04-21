@@ -2,7 +2,10 @@
  * api.js — Riot Games API calls for LAN Tracker
  */
 
-const PROXY = 'http://localhost:3000/riot?url=';
+// Detecta automaticamente si corre en local o en produccion
+const PROXY = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/riot?url='
+  : `${window.location.origin}/riot?url=`;
 
 const ENDPOINTS = {
   AMERICAS: 'https://americas.api.riotgames.com',
@@ -22,7 +25,6 @@ async function riotFetch(url) {
 }
 
 async function getAccountByRiotId(gameName, tagLine) {
-  // NO encodeURIComponent aqui — el proxy recibe la URL limpia
   const url = `${ENDPOINTS.AMERICAS}/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`;
   return riotFetch(url);
 }
