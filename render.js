@@ -68,6 +68,41 @@ function escapeHTML(str) {
     .replace(/"/g, '&quot;');
 }
 
+function formatDuration(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function buildStreakHTML(streak) {
+  if (!streak || streak === 0) return '';
+  const isWin  = streak > 0;
+  const count  = Math.abs(streak);
+  const cls    = isWin ? 'streak-win' : 'streak-loss';
+  const label  = isWin ? count + 'V seguidas' : count + 'D seguidas';
+  return '<span class="streak-badge ' + cls + '">' + label + '</span>';
+}
+
+function buildMatchHistoryHTML(matches) {
+  if (!matches || matches.length === 0) return '';
+
+  const items = matches.map(function(m) {
+    const cls = m.win ? 'match-win' : 'match-loss';
+    const kda = m.kills + '/' + m.deaths + '/' + m.assists;
+    const dur = formatDuration(m.gameDuration);
+    const img = 'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/' + m.champion + '.png';
+    return '<div class="match-item ' + cls + '">' +
+      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
+      '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
+      '<span class="match-champ-name">' + escapeHTML(m.champion) + '</span>' +
+      '<span class="match-kda">' + kda + '</span>' +
+      '<span class="match-dur">' + dur + '</span>' +
+    '</div>';
+  });
+
+  return '<div class="match-history">' + items.join('') + '</div>';
+}
+
 function buildCardHTML(acc) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
@@ -85,8 +120,11 @@ function buildCardHTML(acc) {
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
   const updatedStr = acc.updatedAt
-    ? 'Actualizado: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
     : '';
+
+  const position = acc.mainPosition || '—';
+  const streak   = buildStreakHTML(acc.streak);
 
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
@@ -98,6 +136,8 @@ function buildCardHTML(acc) {
       '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
       '<div class="summoner-meta">' +
         '<span class="summoner-region">LAN</span>' +
+        '<span class="position-badge">' + escapeHTML(position) + '</span>' +
+        streak +
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '</div>' +
     '</div>' +
@@ -111,17 +151,16 @@ function buildCardHTML(acc) {
       '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
       '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
     '</div>' +
-  '</div>';
+  '</div>' +
+  buildMatchHistoryHTML(acc.matches);
 }
 
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
-
   if (accounts.length === 0) {
     grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
     return;
   }
-
   grid.innerHTML = accounts.map(function(acc) {
     var div = document.createElement('div');
     div.className = 'account-card';
