@@ -1,83 +1,102 @@
 /**
  * app.js — Main controller for LAN Tracker
- *
- * Wires together api.js, storage.js, and render.js.
- * Handles user interactions and application state.
  */
 
-/* ---- State ---- */
 let accounts = loadAccounts();
 
-/* ---- DOM References ---- */
-const searchInput = document.getElementById('search-input');
-const searchBtn   = document.getElementById('search-btn');
+const searchInput  = document.getElementById('search-input');
+const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
 
-/* ---- Init ---- */
 renderAccounts(accounts);
 
-/* ---- Search handler ---- */
-
+/* ---- Search ---- */
 async function handleSearch() {
   const raw = searchInput.value.trim();
   showError('');
-
   if (!raw) return;
 
-  // Validate format
   const parts = raw.split('#');
   if (parts.length !== 2 || !parts[0] || !parts[1]) {
-    showError('Formato inválido. Usa Nombre#TAG  (ej: Pepitoflow#LAN1)');
+    showError('Formato invalido. Usa Nombre#TAG  (ej: Pepitoflow#LAN1)');
     return;
   }
 
   const [gameName, tagLine] = parts;
-
-  // Lock UI
   searchBtn.disabled = true;
   searchBtn.textContent = '...';
 
   try {
-    const entry = await fetchAccountSnapshot(gameName, tagLine);
+    const entry  = await fetchAccountSnapshot(gameName, tagLine);
     const result = addAccount(accounts, entry);
 
     if (!result.added) {
-      showError('Esta cuenta ya está en la lista.');
+      showError('Esta cuenta ya esta en la lista.');
     } else {
       accounts = result.accounts;
       renderAccounts(accounts);
       searchInput.value = '';
     }
-
   } catch (err) {
     const msg = err.status
       ? getApiErrorMessage(err.status)
       : `Error de red: ${err.message}`;
     showError(msg);
-    console.error('[LAN Tracker] API error:', err);
   } finally {
     searchBtn.disabled = false;
     searchBtn.textContent = 'Buscar';
   }
 }
 
-/* ---- Remove handler (event delegation) ---- */
+/* ---- Refresh ---- */
+async function handleRefresh(puuid) {
+  const acc = accounts.find(a => a.puuid === puuid);
+  if (!acc) return;
 
+  // Muestra spinner en el boton
+  const card = document.getElementById(`card-${puuid}`);
+  if (card) {
+    const btn = card.querySelector('.refresh-btn');
+    if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
+  }
+
+  try {
+    const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
+    accounts = accounts.map(a => a.puuid === puuid ? updated : a);
+    saveAccounts(accounts);
+    renderAccounts(accounts);
+  } catch (err) {
+    const msg = err.status
+      ? getApiErrorMessage(err.status)
+      : `Error de red: ${err.message}`;
+    showError(msg);
+    // Quita el spinner si fallo
+    const card = document.getElementById(`card-${puuid}`);
+    if (card) {
+      const btn = card.querySelector('.refresh-btn');
+      if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+    }
+  }
+}
+
+/* ---- Event delegation ---- */
 accountsGrid.addEventListener('click', (e) => {
-  const btn = e.target.closest('.remove-btn');
-  if (!btn) return;
+  const removeBtn  = e.target.closest('.remove-btn');
+  const refreshBtn = e.target.closest('.refresh-btn');
 
-  const puuid = btn.dataset.puuid;
-  if (!puuid) return;
+  if (removeBtn) {
+    const puuid = removeBtn.dataset.puuid;
+    accounts = removeAccount(accounts, puuid);
+    renderAccounts(accounts);
+  }
 
-  accounts = removeAccount(accounts, puuid);
-  renderAccounts(accounts);
+  if (refreshBtn) {
+    const puuid = refreshBtn.dataset.puuid;
+    handleRefresh(puuid);
+  }
 });
 
-/* ---- Event listeners ---- */
-
 searchBtn.addEventListener('click', handleSearch);
-
 searchInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleSearch();
 });
