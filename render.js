@@ -2,9 +2,9 @@
  * render.js — DOM rendering helpers for LAN Tracker
  */
 
-// --- CONFIGURACIÓN ---
-const DDragonVersion = '14.8.1'; // Usamos una versión estable de DDragon
-const FALLBACK_ICON_URL = `https://ddragon.leagueoflegends.com/cdn/${DDragonVersion}/img/profileicon/29.png`; // Icono de Poro por defecto
+// 1. CONFIGURACIÓN ÚNICA
+const DDragonVersion = '14.8.1'; 
+const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/14.8.1/img/profileicon/29.png'; 
 
 const RANK_COLORS = {
   IRON:        '#6B5A4E',
@@ -34,8 +34,7 @@ const RANK_EMOJI = {
   UNRANKED:    '❓',
 };
 
-// --- FUNCIONES DE AYUDA (HELPERS) ---
-
+// 2. FUNCIONES DE AYUDA
 function getRankInfo(acc) {
   const soloQ = acc.soloQ;
   if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
@@ -67,11 +66,7 @@ function titleCase(str) {
 }
 
 function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function formatDuration(seconds) {
@@ -91,12 +86,10 @@ function buildStreakHTML(streak) {
 
 function buildMatchHistoryHTML(matches) {
   if (!matches || matches.length === 0) return '';
-
   const items = matches.map(function(m) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
-    // Usamos la versión configurada arriba
     const img = `https://ddragon.leagueoflegends.com/cdn/${DDragonVersion}/img/champion/${m.champion}.png`;
     return '<div class="match-item ' + cls + '">' +
       '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
@@ -108,42 +101,32 @@ function buildMatchHistoryHTML(matches) {
       '</div>' +
     '</div>';
   });
-
   return '<div class="match-history hidden-history">' + items.join('') + '</div>';
 }
 
-// --- FUNCIÓN PRINCIPAL DE RENDERIZADO DE TARJETA ---
-
+// 3. RENDERIZADO DE TARJETA
 function buildCardHTML(acc) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
   const wrCls   = winrateClass(wr);
   const color   = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
   const emoji   = RANK_EMOJI[r.tier]  || '❓';
-  const rankStr = r.tier === 'UNRANKED'
-    ? 'Sin clasificar'
-    : titleCase(r.tier) + ' ' + r.division;
+  const rankStr = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + r.division;
 
-  // CORRECCIÓN: Definimos la URL del icono directamente aquí usando Data Dragon
-  // Y añadimos un "onerror" para cargar la imagen de respaldo si esta falla.
-  const iconId = acc.profileIconId || 29; // Por defecto el poro si no hay ID
+  const iconId = acc.profileIconId || 29;
   const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDragonVersion}/img/profileicon/${iconId}.png`;
 
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
-  const updatedStr = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
-    : '';
-
+  const updatedStr = acc.updatedAt ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}) : '';
   const position = acc.mainPosition || '—';
   const streak   = buildStreakHTML(acc.streak);
 
   return '<div class="card-content-wrapper">' + 
     '<div class="card-top">' +
       '<div class="icon-wrap">' +
-        // CORRECCIÓN: Añadido onerror para usar FALLBACK_ICON_URL
         '<img src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'; this.onerror=null;" />' +
         '<span class="icon-level">' + acc.summonerLevel + '</span>' +
       '</div>' +
@@ -175,47 +158,34 @@ function buildCardHTML(acc) {
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
   if (!grid) return;
-  
   if (accounts.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
+    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p></div>';
     return;
   }
-
   grid.innerHTML = ''; 
-
   accounts.forEach(function(acc) {
     const div = document.createElement('div');
     div.className = 'account-card';
     div.id = 'card-' + acc.puuid;
     div.innerHTML = buildCardHTML(acc);
-
     div.addEventListener('click', function(e) {
       if (e.target.closest('button')) return;
       const historySection = div.querySelector('.match-history');
-      if (historySection) {
-        historySection.classList.toggle('active-history');
-      }
+      if (historySection) historySection.classList.toggle('active-history');
     });
-
     grid.appendChild(div);
   });
 }
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
-  if (el) {
-    el.textContent = msg;
-    el.style.display = msg ? 'block' : 'none';
-  }
+  if (el) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
 }
 
 function getApiErrorMessage(status) {
   switch (status) {
-    case 400: return 'Solicitud invalida. Revisa el formato Nombre#TAG.';
     case 403: return 'API key invalida o expirada.';
-    case 404: return 'Cuenta no encontrada en LAN.';
-    case 429: return 'Demasiadas solicitudes. Espera un momento.';
-    case 503: return 'El servidor de Riot esta caido.';
-    default:  return 'Error inesperado (HTTP ' + status + ').';
+    case 404: return 'Cuenta no encontrada.';
+    default:  return 'Error de conexión.';
   }
 }
