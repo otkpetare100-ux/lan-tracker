@@ -114,13 +114,14 @@ body {
 .account-card:hover {
     border-color: var(--gold);
     background: #161c24;
+    transform: translateY(-2px);
 }
 
 .card-top {
     display: flex;
     align-items: center;
     gap: 20px;
-    flex-wrap: nowrap; /* Evita que se rompa en varias filas arriba */
+    flex-wrap: nowrap;
 }
 
 /* Icono de Invocador */
@@ -160,27 +161,38 @@ body {
 /* Badges */
 .position-badge, .streak-badge, .updated-time {
     background: rgba(255, 255, 255, 0.05);
-    padding: 2px 6px;
+    padding: 2px 8px;
     border-radius: 4px;
     font-size: 0.7rem;
     white-space: nowrap;
+    font-weight: bold;
 }
-.streak-win { color: var(--win-green); border: 1px solid rgba(0, 198, 94, 0.3); }
-.streak-loss { color: var(--loss-red); border: 1px solid rgba(255, 78, 80, 0.3); }
+
+.streak-win { 
+    color: white !important; 
+    background-color: var(--win-green) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.streak-loss { 
+    color: white !important; 
+    background-color: var(--loss-red) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
 
 /* Bloque de Rango */
-.rank-block { text-align: center; min-width: 90px; }
-.rank-emblem { font-size: 1.2rem; }
-.rank-name { font-weight: bold; text-transform: uppercase; font-size: 0.75rem; }
+.rank-block { text-align: center; min-width: 110px; }
+.rank-emblem { font-size: 1.4rem; margin-bottom: 2px; }
+.rank-name { font-weight: bold; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
 .rank-lp { font-size: 0.75rem; color: var(--text-dim); }
 
 /* Winrate */
-.winrate-block { text-align: center; min-width: 80px; }
+.winrate-block { text-align: center; min-width: 80px; border-left: 1px solid var(--border-color); padding-left: 15px; }
 .wr-number { font-size: 1.1rem; font-weight: bold; }
 .wr-number.good { color: var(--win-green); }
+.wr-number.ok { color: var(--text-main); }
 .wr-number.bad { color: var(--loss-red); }
 .wr-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
-.wr-games { font-size: 0.65rem; color: var(--text-dim); }
 
 /* Botones de acción */
 .card-actions { display: flex; gap: 8px; }
@@ -188,16 +200,26 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
     color: white;
-    padding: 6px 10px;
+    padding: 8px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
 }
-.remove-btn:hover { color: var(--loss-red); border-color: var(--loss-red); }
 
-/* --- HISTORIAL (CORREGIDO) --- */
+.refresh-btn:hover { background: rgba(200, 170, 110, 0.2); border-color: var(--gold); }
+.remove-btn:hover { color: var(--loss-red); border-color: var(--loss-red); background: rgba(255, 78, 80, 0.1); }
+
+/* Animación Spin */
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* --- HISTORIAL --- */
 .match-history {
-    display: none; /* Oculto por defecto */
+    display: none;
     gap: 8px;
     margin-top: 15px;
     padding-top: 15px;
@@ -207,68 +229,31 @@ body {
     animation: fadeIn 0.3s ease;
 }
 
-.match-history.active-history {
-    display: flex; /* Se muestra al hacer clic */
-}
+.match-history.active-history { display: flex; }
 
 .match-item {
-    width: 70px;
+    width: 65px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 6px;
     padding: 6px 4px;
     border: 1px solid transparent;
-    transition: transform 0.2s;
 }
 
-.match-item:hover {
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.03);
-}
+.match-win { border-color: rgba(0, 198, 94, 0.4); background: rgba(0, 198, 94, 0.05); }
+.match-loss { border-color: rgba(255, 78, 80, 0.4); background: rgba(255, 78, 80, 0.05); }
 
-.match-win { border-color: rgba(0, 198, 94, 0.3); }
-.match-loss { border-color: rgba(255, 78, 80, 0.3); }
-
-.match-champ { 
-    width: 36px; 
-    height: 36px; 
-    border-radius: 4px; 
-    margin-bottom: 4px;
-    object-fit: cover;
-}
-
-.match-result-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    margin-bottom: 4px;
-}
+.match-champ { width: 32px; height: 32px; border-radius: 4px; margin-bottom: 4px; border: 1px solid rgba(200, 170, 110, 0.3); }
+.match-result-dot { width: 6px; height: 6px; border-radius: 50%; margin-bottom: 4px; }
 .dot-win { background: var(--win-green); box-shadow: 0 0 5px var(--win-green); }
 .dot-loss { background: var(--loss-red); box-shadow: 0 0 5px var(--loss-red); }
 
-.match-info-box {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    font-size: 0.65rem;
-    gap: 1px;
-}
-
-.match-champ-name {
-    color: var(--text-main);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 60px;
-}
-
+.match-info-box { display: flex; flex-direction: column; text-align: center; font-size: 0.6rem; gap: 1px; }
 .match-kda { font-weight: bold; color: var(--gold); }
 .match-dur { color: var(--text-dim); }
 
-/* --- ANIMACIONES --- */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
@@ -276,7 +261,9 @@ body {
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
-    .card-top { flex-wrap: wrap; justify-content: center; text-align: center; }
+    .card-top { flex-wrap: wrap; justify-content: center; text-align: center; gap: 15px; }
     .summoner-info { width: 100%; flex: none; }
+    .winrate-block { border-left: none; border-top: 1px solid var(--border-color); padding-left: 0; padding-top: 10px; width: 50%; }
+    .rank-block { width: 50%; }
     .match-history { justify-content: center; }
 }
