@@ -1,63 +1,79 @@
-const express = require('express');
-const fetch   = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-const path    = require('path');
-const fs      = require('fs');
+const express    = require('express');
+const fetch      = (...args) => import('node-fetch').then(({default: f}) => f(...args));
+const path       = require('path');
+const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
 
-const app     = express();
-const PORT    = process.env.PORT || 3000;
-const API_KEY = process.env.RIOT_API_KEY;
+const app      = express();
+const PORT     = process.env.PORT || 3000;
+const API_KEY  = process.env.RIOT_API_KEY;
+const MONGO_URI = process.env.MONGO_URI;
 
-if (!API_KEY) {
-  console.error('❌ Falta la variable RIOT_API_KEY.');
-  process.exit(1);
+if (!API_KEY)   { console.error('❌ Falta RIOT_API_KEY');  process.exit(1); }
+if (!MONGO_URI) { console.error('❌ Falta MONGO_URI');     process.exit(1); }
+
+// Conexion a MongoDB
+let db;
+async function connectDB() {
+  const client = new MongoClient(MONGO_URI);
+  await client.connect();
+  db = client.db('lan-tracker');
+  console.log('✅ MongoDB conectado');
 }
+connectDB();
 
-const DB_FILE = path.join(__dirname, 'accounts.json');
-
-function readAccounts() {
-  try {
-    if (!fs.existsSync(DB_FILE)) return [];
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-  } catch(e) { return []; }
-}
-
-function writeAccounts(accounts) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(accounts, null, 2), 'utf8');
+function getCollection() {
+  return db.collection('accounts');
 }
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-app.get('/accounts', (req, res) => res.json(readAccounts()));
+// ---- Endpoints de cuentas ----
 
-app.post('/accounts', (req, res) => {
+app.get('/accounts', async (req, res) => {
+  try {
+    const accounts = await getCollection().find({}).toArray();
+    res.json(accounts);
+  } catch(e) {
+    res.status(500).json({ error: 'Error leyendo cuentas' });
+  }
+});
+
+app.post('/accounts', async (req, res) => {
   const entry = req.body;
   if (!entry || !entry.puuid) return res.status(400).json({ error: 'Datos invalidos' });
-  const accounts = readAccounts();
-  if (accounts.some(a => a.puuid === entry.puuid)) return res.status(409).json({ error: 'Ya existe' });
-  accounts.push(entry);
-  writeAccounts(accounts);
-  res.json({ ok: true });
+  try {
+    const exists = await getCollection().findOne({ puuid: entry.puuid });
+    if (exists) return res.status(409).json({ error: 'Ya existe' });
+    await getCollection().insertOne(entry);
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Error guardando cuenta' });
+  }
 });
 
-app.delete('/accounts/:puuid', (req, res) => {
-  writeAccounts(readAccounts().filter(a => a.puuid !== req.params.puuid));
-  res.json({ ok: true });
+app.delete('/accounts/:puuid', async (req, res) => {
+  try {
+    await getCollection().deleteOne({ puuid: req.params.puuid });
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Error eliminando cuenta' });
+  }
 });
 
-app.put('/accounts/:puuid', (req, res) => {
-  let accounts = readAccounts();
-  const idx = accounts.findIndex(a => a.puuid === req.params.puuid);
-  if (idx === -1) return res.status(404).json({ error: 'No encontrada' });
-  accounts[idx] = req.body;
-  writeAccounts(accounts);
-  res.json({ ok: true });
+app.put('/accounts/:puuid', async (req, res) => {
+  try {
+    await getCollection().replaceOne({ puuid: req.params.puuid }, req.body);
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Error actualizando cuenta' });
+  }
 });
 
+// ---- Proxy de Riot API ----
 app.get('/riot', async (req, res) => {
-  // La URL llega sin encoding extra — la usamos directo
   const targetUrl = req.query.url;
   if (!targetUrl) return res.status(400).json({ error: 'Falta ?url=' });
 
