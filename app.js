@@ -2,7 +2,7 @@
  * app.js — Main controller for LAN Tracker
  */
 
-const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
+const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 let accounts = [];
 
@@ -10,14 +10,33 @@ const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
 
-// Carga inicial desde el servidor
+// Orden de rangos para comparar
+const TIER_ORDER = {
+  CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7,
+  DIAMOND: 6, EMERALD: 5, PLATINUM: 4,
+  GOLD: 3, SILVER: 2, BRONZE: 1, IRON: 0, UNRANKED: -1,
+};
+const DIV_ORDER = { I: 4, II: 3, III: 2, IV: 1 };
+
+function getRankScore(acc) {
+  const soloQ = acc.soloQ;
+  if (!soloQ) return -1;
+  const tier = TIER_ORDER[soloQ.tier] ?? -1;
+  const div  = DIV_ORDER[soloQ.rank]  ?? 0;
+  const lp   = soloQ.leaguePoints     || 0;
+  return tier * 10000 + div * 1000 + lp;
+}
+
+function sortByRank(list) {
+  return [...list].sort((a, b) => getRankScore(b) - getRankScore(a));
+}
+
 async function init() {
   accounts = await loadAccounts();
-  renderAccounts(accounts);
+  renderAccounts(sortByRank(accounts));
 }
 init();
 
-// Auto-refresh cada 5 minutos
 setInterval(async () => {
   if (accounts.length === 0) return;
   for (const acc of accounts) {
@@ -49,7 +68,7 @@ async function handleSearch() {
       showError('Esta cuenta ya esta en la lista.');
     } else {
       accounts.push(entry);
-      renderAccounts(accounts);
+      renderAccounts(sortByRank(accounts));
       searchInput.value = '';
     }
   } catch (err) {
@@ -78,7 +97,7 @@ async function handleRefresh(puuid, silent = false) {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
     await updateAccountOnServer(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
-    renderAccounts(accounts);
+    renderAccounts(sortByRank(accounts));
   } catch (err) {
     if (!silent) {
       showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
@@ -100,7 +119,7 @@ accountsGrid.addEventListener('click', async (e) => {
     const puuid = removeBtn.dataset.puuid;
     await deleteAccountFromServer(puuid);
     accounts = accounts.filter(a => a.puuid !== puuid);
-    renderAccounts(accounts);
+    renderAccounts(sortByRank(accounts));
   }
 
   if (refreshBtn) {

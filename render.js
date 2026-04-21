@@ -30,6 +30,8 @@ const RANK_EMOJI = {
   UNRANKED:    '❓',
 };
 
+const MEDALS = { 0: '🥇', 1: '🥈', 2: '🥉' };
+
 function getRankInfo(acc) {
   const soloQ = acc.soloQ;
   if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
@@ -85,7 +87,6 @@ function buildStreakHTML(streak) {
 
 function buildMatchHistoryHTML(matches) {
   if (!matches || matches.length === 0) return '';
-
   const items = matches.map(function(m) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
@@ -99,11 +100,10 @@ function buildMatchHistoryHTML(matches) {
       '<span class="match-dur">' + dur + '</span>' +
     '</div>';
   });
-
   return '<div class="match-history">' + items.join('') + '</div>';
 }
 
-function buildCardHTML(acc) {
+function buildCardHTML(acc, position) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
   const wrCls   = winrateClass(wr);
@@ -113,21 +113,21 @@ function buildCardHTML(acc) {
     ? 'Sin clasificar'
     : titleCase(r.tier) + ' ' + r.division;
 
-  const iconUrl = getProfileIconUrl(acc.profileIconId);
+  const iconUrl    = getProfileIconUrl(acc.profileIconId);
+  const medal      = MEDALS[position] || '';
+  const updatedStr = acc.updatedAt
+    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+    : '';
+  const posLabel = acc.mainPosition || '—';
+  const streak   = buildStreakHTML(acc.streak);
 
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
-  const updatedStr = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
-    : '';
-
-  const position = acc.mainPosition || '—';
-  const streak   = buildStreakHTML(acc.streak);
-
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
+      (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
       '<img src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
@@ -136,7 +136,7 @@ function buildCardHTML(acc) {
       '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
       '<div class="summoner-meta">' +
         '<span class="summoner-region">LAN</span>' +
-        '<span class="position-badge">' + escapeHTML(position) + '</span>' +
+        '<span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
         streak +
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '</div>' +
@@ -161,11 +161,11 @@ function renderAccounts(accounts) {
     grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
     return;
   }
-  grid.innerHTML = accounts.map(function(acc) {
+  grid.innerHTML = accounts.map(function(acc, idx) {
     var div = document.createElement('div');
-    div.className = 'account-card';
+    div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
     div.id = 'card-' + acc.puuid;
-    div.innerHTML = buildCardHTML(acc);
+    div.innerHTML = buildCardHTML(acc, idx);
     return div.outerHTML;
   }).join('');
 }

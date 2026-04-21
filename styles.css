@@ -218,3 +218,17 @@ body {
   .tracker-wrap { padding: 1.5rem 1rem 3rem; }
   .header h1 { font-size: 1.5rem; }
 }
+
+/* ---- Medals ---- */
+.medal-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 1rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+}
+
+.top-1 { border-color: #C89B3C; box-shadow: 0 0 10px rgba(200,155,60,0.15); }
+.top-2 { border-color: #A8A9AD; box-shadow: 0 0 10px rgba(168,169,173,0.1); }
+.top-3 { border-color: #CD7F32; box-shadow: 0 0 10px rgba(205,127,50,0.1); }
