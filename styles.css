@@ -61,4 +61,222 @@ body {
 .search-bar {
     display: flex;
     gap: 10px;
-    background: rgba(2
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+#search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 10px;
+    font-size: 1.1rem;
+    outline: none;
+}
+
+#search-btn {
+    background: var(--gold);
+    color: black;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#search-btn:hover {
+    background: #e1c07a;
+    transform: translateY(-2px);
+}
+
+/* --- TARJETAS DE CUENTA --- */
+.accounts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.account-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.account-card:hover {
+    border-color: var(--gold);
+    background: #161c24;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: nowrap; /* Evita que se rompa en varias filas arriba */
+}
+
+/* Icono de Invocador */
+.icon-wrap {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.icon-wrap img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    object-fit: cover;
+}
+
+.icon-level {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2328;
+    border: 1px solid var(--gold);
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: 10px;
+}
+
+/* Info del Invocador */
+.summoner-info { flex: 1; min-width: 150px; }
+.summoner-name { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: bold; line-height: 1; }
+.summoner-tag { color: var(--text-dim); font-size: 0.8rem; }
+.summoner-meta { display: flex; gap: 8px; margin-top: 5px; align-items: center; flex-wrap: wrap; }
+
+/* Badges */
+.position-badge, .streak-badge, .updated-time {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+.streak-win { color: var(--win-green); border: 1px solid rgba(0, 198, 94, 0.3); }
+.streak-loss { color: var(--loss-red); border: 1px solid rgba(255, 78, 80, 0.3); }
+
+/* Bloque de Rango */
+.rank-block { text-align: center; min-width: 90px; }
+.rank-emblem { font-size: 1.2rem; }
+.rank-name { font-weight: bold; text-transform: uppercase; font-size: 0.75rem; }
+.rank-lp { font-size: 0.75rem; color: var(--text-dim); }
+
+/* Winrate */
+.winrate-block { text-align: center; min-width: 80px; }
+.wr-number { font-size: 1.1rem; font-weight: bold; }
+.wr-number.good { color: var(--win-green); }
+.wr-number.bad { color: var(--loss-red); }
+.wr-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+.wr-games { font-size: 0.65rem; color: var(--text-dim); }
+
+/* Botones de acción */
+.card-actions { display: flex; gap: 8px; }
+.refresh-btn, .remove-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.remove-btn:hover { color: var(--loss-red); border-color: var(--loss-red); }
+
+/* --- HISTORIAL (CORREGIDO) --- */
+.match-history {
+    display: none; /* Oculto por defecto */
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    animation: fadeIn 0.3s ease;
+}
+
+.match-history.active-history {
+    display: flex; /* Se muestra al hacer clic */
+}
+
+.match-item {
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 6px 4px;
+    border: 1px solid transparent;
+    transition: transform 0.2s;
+}
+
+.match-item:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.match-win { border-color: rgba(0, 198, 94, 0.3); }
+.match-loss { border-color: rgba(255, 78, 80, 0.3); }
+
+.match-champ { 
+    width: 36px; 
+    height: 36px; 
+    border-radius: 4px; 
+    margin-bottom: 4px;
+    object-fit: cover;
+}
+
+.match-result-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+}
+.dot-win { background: var(--win-green); box-shadow: 0 0 5px var(--win-green); }
+.dot-loss { background: var(--loss-red); box-shadow: 0 0 5px var(--loss-red); }
+
+.match-info-box {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    font-size: 0.65rem;
+    gap: 1px;
+}
+
+.match-champ-name {
+    color: var(--text-main);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+}
+
+.match-kda { font-weight: bold; color: var(--gold); }
+.match-dur { color: var(--text-dim); }
+
+/* --- ANIMACIONES --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .card-top { flex-wrap: wrap; justify-content: center; text-align: center; }
+    .summoner-info { width: 100%; flex: none; }
+    .match-history { justify-content: center; }
+}
