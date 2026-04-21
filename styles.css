@@ -12,13 +12,11 @@
   --gold:        #C89B3C;
   --gold-light:  #F0E6C8;
   --gold-dark:   #785A28;
-  --blue-accent: #0BC4E3;
   --dark-bg:     #07090F;
   --card-bg:     #0D1425;
   --card-border: #1A2840;
   --text-muted:  #5A7899;
   --text-dim:    #2E3D52;
-
   --wr-good: #00C65E;
   --wr-ok:   #C89B3C;
   --wr-bad:  #E05252;
@@ -55,16 +53,8 @@ body {
 }
 
 /* ---- Header ---- */
-.header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-  animation: fadeDown 0.5s ease both;
-}
-.header-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  filter: drop-shadow(0 0 12px rgba(200,155,60,0.5));
-}
+.header { text-align: center; margin-bottom: 2.5rem; animation: fadeDown 0.5s ease both; }
+.header-icon { font-size: 2rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 12px rgba(200,155,60,0.5)); }
 .header h1 {
   font-family: 'Cinzel', serif;
   font-size: 2rem;
@@ -84,10 +74,7 @@ body {
 }
 
 /* ---- Search ---- */
-.search-section {
-  margin-bottom: 2rem;
-  animation: fadeDown 0.5s ease 0.1s both;
-}
+.search-section { margin-bottom: 2rem; animation: fadeDown 0.5s ease 0.1s both; }
 .search-bar { display: flex; gap: 8px; }
 .search-bar input {
   flex: 1;
@@ -102,10 +89,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-bar input::placeholder { color: var(--text-dim); }
-.search-bar input:focus {
-  border-color: var(--gold-dark);
-  box-shadow: 0 0 0 3px rgba(200,155,60,0.1);
-}
+.search-bar input:focus { border-color: var(--gold-dark); box-shadow: 0 0 0 3px rgba(200,155,60,0.1); }
 .search-bar button {
   background: linear-gradient(135deg, #C89B3C 0%, #785A28 100%);
   border: none;
@@ -150,11 +134,7 @@ body {
 .section-title::after { content: ''; flex: 1; border-top: 1px solid #16233A; }
 
 /* ---- Accounts grid ---- */
-.accounts-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.accounts-grid { display: flex; flex-direction: column; gap: 10px; }
 
 /* ---- Empty state ---- */
 .empty-state {
@@ -165,12 +145,7 @@ body {
   border-radius: 6px;
 }
 .empty-icon { font-size: 1.8rem; display: block; margin-bottom: 10px; opacity: 0.4; }
-.empty-state p {
-  font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  color: #2E3D52;
-}
+.empty-state p { font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.12em; color: #2E3D52; }
 .empty-state small { display: block; font-size: 0.75rem; margin-top: 6px; color: #1E2D40; }
 
 /* ---- Account card ---- */
@@ -182,10 +157,7 @@ body {
   transition: border-color 0.2s, transform 0.15s;
   animation: slideIn 0.3s ease both;
 }
-.account-card:hover {
-  border-color: var(--gold-dark);
-  transform: translateY(-1px);
-}
+.account-card:hover { border-color: var(--gold-dark); transform: translateY(-1px); }
 
 /* ---- Card top row ---- */
 .card-top {
@@ -232,13 +204,7 @@ body {
   text-overflow: ellipsis;
 }
 .summoner-tag { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
-.summoner-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 5px;
-  flex-wrap: wrap;
-}
+.summoner-meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
 .summoner-region {
   display: inline-block;
   font-size: 0.65rem;
@@ -254,13 +220,7 @@ body {
 /* ---- Rank block ---- */
 .rank-block { text-align: center; min-width: 100px; }
 .rank-emblem { font-size: 1.6rem; line-height: 1; margin-bottom: 3px; }
-.rank-name {
-  font-family: 'Cinzel', serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
+.rank-name { font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 .rank-lp { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
 
 /* ---- Winrate block ---- */
@@ -270,8 +230,8 @@ body {
 .wr-number.ok    { color: var(--wr-ok); }
 .wr-number.bad   { color: var(--wr-bad); }
 .wr-number.empty { color: var(--text-dim); }
-.wr-label  { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
-.wr-games  { font-size: 0.7rem; color: var(--text-dim); }
+.wr-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
+.wr-games { font-size: 0.7rem; color: var(--text-dim); }
 
 /* ---- Card actions ---- */
 .card-actions { display: flex; flex-direction: column; gap: 4px; align-items: center; }
@@ -312,48 +272,6 @@ body {
   pointer-events: none;
 }
 
-/* ---- Champions block ---- */
-.champs-block {
-  display: flex;
-  gap: 0;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #16233A;
-  justify-content: space-around;
-}
-
-.champ-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-
-.champ-item img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #1E2D4A;
-  object-fit: cover;
-}
-
-.champ-name {
-  font-size: 0.7rem;
-  color: #8A9BB5;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 70px;
-}
-
-.champ-pts {
-  font-size: 0.65rem;
-  color: var(--gold-dark);
-  font-weight: 600;
-}
-
 /* ---- Animations ---- */
 @keyframes fadeDown {
   from { opacity: 0; transform: translateY(-10px); }
@@ -366,19 +284,8 @@ body {
 
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
-  .card-top {
-    grid-template-columns: 52px 1fr auto 36px;
-    gap: 10px;
-  }
+  .card-top { grid-template-columns: 52px 1fr auto 36px; gap: 10px; }
   .rank-block { display: none; }
   .tracker-wrap { padding: 1.5rem 1rem 3rem; }
   .header h1 { font-size: 1.5rem; }
-  .champ-item img { width: 32px; height: 32px; }
 }
-
-/* ---- Champion winrate colors ---- */
-.champ-games { font-size: 0.62rem; color: var(--text-muted); }
-.champ-wr { font-size: 0.65rem; font-weight: 600; }
-.champ-wr.good { color: var(--wr-good); }
-.champ-wr.ok   { color: var(--wr-ok); }
-.champ-wr.bad  { color: var(--wr-bad); }

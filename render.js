@@ -68,25 +68,6 @@ function escapeHTML(str) {
     .replace(/"/g, '&quot;');
 }
 
-function buildChampionsHTML(topChampions) {
-  if (!topChampions || topChampions.length === 0) return '';
-
-  const items = topChampions.map(function(c) {
-    const wrCls  = c.wr >= 55 ? 'good' : c.wr >= 48 ? 'ok' : 'bad';
-    const imgUrl = c.image
-      ? 'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/' + c.image
-      : '';
-    return '<div class="champ-item">' +
-      '<img src="' + imgUrl + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
-      '<span class="champ-name">' + escapeHTML(c.name) + '</span>' +
-      '<span class="champ-games">' + c.games + ' partidas</span>' +
-      '<span class="champ-wr ' + wrCls + '">' + c.wr + '% WR</span>' +
-      '</div>';
-  });
-
-  return '<div class="champs-block">' + items.join('') + '</div>';
-}
-
 function buildCardHTML(acc) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
@@ -130,8 +111,7 @@ function buildCardHTML(acc) {
       '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
       '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
     '</div>' +
-  '</div>' +
-  buildChampionsHTML(acc.topChampions);
+  '</div>';
 }
 
 function renderAccounts(accounts) {
