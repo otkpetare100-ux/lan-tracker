@@ -39,6 +39,11 @@ async function getRankedEntriesByPuuid(puuid) {
   return riotFetch(url);
 }
 
+async function getTopMasteryChampions(puuid) {
+  const url = `${ENDPOINTS.LAN}/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3`;
+  return riotFetch(url);
+}
+
 async function getMatchIds(puuid) {
   const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=5`;
   return riotFetch(url);
@@ -64,7 +69,19 @@ const POSITION_LABELS = {
   '':      '—',
 };
 
-// Carga el historial bajo demanda (cuando el usuario hace click)
+let championDataCache = null;
+async function getChampionData() {
+  if (championDataCache) return championDataCache;
+  const res  = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
+  const data = await res.json();
+  const map  = {};
+  for (const champ of Object.values(data.data)) {
+    map[String(champ.key)] = { name: champ.name, image: champ.image.full };
+  }
+  championDataCache = map;
+  return map;
+}
+
 async function fetchMatchHistory(puuid) {
   try {
     const matchIds = await getMatchIds(puuid);
@@ -108,16 +125,31 @@ async function fetchMatchHistory(puuid) {
 
     return { matches: details, streak, mainPosition };
   } catch(e) {
-    console.warn('Error cargando historial:', e);
     return { matches: [], streak: 0, mainPosition: '—' };
   }
 }
 
-// Carga rapida — sin historial
+// Carga rapida — incluye top 3 campeones por maestria
 async function fetchAccountSnapshot(gameName, tagLine) {
   const account  = await getAccountByRiotId(gameName, tagLine);
   const summoner = await getSummonerByPuuid(account.puuid);
   const ranked   = await getRankedEntriesByPuuid(account.puuid);
+
+  // Top 3 campeones por maestria
+  let topChampions = [];
+  try {
+    const mastery   = await getTopMasteryChampions(account.puuid);
+    const champData = await getChampionData();
+    topChampions = mastery.slice(0, 3).map(m => {
+      const info = champData[String(m.championId)] || {};
+      return {
+        name:   info.name  || 'Unknown',
+        image:  info.image || null,
+      };
+    });
+  } catch(e) {
+    console.warn('No se cargaron campeones:', e);
+  }
 
   const soloQ = ranked.find(r => r.queueType === 'RANKED_SOLO_5x5') || null;
   const flex  = ranked.find(r => r.queueType === 'RANKED_FLEX_SR')  || null;
@@ -130,6 +162,7 @@ async function fetchAccountSnapshot(gameName, tagLine) {
     summonerLevel: summoner.summonerLevel,
     soloQ,
     flex,
+    topChampions,
     matches:      [],
     streak:       0,
     mainPosition: '—',

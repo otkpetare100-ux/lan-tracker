@@ -114,7 +114,7 @@ body {
 /* ---- Card top row ---- */
 .card-top {
   display: grid;
-  grid-template-columns: 58px 1fr auto auto 36px;
+  grid-template-columns: 58px 1fr auto auto auto 36px;
   align-items: center;
   gap: 16px;
 }
@@ -284,3 +284,28 @@ body {
 .match-kda  { font-size: 0.6rem; color: #E8E0D0; font-weight: 500; }
 .match-dur  { font-size: 0.56rem; color: var(--text-dim); }
 .match-empty { font-size: 0.75rem; color: var(--text-dim); padding: 8px 0; }
+
+/* ---- Top champions ---- */
+.top-champs-block {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.top-champ img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #1E2D4A;
+  object-fit: cover;
+  display: block;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.top-champ img:hover {
+  border-color: var(--gold-dark);
+  transform: scale(1.1);
+}
+
+@media (max-width: 600px) {
+  .top-champs-block { display: none; }
+}

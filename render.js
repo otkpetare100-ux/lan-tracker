@@ -105,6 +105,18 @@ function buildMatchHistoryHTML(matches) {
   return '<div class="match-history">' + items.join('') + '</div>';
 }
 
+
+function buildTopChampsHTML(topChampions) {
+  if (!topChampions || topChampions.length === 0) return '';
+  return topChampions.map(function(c) {
+    if (!c.image) return '';
+    var img = 'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/' + c.image;
+    return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
+      '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
+    '</div>';
+  }).join('');
+}
+
 function buildCardHTML(acc, position) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
@@ -149,6 +161,7 @@ function buildCardHTML(acc, position) {
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '</div>' +
     '</div>' +
+    '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions) + '</div>' +
     '<div class="rank-block">' +
       '<div class="rank-emblem">' + emoji + '</div>' +
       '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
