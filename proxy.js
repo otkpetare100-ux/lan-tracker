@@ -14,7 +14,6 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// Archivo donde se guardan las cuentas compartidas
 const DB_FILE = path.join(__dirname, 'accounts.json');
 
 function readAccounts() {
@@ -31,52 +30,43 @@ function writeAccounts(accounts) {
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// ---- Endpoints de cuentas compartidas ----
+app.get('/accounts', (req, res) => res.json(readAccounts()));
 
-// GET /accounts — devuelve todas las cuentas guardadas
-app.get('/accounts', (req, res) => {
-  res.json(readAccounts());
-});
-
-// POST /accounts — agrega una cuenta
 app.post('/accounts', (req, res) => {
   const entry = req.body;
   if (!entry || !entry.puuid) return res.status(400).json({ error: 'Datos invalidos' });
   const accounts = readAccounts();
-  if (accounts.some(a => a.puuid === entry.puuid)) {
-    return res.status(409).json({ error: 'Ya existe' });
-  }
+  if (accounts.some(a => a.puuid === entry.puuid)) return res.status(409).json({ error: 'Ya existe' });
   accounts.push(entry);
   writeAccounts(accounts);
   res.json({ ok: true });
 });
 
-// DELETE /accounts/:puuid — elimina una cuenta
 app.delete('/accounts/:puuid', (req, res) => {
-  const { puuid } = req.params;
-  const accounts = readAccounts().filter(a => a.puuid !== puuid);
-  writeAccounts(accounts);
+  writeAccounts(readAccounts().filter(a => a.puuid !== req.params.puuid));
   res.json({ ok: true });
 });
 
-// PUT /accounts/:puuid — actualiza una cuenta existente
 app.put('/accounts/:puuid', (req, res) => {
-  const { puuid } = req.params;
-  const updated  = req.body;
-  let accounts   = readAccounts();
-  const idx      = accounts.findIndex(a => a.puuid === puuid);
+  let accounts = readAccounts();
+  const idx = accounts.findIndex(a => a.puuid === req.params.puuid);
   if (idx === -1) return res.status(404).json({ error: 'No encontrada' });
-  accounts[idx] = updated;
+  accounts[idx] = req.body;
   writeAccounts(accounts);
   res.json({ ok: true });
 });
 
-// ---- Proxy de Riot API ----
 app.get('/riot', async (req, res) => {
   let targetUrl = req.query.url;
   if (!targetUrl) return res.status(400).json({ error: 'Falta ?url=' });
 
+  // Decodifica una sola vez
   try { targetUrl = decodeURIComponent(targetUrl); } catch(e) {}
+
+  // Si quedaron %XX extra, decodifica una vez mas
+  if (targetUrl.includes('%')) {
+    try { targetUrl = decodeURIComponent(targetUrl); } catch(e) {}
+  }
 
   const allowed = ['americas.api.riotgames.com', 'la1.api.riotgames.com', 'la2.api.riotgames.com'];
   if (!allowed.some(d => targetUrl.includes(d))) {

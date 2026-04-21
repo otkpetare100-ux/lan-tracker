@@ -39,22 +39,18 @@ async function getRankedEntriesByPuuid(puuid) {
 }
 
 async function getMatchIds(puuid) {
-  // Ultimas 10 partidas de SoloQ (queue=420)
   const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=5`;
   return riotFetch(url);
 }
 
 async function getMatchDetail(matchId) {
+  // matchId ya es un string simple como "LA1_1234567" — no necesita encoding extra
   const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/${matchId}`;
   return riotFetch(url);
 }
 
 function getProfileIconUrl(iconId) {
   return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${iconId}.png`;
-}
-
-function getChampionIconUrl(championName) {
-  return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${championName}.png`;
 }
 
 const FALLBACK_ICON_URL = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
@@ -100,10 +96,10 @@ async function getMatchHistory(puuid) {
         if (m.win === first) streak++;
         else break;
       }
-      streak = first ? streak : -streak; // positivo = victorias, negativo = derrotas
+      streak = first ? streak : -streak;
     }
 
-    // Posicion principal (la mas frecuente)
+    // Posicion principal
     const posCount = {};
     for (const m of details) {
       if (m.position) posCount[m.position] = (posCount[m.position] || 0) + 1;
