@@ -2,6 +2,10 @@
  * render.js — DOM rendering helpers for LAN Tracker
  */
 
+// --- CONFIGURACIÓN ---
+const DDragonVersion = '14.8.1'; // Usamos una versión estable de DDragon
+const FALLBACK_ICON_URL = `https://ddragon.leagueoflegends.com/cdn/${DDragonVersion}/img/profileicon/29.png`; // Icono de Poro por defecto
+
 const RANK_COLORS = {
   IRON:        '#6B5A4E',
   BRONZE:      '#CD7F32',
@@ -29,6 +33,8 @@ const RANK_EMOJI = {
   CHALLENGER:  '✨',
   UNRANKED:    '❓',
 };
+
+// --- FUNCIONES DE AYUDA (HELPERS) ---
 
 function getRankInfo(acc) {
   const soloQ = acc.soloQ;
@@ -90,7 +96,8 @@ function buildMatchHistoryHTML(matches) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
-    const img = 'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/' + m.champion + '.png';
+    // Usamos la versión configurada arriba
+    const img = `https://ddragon.leagueoflegends.com/cdn/${DDragonVersion}/img/champion/${m.champion}.png`;
     return '<div class="match-item ' + cls + '">' +
       '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
       '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
@@ -105,6 +112,8 @@ function buildMatchHistoryHTML(matches) {
   return '<div class="match-history hidden-history">' + items.join('') + '</div>';
 }
 
+// --- FUNCIÓN PRINCIPAL DE RENDERIZADO DE TARJETA ---
+
 function buildCardHTML(acc) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
@@ -115,7 +124,10 @@ function buildCardHTML(acc) {
     ? 'Sin clasificar'
     : titleCase(r.tier) + ' ' + r.division;
 
-  const iconUrl = typeof getProfileIconUrl === 'function' ? getProfileIconUrl(acc.profileIconId) : '';
+  // CORRECCIÓN: Definimos la URL del icono directamente aquí usando Data Dragon
+  // Y añadimos un "onerror" para cargar la imagen de respaldo si esta falla.
+  const iconId = acc.profileIconId || 29; // Por defecto el poro si no hay ID
+  const iconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDragonVersion}/img/profileicon/${iconId}.png`;
 
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
@@ -131,7 +143,8 @@ function buildCardHTML(acc) {
   return '<div class="card-content-wrapper">' + 
     '<div class="card-top">' +
       '<div class="icon-wrap">' +
-        '<img src="' + iconUrl + '" alt="Icono" />' +
+        // CORRECCIÓN: Añadido onerror para usar FALLBACK_ICON_URL
+        '<img src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'; this.onerror=null;" />' +
         '<span class="icon-level">' + acc.summonerLevel + '</span>' +
       '</div>' +
       '<div class="summoner-info">' +
