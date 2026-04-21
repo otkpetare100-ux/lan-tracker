@@ -1,60 +1,52 @@
 /**
- * storage.js — Persistent storage for LAN Tracker
- *
- * Wraps localStorage with a simple typed interface.
- * All account data is stored under a single key as a JSON array.
+ * storage.js — Cuentas compartidas guardadas en el servidor
  */
 
-const STORAGE_KEY = 'lol-lan-tracker-accounts';
+const SERVER = window.location.origin;
 
-/**
- * Loads all saved accounts from localStorage.
- * @returns {AccountEntry[]}
- */
-function loadAccounts() {
+async function loadAccounts() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+    const res  = await fetch(SERVER + '/accounts');
+    if (!res.ok) return [];
+    return await res.json();
+  } catch(e) {
+    console.warn('[Storage] Error cargando cuentas:', e);
     return [];
   }
 }
 
-/**
- * Persists the current accounts array to localStorage.
- * @param {AccountEntry[]} accounts
- */
-function saveAccounts(accounts) {
+async function saveAccountToServer(entry) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-  } catch (e) {
-    console.warn('[LAN Tracker] Could not save to localStorage:', e);
+    const res = await fetch(SERVER + '/accounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+    if (res.status === 409) return { added: false };
+    if (!res.ok) return { added: false };
+    return { added: true };
+  } catch(e) {
+    console.warn('[Storage] Error guardando cuenta:', e);
+    return { added: false };
   }
 }
 
-/**
- * Adds a new account entry (if the puuid isn't already tracked).
- * @param {AccountEntry[]} accounts
- * @param {AccountEntry}   entry
- * @returns {{ accounts: AccountEntry[], added: boolean }}
- */
-function addAccount(accounts, entry) {
-  if (accounts.some(a => a.puuid === entry.puuid)) {
-    return { accounts, added: false };
+async function deleteAccountFromServer(puuid) {
+  try {
+    await fetch(SERVER + '/accounts/' + puuid, { method: 'DELETE' });
+  } catch(e) {
+    console.warn('[Storage] Error eliminando cuenta:', e);
   }
-  const updated = [...accounts, entry];
-  saveAccounts(updated);
-  return { accounts: updated, added: true };
 }
 
-/**
- * Removes an account by puuid.
- * @param {AccountEntry[]} accounts
- * @param {string}         puuid
- * @returns {AccountEntry[]}
- */
-function removeAccount(accounts, puuid) {
-  const updated = accounts.filter(a => a.puuid !== puuid);
-  saveAccounts(updated);
-  return updated;
+async function updateAccountOnServer(entry) {
+  try {
+    await fetch(SERVER + '/accounts/' + entry.puuid, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+  } catch(e) {
+    console.warn('[Storage] Error actualizando cuenta:', e);
+  }
 }

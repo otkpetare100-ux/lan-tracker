@@ -4,18 +4,25 @@
 
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
 
-let accounts = loadAccounts();
+let accounts = [];
 
 const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
 
-renderAccounts(accounts);
+// Carga inicial desde el servidor
+async function init() {
+  accounts = await loadAccounts();
+  renderAccounts(accounts);
+}
+init();
 
-/* ---- Auto-refresh ---- */
-setInterval(() => {
+// Auto-refresh cada 5 minutos
+setInterval(async () => {
   if (accounts.length === 0) return;
-  accounts.forEach(acc => handleRefresh(acc.puuid, true));
+  for (const acc of accounts) {
+    await handleRefresh(acc.puuid, true);
+  }
 }, AUTO_REFRESH_INTERVAL);
 
 /* ---- Search ---- */
@@ -36,19 +43,19 @@ async function handleSearch() {
 
   try {
     const entry  = await fetchAccountSnapshot(gameName, tagLine);
-    const result = addAccount(accounts, entry);
+    const result = await saveAccountToServer(entry);
 
     if (!result.added) {
       showError('Esta cuenta ya esta en la lista.');
     } else {
-      accounts = result.accounts;
+      accounts.push(entry);
       renderAccounts(accounts);
       searchInput.value = '';
     }
   } catch (err) {
     const msg = err.status
       ? getApiErrorMessage(err.status)
-      : `Error de red: ${err.message}`;
+      : 'Error de red: ' + err.message;
     showError(msg);
   } finally {
     searchBtn.disabled = false;
@@ -56,13 +63,12 @@ async function handleSearch() {
   }
 }
 
-/* ---- Refresh individual ---- */
+/* ---- Refresh ---- */
 async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Muestra spinner
-  const card = document.getElementById(`card-${puuid}`);
+  const card = document.getElementById('card-' + puuid);
   if (card) {
     const btn = card.querySelector('.refresh-btn');
     if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
@@ -70,18 +76,14 @@ async function handleRefresh(puuid, silent = false) {
 
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
+    await updateAccountOnServer(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
-    saveAccounts(accounts);
     renderAccounts(accounts);
   } catch (err) {
     if (!silent) {
-      const msg = err.status
-        ? getApiErrorMessage(err.status)
-        : `Error de red: ${err.message}`;
-      showError(msg);
+      showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
     }
-    // Quita el spinner si fallo
-    const card = document.getElementById(`card-${puuid}`);
+    const card = document.getElementById('card-' + puuid);
     if (card) {
       const btn = card.querySelector('.refresh-btn');
       if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
@@ -90,13 +92,14 @@ async function handleRefresh(puuid, silent = false) {
 }
 
 /* ---- Event delegation ---- */
-accountsGrid.addEventListener('click', (e) => {
+accountsGrid.addEventListener('click', async (e) => {
   const removeBtn  = e.target.closest('.remove-btn');
   const refreshBtn = e.target.closest('.refresh-btn');
 
   if (removeBtn) {
     const puuid = removeBtn.dataset.puuid;
-    accounts = removeAccount(accounts, puuid);
+    await deleteAccountFromServer(puuid);
+    accounts = accounts.filter(a => a.puuid !== puuid);
     renderAccounts(accounts);
   }
 
