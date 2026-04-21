@@ -60,13 +60,8 @@ app.get('/riot', async (req, res) => {
   let targetUrl = req.query.url;
   if (!targetUrl) return res.status(400).json({ error: 'Falta ?url=' });
 
-  // Decodifica una sola vez
+  // Decodifica la URL una sola vez
   try { targetUrl = decodeURIComponent(targetUrl); } catch(e) {}
-
-  // Si quedaron %XX extra, decodifica una vez mas
-  if (targetUrl.includes('%')) {
-    try { targetUrl = decodeURIComponent(targetUrl); } catch(e) {}
-  }
 
   const allowed = ['americas.api.riotgames.com', 'la1.api.riotgames.com', 'la2.api.riotgames.com'];
   if (!allowed.some(d => targetUrl.includes(d))) {

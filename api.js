@@ -24,7 +24,7 @@ async function riotFetch(url) {
 }
 
 async function getAccountByRiotId(gameName, tagLine) {
-  const url = `${ENDPOINTS.AMERICAS}/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`;
+  const url = `${ENDPOINTS.AMERICAS}/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`;
   return riotFetch(url);
 }
 
