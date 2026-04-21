@@ -2,7 +2,6 @@
  * api.js — Riot Games API calls for LAN Tracker
  */
 
-// Detecta automaticamente si corre en local o en produccion
 const PROXY = window.location.hostname === 'localhost'
   ? 'http://localhost:3000/riot?url='
   : `${window.location.origin}/riot?url=`;
@@ -39,16 +38,57 @@ async function getRankedEntriesByPuuid(puuid) {
   return riotFetch(url);
 }
 
+async function getChampionMastery(puuid) {
+  // Top 5 campeones por maestria
+  const url = `${ENDPOINTS.LAN}/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=5`;
+  return riotFetch(url);
+}
+
 function getProfileIconUrl(iconId) {
   return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${iconId}.png`;
 }
 
+function getChampionIconUrl(championId) {
+  return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${championId}.png`;
+}
+
 const FALLBACK_ICON_URL = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
+
+// Cache de nombres de campeones
+let championDataCache = null;
+
+async function getChampionData() {
+  if (championDataCache) return championDataCache;
+  const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
+  const data = await res.json();
+  // Crea un mapa de id numerico -> {name, image}
+  const map = {};
+  for (const champ of Object.values(data.data)) {
+    map[champ.key] = { name: champ.name, image: champ.image.full };
+  }
+  championDataCache = map;
+  return map;
+}
 
 async function fetchAccountSnapshot(gameName, tagLine) {
   const account  = await getAccountByRiotId(gameName, tagLine);
   const summoner = await getSummonerByPuuid(account.puuid);
   const ranked   = await getRankedEntriesByPuuid(account.puuid);
+
+  let topChampions = [];
+  try {
+    const mastery   = await getChampionMastery(account.puuid);
+    const champData = await getChampionData();
+    topChampions = mastery.slice(0, 3).map(m => ({
+      championId:    m.championId,
+      championLevel: m.championLevel,
+      championPoints: m.championPoints,
+      name:  champData[String(m.championId)]?.name  || 'Desconocido',
+      image: champData[String(m.championId)]?.image || null,
+    }));
+  } catch(e) {
+    console.warn('No se pudieron cargar los campeones:', e);
+  }
 
   const soloQ = ranked.find(r => r.queueType === 'RANKED_SOLO_5x5') || null;
   const flex  = ranked.find(r => r.queueType === 'RANKED_FLEX_SR')  || null;
@@ -61,6 +101,8 @@ async function fetchAccountSnapshot(gameName, tagLine) {
     summonerLevel: summoner.summonerLevel,
     soloQ,
     flex,
+    topChampions,
     addedAt:       Date.now(),
+    updatedAt:     Date.now(),
   };
 }

@@ -2,6 +2,8 @@
  * app.js — Main controller for LAN Tracker
  */
 
+const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
+
 let accounts = loadAccounts();
 
 const searchInput  = document.getElementById('search-input');
@@ -9,6 +11,12 @@ const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
 
 renderAccounts(accounts);
+
+/* ---- Auto-refresh ---- */
+setInterval(() => {
+  if (accounts.length === 0) return;
+  accounts.forEach(acc => handleRefresh(acc.puuid, true));
+}, AUTO_REFRESH_INTERVAL);
 
 /* ---- Search ---- */
 async function handleSearch() {
@@ -48,12 +56,12 @@ async function handleSearch() {
   }
 }
 
-/* ---- Refresh ---- */
-async function handleRefresh(puuid) {
+/* ---- Refresh individual ---- */
+async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Muestra spinner en el boton
+  // Muestra spinner
   const card = document.getElementById(`card-${puuid}`);
   if (card) {
     const btn = card.querySelector('.refresh-btn');
@@ -66,10 +74,12 @@ async function handleRefresh(puuid) {
     saveAccounts(accounts);
     renderAccounts(accounts);
   } catch (err) {
-    const msg = err.status
-      ? getApiErrorMessage(err.status)
-      : `Error de red: ${err.message}`;
-    showError(msg);
+    if (!silent) {
+      const msg = err.status
+        ? getApiErrorMessage(err.status)
+        : `Error de red: ${err.message}`;
+      showError(msg);
+    }
     // Quita el spinner si fallo
     const card = document.getElementById(`card-${puuid}`);
     if (card) {
@@ -97,6 +107,6 @@ accountsGrid.addEventListener('click', (e) => {
 });
 
 searchBtn.addEventListener('click', handleSearch);
-searchInput.addEventListener('keydown', (e) => {
+searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') handleSearch();
 });

@@ -30,6 +30,8 @@ const RANK_EMOJI = {
   UNRANKED:    '❓',
 };
 
+const DDRAGON_VERSION = '14.10.1';
+
 function getRankInfo(acc) {
   const soloQ = acc.soloQ;
   if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
@@ -68,6 +70,31 @@ function escapeHTML(str) {
     .replace(/"/g, '&quot;');
 }
 
+function formatPoints(pts) {
+  if (pts >= 1000000) return (pts / 1000000).toFixed(1) + 'M';
+  if (pts >= 1000)    return Math.round(pts / 1000) + 'K';
+  return pts;
+}
+
+function buildChampionsHTML(topChampions) {
+  if (!topChampions || topChampions.length === 0) return '';
+  return `
+    <div class="champs-block">
+      ${topChampions.map(c => `
+        <div class="champ-item" title="${escapeHTML(c.name)} — ${formatPoints(c.championPoints)} pts">
+          <img
+            src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${escapeHTML(c.image)}"
+            alt="${escapeHTML(c.name)}"
+            onerror="this.style.display='none'"
+          />
+          <span class="champ-name">${escapeHTML(c.name)}</span>
+          <span class="champ-pts">${formatPoints(c.championPoints)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function buildCardHTML(acc, isRefreshing = false) {
   const r       = getRankInfo(acc);
   const wr      = computeWinrate(r.wins, r.losses);
@@ -83,51 +110,47 @@ function buildCardHTML(acc, isRefreshing = false) {
   const wrHTML = wr !== null
     ? `<div class="wr-number ${wrCls}">${wr}%</div>
        <div class="wr-label">Winrate</div>
-       <div class="wr-games">${r.wins}V  ${r.losses}D</div>`
+       <div class="wr-games">${r.wins}V ${r.losses}D</div>`
     : `<div class="wr-number empty">—</div>
        <div class="wr-label">Sin partidas</div>`;
 
+  const updatedStr = acc.updatedAt
+    ? `Actualizado: ${new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})}`
+    : '';
+
   return `
-    <div class="icon-wrap">
-      <img
-        src="${iconUrl}"
-        alt="Icono de invocador"
-        onerror="this.src='${FALLBACK_ICON_URL}'"
-      />
-      <span class="icon-level">${acc.summonerLevel}</span>
+    <div class="card-top">
+      <div class="icon-wrap">
+        <img src="${iconUrl}" alt="Icono" onerror="this.src='${FALLBACK_ICON_URL}'" />
+        <span class="icon-level">${acc.summonerLevel}</span>
+      </div>
+
+      <div class="summoner-info">
+        <div class="summoner-name">${escapeHTML(acc.gameName)}</div>
+        <div class="summoner-tag">#${escapeHTML(acc.tagLine)}</div>
+        <div class="summoner-meta">
+          <span class="summoner-region">LAN</span>
+          ${updatedStr ? `<span class="updated-time">${updatedStr}</span>` : ''}
+        </div>
+      </div>
+
+      <div class="rank-block">
+        <div class="rank-emblem">${emoji}</div>
+        <div class="rank-name" style="color:${color}">${rankStr}</div>
+        <div class="rank-lp">${r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—'}</div>
+      </div>
+
+      <div class="winrate-block">
+        ${wrHTML}
+      </div>
+
+      <div class="card-actions">
+        <button class="refresh-btn ${isRefreshing ? 'spinning' : ''}" data-puuid="${acc.puuid}" title="Actualizar" ${isRefreshing ? 'disabled' : ''}>↻</button>
+        <button class="remove-btn" data-puuid="${acc.puuid}" title="Eliminar">✕</button>
+      </div>
     </div>
 
-    <div class="summoner-info">
-      <div class="summoner-name">${escapeHTML(acc.gameName)}</div>
-      <div class="summoner-tag">#${escapeHTML(acc.tagLine)}</div>
-      <span class="summoner-region">LAN</span>
-    </div>
-
-    <div class="rank-block">
-      <div class="rank-emblem">${emoji}</div>
-      <div class="rank-name" style="color:${color}">${rankStr}</div>
-      <div class="rank-lp">${r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—'}</div>
-    </div>
-
-    <div class="winrate-block">
-      ${wrHTML}
-    </div>
-
-    <div class="card-actions">
-      <button
-        class="refresh-btn ${isRefreshing ? 'spinning' : ''}"
-        data-puuid="${acc.puuid}"
-        title="Actualizar"
-        aria-label="Actualizar ${acc.gameName}"
-        ${isRefreshing ? 'disabled' : ''}
-      >↻</button>
-      <button
-        class="remove-btn"
-        data-puuid="${acc.puuid}"
-        title="Eliminar cuenta"
-        aria-label="Eliminar ${acc.gameName}"
-      >✕</button>
-    </div>
+    ${buildChampionsHTML(acc.topChampions)}
   `;
 }
 
@@ -138,21 +161,19 @@ function renderAccounts(accounts) {
     grid.innerHTML = `
       <div class="empty-state">
         <span class="empty-icon">🗡</span>
-        <p>Sin cuentas aún</p>
+        <p>Sin cuentas aun</p>
         <small>Escribe Nombre#TAG y presiona Buscar</small>
       </div>`;
     return;
   }
 
-  grid.innerHTML = accounts
-    .map(acc => {
-      const div = document.createElement('div');
-      div.className = 'account-card';
-      div.id = `card-${acc.puuid}`;
-      div.innerHTML = buildCardHTML(acc);
-      return div.outerHTML;
-    })
-    .join('');
+  grid.innerHTML = accounts.map(acc => {
+    const div = document.createElement('div');
+    div.className = 'account-card';
+    div.id = `card-${acc.puuid}`;
+    div.innerHTML = buildCardHTML(acc);
+    return div.outerHTML;
+  }).join('');
 }
 
 function showError(msg) {

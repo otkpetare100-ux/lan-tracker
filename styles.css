@@ -394,3 +394,75 @@ body {
   color: var(--gold);
   pointer-events: none;
 }
+
+/* ---- Champions block ---- */
+.card-top {
+  display: grid;
+  grid-template-columns: 58px 1fr auto auto 36px;
+  align-items: center;
+  gap: 16px;
+}
+
+.champs-block {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #16233A;
+}
+
+.champ-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+.champ-item img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #1E2D4A;
+  object-fit: cover;
+}
+
+.champ-name {
+  font-size: 0.68rem;
+  color: #8A9BB5;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+.champ-pts {
+  font-size: 0.62rem;
+  color: var(--gold-dark);
+  font-weight: 600;
+}
+
+/* ---- Updated time ---- */
+.summoner-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.updated-time {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+/* ---- Responsive fix ---- */
+@media (max-width: 600px) {
+  .card-top {
+    grid-template-columns: 52px 1fr auto 24px;
+    gap: 10px;
+  }
+  .rank-block { display: none; }
+  .champs-block { gap: 6px; }
+}
