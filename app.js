@@ -141,6 +141,23 @@ async function handleHistoryToggle(puuid) {
       acc.matches      = history.matches;
       acc.streak       = history.streak;
       acc.mainPosition = history.mainPosition;
+
+      // Actualiza campeones mas jugados en SoloQ
+      if (history.matches && history.matches.length > 0) {
+        const champCount = {};
+        for (const m of history.matches) {
+          if (!champCount[m.champion]) champCount[m.champion] = 0;
+          champCount[m.champion]++;
+        }
+        acc.topChampions = Object.entries(champCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(function([name]) {
+            // Convierte nombre a imagen DDragon (nombre sin espacios)
+            var image = name.replace(/[^a-zA-Z0-9]/g, '') + '.png';
+            return { name: name, image: image };
+          });
+      }
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
       await updateAccountOnServer(acc);
       renderAccounts(sortByRank(accounts));

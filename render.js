@@ -161,7 +161,7 @@ function buildCardHTML(acc, position) {
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '</div>' +
     '</div>' +
-    '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions) + '</div>' +
+    '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions) + '</div></div>' +
     '<div class="rank-block">' +
       '<div class="rank-emblem">' + emoji + '</div>' +
       '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
