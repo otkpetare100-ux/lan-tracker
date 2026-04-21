@@ -30,7 +30,7 @@ const RANK_EMOJI = {
   UNRANKED:    '❓',
 };
 
-const DDRAGON_VERSION = '14.10.1';
+
 
 function getRankInfo(acc) {
   const soloQ = acc.soloQ;
