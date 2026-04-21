@@ -2,9 +2,9 @@
  * api.js — Riot Games API calls for LAN Tracker
  */
 
-const PROXY = window.location.hostname === 'localhost'
-  ? 'http://localhost:3000/riot?url='
-  : `${window.location.origin}/riot?url=`;
+const BASE_PROXY = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/riot'
+  : `${window.location.origin}/riot`;
 
 const ENDPOINTS = {
   AMERICAS: 'https://americas.api.riotgames.com',
@@ -14,7 +14,9 @@ const ENDPOINTS = {
 const DDRAGON_VERSION = '14.10.1';
 
 async function riotFetch(url) {
-  const res = await fetch(PROXY + encodeURIComponent(url));
+  // Pasa la URL como parametro sin encodear — el proxy la recibe limpia
+  const proxyUrl = BASE_PROXY + '?url=' + url;
+  const res = await fetch(proxyUrl);
   if (!res.ok) {
     const err = new Error(`HTTP ${res.status}`);
     err.status = res.status;
@@ -44,7 +46,6 @@ async function getMatchIds(puuid) {
 }
 
 async function getMatchDetail(matchId) {
-  // matchId ya es un string simple como "LA1_1234567" — no necesita encoding extra
   const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/${matchId}`;
   return riotFetch(url);
 }
@@ -88,7 +89,6 @@ async function getMatchHistory(puuid) {
       } catch(e) { continue; }
     }
 
-    // Racha actual
     let streak = 0;
     if (details.length > 0) {
       const first = details[0].win;
@@ -99,7 +99,6 @@ async function getMatchHistory(puuid) {
       streak = first ? streak : -streak;
     }
 
-    // Posicion principal
     const posCount = {};
     for (const m of details) {
       if (m.position) posCount[m.position] = (posCount[m.position] || 0) + 1;

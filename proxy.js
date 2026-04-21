@@ -57,11 +57,9 @@ app.put('/accounts/:puuid', (req, res) => {
 });
 
 app.get('/riot', async (req, res) => {
-  let targetUrl = req.query.url;
+  // La URL llega sin encoding extra — la usamos directo
+  const targetUrl = req.query.url;
   if (!targetUrl) return res.status(400).json({ error: 'Falta ?url=' });
-
-  // Decodifica la URL una sola vez
-  try { targetUrl = decodeURIComponent(targetUrl); } catch(e) {}
 
   const allowed = ['americas.api.riotgames.com', 'la1.api.riotgames.com', 'la2.api.riotgames.com'];
   if (!allowed.some(d => targetUrl.includes(d))) {
