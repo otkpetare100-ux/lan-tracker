@@ -36,6 +36,16 @@ body {
   overflow-x: hidden;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url('bg.jpg') center center / cover no-repeat;
+  opacity: 0.18;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ---- Background ---- */
 .bg-overlay {
   pointer-events: none;
