@@ -42,7 +42,13 @@
   function getRankInfo(acc) {
     const soloQ = acc.soloQ;
     if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
-    return { tier: soloQ.tier, division: soloQ.rank, lp: soloQ.leaguePoints, wins: soloQ.wins, losses: soloQ.losses };
+    return {
+      tier: soloQ.tier,
+      division: soloQ.rank,
+      lp: soloQ.leaguePoints,
+      wins: soloQ.wins,
+      losses: soloQ.losses
+    };
   }
 
   function computeWinrate(wins, losses) {
@@ -57,10 +63,16 @@
     return 'bad';
   }
 
-  function titleCase(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ''; }
+  function titleCase(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+  }
 
   function escapeHTML(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   function formatDuration(seconds) {
@@ -135,7 +147,11 @@
           </div>
         </div>
 
-        <div class="top-champs-block"><div class="top-champs-inner">${buildTopChampsHTML(acc.topChampions)}</div></div>
+        <div class="top-champs-block">
+          <div class="top-champs-inner">
+            ${buildTopChampsHTML(acc.topChampions)}
+          </div>
+        </div>
 
         <div class="rank-block">
           <div class="rank-emblem">
@@ -160,9 +176,10 @@
         <button class="history-toggle-btn" data-puuid="${acc.puuid}">
           <span class="history-btn-text">Ver historial</span> <span class="history-arrow">▾</span>
         </button>
-        <div class="history-content" id="history-${acc.puuid}" style="display:none;">
-          ${buildMatchHistoryHTML(acc.matches)}
-        </div>
+      </div>
+
+      <div class="history-content" id="history-${acc.puuid}" style="display:none;">
+        ${buildMatchHistoryHTML(acc.matches)}
       </div>
     `;
   }
@@ -191,7 +208,11 @@
   }
 
   function getApiErrorMessage(status) {
-    const errors = { 404: "No encontrado", 429: "Límite de Riot alcanzado", 403: "API Key vencida" };
+    const errors = {
+      404: "No encontrado",
+      429: "Límite de Riot alcanzado",
+      403: "API Key vencida"
+    };
     return errors[status] || "Error de conexión";
   }
 

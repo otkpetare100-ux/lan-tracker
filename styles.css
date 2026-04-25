@@ -1,31 +1,37 @@
 /* =============================================
-   LAN TRACKER — Temática Jardín Élfico (Mejorado)
+   LAN TRACKER — Temática Jardín Élfico
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --pink:        #D4789A;
-  --pink-light:  #F0B8CC;
-  --pink-dark:   #8B3A5A;
-  --purple:      #7B4E8A;
-  --purple-light:#C49FD4;
-  --gold:        #C8A84B;
-  --gold-dark:   #7A6020;
-  --dark-bg:     #0A0610;
-  --card-bg:     rgba(20, 10, 30, 0.85);
-  --card-border: rgba(180, 100, 140, 0.25);
-  --text-main:   #F0E0EC;
-  --text-muted:  #9A7090;
-  --text-dim:    #4A2A40;
-  --wr-good:     #7DD68A;
-  --wr-ok:       #C8A84B;
-  --wr-bad:      #D45A6A;
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-html { scroll-behavior: smooth; }
+:root {
+  --pink: #D4789A;
+  --pink-light: #F0B8CC;
+  --pink-dark: #8B3A5A;
+  --purple: #7B4E8A;
+  --purple-light: #C49FD4;
+  --gold: #C8A84B;
+  --gold-dark: #7A6020;
+  --dark-bg: #0A0610;
+  --card-bg: rgba(20, 10, 30, 0.85);
+  --card-border: rgba(180, 100, 140, 0.25);
+  --text-main: #F0E0EC;
+  --text-muted: #9A7090;
+  --text-dim: #4A2A40;
+  --wr-good: #7DD68A;
+  --wr-ok: #C8A84B;
+  --wr-bad: #D45A6A;
+}
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background: var(--dark-bg);
@@ -36,29 +42,14 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- boton de historial ---- */
-.history-toggle-btn {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.history-toggle-btn:hover {
-  background: rgba(255,255,255,0.14);
-}
-
-/* ---- Background & Overlay ---- */
+/* Background */
 .bg-overlay {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  background: 
+  background:
     linear-gradient(rgba(10, 6, 16, 0.8), rgba(10, 6, 16, 0.8)),
-    url('/pic/bg.jpg'); 
+    url('/pic/bg.jpg');
   background-size: cover;
   background-position: center;
   z-index: -1;
@@ -76,22 +67,21 @@ body {
 
 @keyframes petals {
   from { transform: translateY(0px); opacity: 0.6; }
-  to   { transform: translateY(-20px); opacity: 1; }
+  to { transform: translateY(-20px); opacity: 1; }
 }
 
-/* ---- Layout ---- */
+/* Layout */
 .tracker-wrap {
   position: relative;
   z-index: 1;
-  max-width: 950px;
+  max-width: 1150px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 3rem;
 }
 
-/* ---- Header ---- */
 .header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .header h1 {
@@ -105,240 +95,132 @@ body {
   filter: drop-shadow(0 0 15px rgba(212,120,154,0.3));
 }
 
-/* ---- Search Section ---- */
+.header p {
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+/* Search */
+.search-section {
+  margin-bottom: 1.5rem;
+}
+
 .search-bar {
   display: flex;
   gap: 10px;
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
 }
 
 .search-bar input {
   flex: 1;
   background: rgba(30, 10, 40, 0.7);
   border: 1px solid var(--card-border);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 12px 14px;
   color: white;
+  outline: none;
   backdrop-filter: blur(8px);
+}
+
+.search-bar input::placeholder {
+  color: #b48ca2;
 }
 
 .search-bar button {
   background: linear-gradient(135deg, var(--pink-dark), #5A2040);
   border: 1px solid var(--pink);
   color: white;
-  padding: 0 25px;
-  border-radius: 8px;
+  padding: 0 22px;
+  border-radius: 10px;
   cursor: pointer;
   font-family: 'Cinzel', serif;
+  font-weight: 600;
 }
 
-/* ---- Account Card ---- */
+.search-bar button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  color: #ffb4bf;
+  background: rgba(212, 90, 106, 0.12);
+  border: 1px solid rgba(212, 90, 106, 0.22);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+/* Section title */
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  margin: 0 0 12px;
+  color: var(--pink-light);
+  letter-spacing: 0.04em;
+}
+
+/* Cards */
+.accounts-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.empty-state {
+  background: rgba(20, 10, 30, 0.55);
+  border: 1px dashed rgba(180, 100, 140, 0.22);
+  border-radius: 14px;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  display: block;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
 .account-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 12px;
-  padding: 1.25rem;
-  margin-bottom: 12px;
+  border-radius: 14px;
+  padding: 1.1rem;
+  margin-bottom: 0;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .account-card:hover {
   transform: translateY(-3px);
-  border-color: var(--pink);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border-color: rgba(212, 120, 154, 0.55);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* ---- GRID PRINCIPAL ---- */
+/* Main grid */
 .card-top {
   display: grid;
-  grid-template-columns: 180px 1fr 240px;
-  gap: 24px;
+  grid-template-columns: 120px 1fr 180px 120px;
+  gap: 18px;
   align-items: center;
+  min-height: 220px;
 }
 
+/* Profile icon */
 .icon-wrap {
   position: relative;
+  width: 86px;
+  height: 86px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  justify-self: center;
 }
 
 .profile-main-icon {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-}
-
-.rank-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.rank-icon {
-  width: 180px;
-  height: 180px;
-}
-
-/* ---- CONTENEDOR DE ICONO Y MARCO ---- */
-.icon-wrap {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* La foto de perfil circular */
-.profile-main-icon {
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   border: 2px solid var(--gold);
   object-fit: cover;
-  z-index: 5;
-}
-
-/* El marco de rango (Top 3) */
-.rank-frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 110px; /* Ajusta según el tamaño de tus PNGs */
-  height: 110px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-/* Medalla (🥇, 🥈, 🥉) */
-.medal-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  z-index: 20;
-  font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-}
-
-/* Nivel del invocador */
-.icon-level {
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--dark-bg);
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  padding: 1px 6px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: bold;
-  z-index: 15;
-}
-
-/* ---- Summoner Info ---- */
-.summoner-name {
-  font-family: 'Cinzel', serif;
-  font-size: 1.1rem;
-  color: var(--pink-light);
-}
-
-.summoner-tag {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-}
-
-/* ---- Rank & Winrate ---- */
-.rank-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 180px;
-}
-
-.rank-icon {
-  width: 220px;
-  height: 220px;
-  object-fit: contain;
-}
-
-.rank-emblem { font-size: 1.8rem; }
-
-.rank-name {
-  font-family: 'Cinzel', serif;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-}
-
-.wr-number {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-.wr-number.good { color: var(--wr-good); }
-.wr-number.ok   { color: var(--wr-ok); }
-.wr-number.bad  { color: var(--wr-bad); }
-
-/* ---- Champions ---- */
-.top-champs-inner {
-  display: flex;
-  gap: 6px;
-}
-
-.top-champ img {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  border: 1px solid var(--pink);
-  transition: transform 0.2s;
-}
-
-.top-champ img:hover {
-  transform: scale(1.2);
-}
-
-/* ---- Acciones ---- */
-.card-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.refresh-btn, .remove-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  transition: color 0.2s;
-}
-
-.refresh-btn:hover { color: var(--pink-light); }
-.remove-btn:hover { color: var(--wr-bad); }
-
-.refresh-btn.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-/* ---- perplexity ---- */
-.winrate-block {
-  text-align: center;
-  min-width: 120px;
-  margin-right: 10px;
-}
-
-/* ---- Responsive ---- */
-@media (max-width: 768px) {
-  .card-top {
-    grid-template-columns: 80px 1fr auto 40px;
-  }
-  .rank-block, .top-champs-block {
-    display: none;
-  }
-}

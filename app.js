@@ -7,7 +7,6 @@
   window.__LAN_TRACKER_APP_LOADED__ = true;
 
   const AUTO_REFRESH_INTERVAL = 10 * 60 * 1000;
-
   let accounts = [];
   const refreshCooldowns = {};
   const REFRESH_COOLDOWN = 60 * 1000;
@@ -54,7 +53,6 @@
     searchInput = document.getElementById('search-input');
     searchBtn = document.getElementById('search-btn');
     accountsGrid = document.getElementById('accounts-grid');
-
     if (!searchInput || !searchBtn || !accountsGrid) return;
 
     accounts = await loadAccounts();
@@ -85,14 +83,12 @@
       }
 
       if (refreshBtn) {
-        const puuid = refreshBtn.dataset.puuid;
-        handleRefresh(puuid);
+        handleRefresh(refreshBtn.dataset.puuid);
         return;
       }
 
       if (historyBtn) {
-        const puuid = historyBtn.dataset.puuid;
-        handleHistoryToggle(puuid);
+        handleHistoryToggle(historyBtn.dataset.puuid);
       }
     });
 
