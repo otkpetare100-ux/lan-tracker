@@ -63,7 +63,12 @@ function titleCase(str) {
 }
 
 function escapeHTML(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function formatDuration(seconds) {
@@ -74,7 +79,7 @@ function formatDuration(seconds) {
 
 function getChampImageName(name) {
   if (!name) return 'Unknown.png';
-  var base  = name.replace(/\\.png$/i, '');
+  var base = name.replace(/\.png$/i, '');
   var clean = base.replace(/[^a-zA-Z0-9]/g, '');
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
@@ -82,7 +87,7 @@ function getChampImageName(name) {
 function buildStreakHTML(streak) {
   if (!streak || streak === 0) return '';
   const isWin = streak > 0;
-  const cls   = isWin ? 'streak-win' : 'streak-loss';
+  const cls = isWin ? 'streak-win' : 'streak-loss';
   const label = Math.abs(streak) + (isWin ? 'V seguidas' : 'D seguidas');
   return '<span class="streak-badge ' + cls + '">' + label + '</span>';
 }
@@ -95,7 +100,7 @@ function buildMatchHistoryHTML(matches) {
     const dur = formatDuration(m.gameDuration);
     const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(m.champion);
     return '<div class="match-item ' + cls + '">' +
-      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\\'none\\'" />' +
+      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
       '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
       '<span class="match-champ-name">' + escapeHTML(m.champion) + '</span>' +
       '<span class="match-kda">' + kda + '</span>' +
@@ -110,31 +115,31 @@ function buildTopChampsHTML(topChampions) {
     if (!c.name) return '';
     var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
-      '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\\'none\\'" />' +
+      '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
   }).join('');
 }
 
 function buildCardHTML(acc, position) {
-  const r       = getRankInfo(acc);
-  const wr      = computeWinrate(r.wins, r.losses);
-  const wrCls   = winrateClass(wr);
-  const color   = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+  const r = getRankInfo(acc);
+  const wr = computeWinrate(r.wins, r.losses);
+  const wrCls = winrateClass(wr);
+  const color = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
   const rankStr = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + r.division;
   const iconUrl = getProfileIconUrl(acc.profileIconId);
 
   const updatedStr = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
     : '';
   const posLabel = acc.mainPosition || '—';
-  const streak   = buildStreakHTML(acc.streak);
+  const streak = buildStreakHTML(acc.streak);
 
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
   const medalHTML = MEDALS[position]
-    ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position+1) + '">'
+    ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position + 1) + '">'
     : '';
 
   const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame" onerror="this.remove()">';
@@ -151,7 +156,7 @@ function buildCardHTML(acc, position) {
     '<div class="icon-wrap">' +
       frameHTML +
       medalHTML +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\\'' + FALLBACK_ICON_URL + '\\'" />' +
+      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'"/>' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info">' +
@@ -186,10 +191,16 @@ function buildCardHTML(acc, position) {
 
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
+  if (!grid) {
+    console.error('No se encontró #accounts-grid');
+    return;
+  }
+
   if (accounts.length === 0) {
     grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
     return;
   }
+
   grid.innerHTML = accounts.map(function(acc, idx) {
     var div = document.createElement('div');
     div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
@@ -201,6 +212,7 @@ function renderAccounts(accounts) {
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
+  if (!el) return;
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
   clearTimeout(window._errorTimeout);
@@ -222,3 +234,7 @@ function getApiErrorMessage(status) {
     default:  return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
   }
 }
+
+window.renderAccounts = renderAccounts;
+window.showError = showError;
+window.getApiErrorMessage = getApiErrorMessage;
