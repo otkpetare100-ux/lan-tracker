@@ -244,6 +244,13 @@ function showError(msg) {
   const el = document.getElementById('error-msg');
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
+  clearTimeout(window._errorTimeout);
+  if (msg) {
+    window._errorTimeout = setTimeout(function() {
+      el.style.display = 'none';
+      el.textContent = '';
+    }, 5000);
+  }
 }
 
 function getApiErrorMessage(status) {

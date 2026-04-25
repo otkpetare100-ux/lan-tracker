@@ -107,6 +107,8 @@ async function handleRefresh(puuid, silent = false) {
     if (elapsed < REFRESH_COOLDOWN) {
       const seconds = Math.ceil((REFRESH_COOLDOWN - elapsed) / 1000);
       showError('Espera ' + seconds + ' segundos para actualizar esta cuenta.');
+      clearTimeout(window._errorTimeout);
+      window._errorTimeout = setTimeout(() => showError(''), 5000);
       return;
     }
     refreshCooldowns[puuid] = Date.now();
