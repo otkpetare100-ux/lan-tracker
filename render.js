@@ -163,42 +163,25 @@ function buildTopChampsHTML(topChampions) {
 }
 
 function buildCardHTML(acc, position) {
-  const r        = getRankInfo(acc);
-  const wr       = computeWinrate(r.wins, r.losses);
-  const wrCls    = winrateClass(wr);
-  const color    = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const rankStr = r.tier === 'UNRANKED'
-    ? 'Sin clasificar'
-    : titleCase(r.tier) + ' ' + r.division;
+  const r = getRankInfo(acc);
+  // ... (tus otras variables)
 
-  const iconUrl    = getProfileIconUrl(acc.profileIconId);
-  const medal      = MEDALS[position] || '';
-  const updatedStr = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
-    : '';
-  const posLabel = acc.mainPosition || '—';
-  const streak   = buildStreakHTML(acc.streak);
-
-  // --- LÓGICA DE MARCOS PARA TOP 3 ---
+  // --- LÓGICA DE MARCOS ---
   let frameHTML = '';
   if (position < 3) {
-    // Convierte el tier a minúsculas para buscar el archivo (ej: 'gold', 'diamond')
-    const tierFile = r.tier.toLowerCase();
-    // Esto genera: <img src="/pic/gold.png" class="rank-frame">
+    const tierFile = r.tier.toLowerCase(); // ej: 'gold'
+    // Usamos /pic/ porque ahí es donde guardaste los marcos
     frameHTML = '<img src="/pic/' + tierFile + '.png" class="rank-frame" onerror="this.style.display=\'none\'" />';
   }
-  // ----------------------------------
+  // ------------------------
 
-  const wrHTML = wr !== null
-    ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
-    : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
-
-  const hasHistory = acc.matches && acc.matches.length > 0;
-  const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
-    '<span class="history-btn-text">Ver historial</span>' +
-    '<span class="history-arrow">▾</span>' +
-  '</button>';
-
+  return '<div class="card-top">' +
+    '<div class="icon-wrap">' +
+      frameHTML + // <--- Insertamos el marco aquí
+      (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
+      '<img class="profile-main-icon" src="' + getProfileIconUrl(acc.profileIconId) + '" alt="Icono" />' +
+      '<span class="icon-level">' + acc.summonerLevel + '</span>' +
+    '</div>' +
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
       frameHTML + // Aquí se inserta el marco si es Top 3
