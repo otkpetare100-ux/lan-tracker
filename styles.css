@@ -57,3 +57,81 @@ body::before {
 @media (max-width: 600px) {
   .rank-block, .top-champs-block { display: none; }
 }
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('/pic/bg.jpg') center center / cover no-repeat;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% -10%, rgba(180,80,140,0.15) 0%, transparent 60%),
+              rgba(10, 6, 16, 0.7);
+  pointer-events: none;
+}
+
+.tracker-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Layout Flexbox Dinámico ---- */
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+/* ---- Superposición de Medallas ---- */
+.icon-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+.medal-badge-img {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+}
+
+/* Asegura que el nombre del invocador crezca pero no rompa el diseño */
+.summoner-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Fondo y Legibilidad ---- */
+.account-card {
+  background: rgba(20, 10, 30, 0.75);
+  backdrop-filter: blur(12px);
+  position: relative;
+}
+
+/* ---- Ajuste Responsivo ---- */
+@media (max-width: 600px) {
+  .card-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rank-block,
+  .top-champs-block {
+    display: none;
+  }
+}

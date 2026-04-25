@@ -74,7 +74,7 @@ function formatDuration(seconds) {
 
 function getChampImageName(name) {
   if (!name) return 'Unknown.png';
-  var base  = name.replace(/\.png$/i, '');
+  var base  = name.replace(/\\.png$/i, '');
   var clean = base.replace(/[^a-zA-Z0-9]/g, '');
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
@@ -95,7 +95,7 @@ function buildMatchHistoryHTML(matches) {
     const dur = formatDuration(m.gameDuration);
     const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(m.champion);
     return '<div class="match-item ' + cls + '">' +
-      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
+      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\\'none\\'" />' +
       '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
       '<span class="match-champ-name">' + escapeHTML(m.champion) + '</span>' +
       '<span class="match-kda">' + kda + '</span>' +
@@ -110,7 +110,7 @@ function buildTopChampsHTML(topChampions) {
     if (!c.name) return '';
     var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
-      '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
+      '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\\'none\\'" />' +
     '</div>';
   }).join('');
 }
@@ -151,7 +151,7 @@ function buildCardHTML(acc, position) {
     '<div class="icon-wrap">' +
       frameHTML +
       medalHTML +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
+      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\\'' + FALLBACK_ICON_URL + '\\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info">' +
