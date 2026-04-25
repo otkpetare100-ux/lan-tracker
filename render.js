@@ -17,17 +17,18 @@ const RANK_COLORS = {
 };
 
 const RANK_ICONS = {
-  IRON:        'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/iron.png',
-  BRONZE:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/bronze.png',
-  SILVER:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/silver.png',
-  GOLD:        'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/gold.png',
-  PLATINUM:    'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/platinum.png',
-  EMERALD:     'C:\Users\Nanami\Desktop\s\ranks/emerald.png',
-  DIAMOND:     'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/diamond.png',
-  MASTER:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/master.png',
-  GRANDMASTER: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/grandmaster.png',
-  CHALLENGER:  'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-mini-crests/challenger.png',
-  UNRANKED:    null,
+  UNRANKED: '/ranks/unranked.png',
+  IRON: '/ranks/iron.png',
+  BRONZE: '/ranks/bronze.png',
+  SILVER: '/ranks/silver.png',
+  GOLD: '/ranks/gold.png',
+  PLATINUM: '/ranks/platinum.png',
+  EMERALD: './ranks/emerald.png',
+  DIAMOND: '/ranks/diamond.png',
+  MASTER: '/ranks/master.png',
+  GRANDMASTER: '/ranks/grandmaster.png',
+  CHALLENGER: '/ranks/challenger.png',
+  
 };
 
 const MEDALS = { 0: '🥇', 1: '🥈', 2: '🥉' };

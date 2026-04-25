@@ -27,8 +27,15 @@ function getCollection() {
   return db.collection('accounts');
 }
 
+// --- CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS ---
 app.use(express.json());
+
+// Sirve los archivos de la raíz (index.html, styles.css, app.js, etc.)
 app.use(express.static(path.join(__dirname)));
+
+// Sirve específicamente la carpeta de rangos para que Railway la reconozca
+app.use('/ranks', express.static(path.join(__dirname, 'ranks')));
+// -------------------------------------------
 
 // ---- Endpoints de cuentas ----
 
