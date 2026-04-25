@@ -163,30 +163,48 @@ function buildTopChampsHTML(topChampions) {
 }
 
 function buildCardHTML(acc, position) {
-  const r = getRankInfo(acc);
-  // ... (tus otras variables)
+  const r        = getRankInfo(acc);
+  const wr       = computeWinrate(r.wins, r.losses);
+  const wrCls    = winrateClass(wr);
+  const color    = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+  const rankStr = r.tier === 'UNRANKED'
+    ? 'Sin clasificar'
+    : titleCase(r.tier) + ' ' + r.division;
 
-  // --- LÓGICA DE MARCOS ---
+  const iconUrl    = getProfileIconUrl(acc.profileIconId); // Nombre correcto
+  const medal      = MEDALS[position] || '';
+  const updatedStr = acc.updatedAt
+    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
+    : '';
+  const posLabel = acc.mainPosition || '—';
+  const streak   = buildStreakHTML(acc.streak);
+
+  // --- LÓGICA DE MARCOS (Ya automatizada) ---
   let frameHTML = '';
   if (position < 3) {
-    const tierFile = r.tier.toLowerCase(); // ej: 'gold'
-    // Usamos /pic/ porque ahí es donde guardaste los marcos
+    // Si tu archivo se llama "iron.png", usa esto:
+    const tierFile = r.tier.toLowerCase(); 
     frameHTML = '<img src="/pic/' + tierFile + '.png" class="rank-frame" onerror="this.style.display=\'none\'" />';
+    
+    // NOTA: Si tus archivos se llaman "iron-frame.png", cambia la línea de arriba por:
+    // frameHTML = '<img src="/pic/' + tierFile + '-frame.png" class="rank-frame" />';
   }
-  // ------------------------
 
+  const wrHTML = wr !== null
+    ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
+    : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
+
+  const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
+    '<span class="history-btn-text">Ver historial</span>' +
+    '<span class="history-arrow">▾</span>' +
+  '</button>';
+
+  // RETORNO ÚNICO DE LA FUNCIÓN
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
-      frameHTML + // <--- Insertamos el marco aquí
+      frameHTML + 
       (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
-      '<img class="profile-main-icon" src="' + getProfileIconUrl(acc.profileIconId) + '" alt="Icono" />' +
-      '<span class="icon-level">' + acc.summonerLevel + '</span>' +
-    '</div>' +
-  return '<div class="card-top">' +
-    '<div class="icon-wrap">' +
-      frameHTML + // Aquí se inserta el marco si es Top 3
-      (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
+      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info">' +

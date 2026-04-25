@@ -241,7 +241,7 @@ function renderAccounts(sortedList) {
       <div class="account-card" id="card-${acc.puuid}">
         <div class="profile-container">
            ${frameHTML} 
-           <img src="${getIconUrl(acc.profileIconId)}" class="profile-icon">
+           <img src="${getProfileIconUrl(acc.profileIconId)(acc.profileIconId)}" class="profile-icon">
            <div class="level-badge">${acc.summonerLevel}</div>
         </div>
         </div>
