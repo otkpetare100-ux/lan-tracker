@@ -51,11 +51,18 @@ body::before {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  background:
+  background: 
+    /* Los gradientes radiales arriba para dar color y brillo */
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(180,80,140,0.18) 0%, transparent 60%),
     radial-gradient(ellipse 50% 70% at 100% 50%, rgba(120,60,160,0.12) 0%, transparent 60%),
     radial-gradient(ellipse 50% 70% at 0% 50%,   rgba(180,80,140,0.08) 0%, transparent 60%),
-    linear-gradient(180deg, #0A0610 0%, #120818 50%, #0A0610 100%);
+    /* TU IMAGEN AQUÍ (reemplazando el linear-gradient) */
+    url('/pic/bg.jpg'); 
+
+  /* Ajustes para que la imagen se vea bien */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   z-index: 0;
 }
 

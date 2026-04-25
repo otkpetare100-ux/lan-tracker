@@ -1,3 +1,3 @@
 git add .
-git commit -m "actualizar icono de rangos"
+git commit -m "actualizar fondo"
 git push

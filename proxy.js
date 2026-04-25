@@ -33,8 +33,9 @@ app.use(express.json());
 // Sirve los archivos de la raíz (index.html, styles.css, app.js, etc.)
 app.use(express.static(path.join(__dirname)));
 
-// Sirve específicamente la carpeta de rangos para que Railway la reconozca
+// Sirve específicamente para la carpeta de rangos y pic para que Railway la reconozca
 app.use('/ranks', express.static(path.join(__dirname, 'ranks')));
+app.use('/pic', express.static(path.join(__dirname, 'pic')));
 // -------------------------------------------
 
 // ---- Endpoints de cuentas ----
