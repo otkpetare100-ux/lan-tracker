@@ -250,19 +250,43 @@ body::before {
 }
 
 /* ---- Profile icon ---- */
-.icon-wrap { position: relative; flex-shrink: 0; }
-.icon-wrap img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 2px solid rgba(212,120,154,0.5);
-  display: block;
-  object-fit: cover;
-  box-shadow: 0 0 12px rgba(212,120,154,0.2);
+.icon-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.profile-main-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(212,120,154,0.5);
+  box-shadow: 0 0 12px rgba(212,120,154,0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.rank-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .icon-level {
   position: absolute;
-  bottom: -5px;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   background: #0A0610;
@@ -273,6 +297,7 @@ body::before {
   color: var(--pink-light);
   padding: 1px 5px;
   white-space: nowrap;
+  z-index: 3;
 }
 
 /* ---- Medal ---- */
@@ -455,49 +480,25 @@ body::before {
   .header h1 { font-size: 1.5rem; }
 }
 
-/* ---- tamaño del icono de rango ---- */
+/* ---- Scrollbar historial ---- */
+.history-content::-webkit-scrollbar {
+  height: 4px;
+}
+.history-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.history-content::-webkit-scrollbar-thumb {
+  background: rgba(212,120,154,0.3);
+  border-radius: 4px;
+}
+.history-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(212,120,154,0.6);
+}
 
+/* ---- Rank icon image ---- */
 .rank-icon {
-  width: 48px !important;
-  height: 48px !important;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-}
-
-.rank-emblem {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.icon-wrap {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  overflow: visible;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile-main-icon {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-  z-index: 1;
-  border: none;
-}
-
-.rank-frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 180px;
-  height: 180px;
-  object-fit: contain;
-  pointer-events: none;
-  z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(212,120,154,0.3));
 }
