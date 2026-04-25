@@ -11,17 +11,17 @@ const RANK_COLORS = {
 };
 
 const RANK_ICONS = {
-  IRON:        '/pic/ranks/iron.png',
-  BRONZE:      '/pic/ranks/bronze.png',
-  SILVER:      '/pic/ranks/silver.png',
-  GOLD:        '/pic/ranks/gold.png',
-  PLATINUM:    '/pic/ranks/platinum.png',
-  EMERALD:     '/pic/ranks/emerald.png',
-  DIAMOND:     '/pic/ranks/diamond.png',
-  MASTER:      '/pic/ranks/master.png',
+  IRON: '/pic/ranks/iron.png',
+  BRONZE: '/pic/ranks/bronze.png',
+  SILVER: '/pic/ranks/silver.png',
+  GOLD: '/pic/ranks/gold.png',
+  PLATINUM: '/pic/ranks/platinum.png',
+  EMERALD: '/pic/ranks/emerald.png',
+  DIAMOND: '/pic/ranks/diamond.png',
+  MASTER: '/pic/ranks/master.png',
   GRANDMASTER: '/pic/ranks/grandmaster.png',
-  CHALLENGER:  '/pic/ranks/challenger.png',
-  UNRANKED:    null,
+  CHALLENGER: '/pic/ranks/challenger.png',
+  UNRANKED: null,
 };
 
 const MEDALS = {
@@ -81,13 +81,9 @@ function formatDuration(seconds) {
 
 function getChampImageName(name) {
   if (!name) return 'Unknown.png';
-  var base = name.replace(/\.png$/i, '');
-  var clean = base.replace(/[^a-zA-Z0-9]/g, '');
+  const base = name.replace(/\.png$/i, '');
+  const clean = base.replace(/[^a-zA-Z0-9]/g, '');
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
-}
-
-function getProfileIconUrl(iconId) {
-  return 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/' + iconId + '.png';
 }
 
 function buildStreakHTML(streak) {
@@ -100,7 +96,7 @@ function buildStreakHTML(streak) {
 
 function buildMatchHistoryHTML(matches) {
   if (!matches || matches.length === 0) return '<div class="match-empty">Sin partidas registradas</div>';
-  return '<div class="match-history">' + matches.map(function(m) {
+  return '<div class="match-history">' + matches.map(function (m) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
@@ -117,9 +113,9 @@ function buildMatchHistoryHTML(matches) {
 
 function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
-  return topChampions.map(function(c) {
+  return topChampions.map(function (c) {
     if (!c.name) return '';
-    var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
+    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
@@ -207,7 +203,7 @@ function renderAccounts(accounts) {
     return;
   }
 
-  grid.innerHTML = accounts.map(function(acc, idx) {
+  grid.innerHTML = accounts.map(function (acc, idx) {
     var div = document.createElement('div');
     div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
     div.id = 'card-' + acc.puuid;
@@ -223,7 +219,7 @@ function showError(msg) {
   el.style.display = msg ? 'block' : 'none';
   clearTimeout(window._errorTimeout);
   if (msg) {
-    window._errorTimeout = setTimeout(function() {
+    window._errorTimeout = setTimeout(function () {
       el.style.display = 'none';
       el.textContent = '';
     }, 5000);
@@ -237,11 +233,10 @@ function getApiErrorMessage(status) {
     case 404: return 'Cuenta no encontrada en LAN. Verifica el nombre y tag.';
     case 429: return 'Demasiadas solicitudes. Espera un momento e intenta de nuevo.';
     case 503: return 'El servidor de Riot esta caido. Intenta mas tarde.';
-    default:  return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
+    default: return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
   }
 }
 
-// Exponer funciones al objeto window para visibilidad global
 window.renderAccounts = renderAccounts;
 window.showError = showError;
 window.getApiErrorMessage = getApiErrorMessage;
