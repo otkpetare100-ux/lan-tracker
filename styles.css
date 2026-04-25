@@ -51,19 +51,42 @@ body::before {
   pointer-events: none;
   position: fixed;
   inset: 0;
+  
+  /* Capa de oscurecimiento + imagen */
   background: 
-    /* Los gradientes radiales arriba para dar color y brillo */
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(180,80,140,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 70% at 100% 50%, rgba(120,60,160,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 70% at 0% 50%,   rgba(180,80,140,0.08) 0%, transparent 60%),
-    /* TU IMAGEN AQUÍ (reemplazando el linear-gradient) */
+    linear-gradient(rgba(10, 6, 16, 0.75), rgba(10, 6, 16, 0.75)),
     url('/pic/bg.jpg'); 
 
-  /* Ajustes para que la imagen se vea bien */
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  z-index: 0;
+  background-repeat: no-repeat;
+  z-index: -1; /* Asegura que esté al fondo */
+}
+
+/* Mejora para el título principal */
+h1 {
+  color: #d4af37; /* Dorado */
+  text-shadow: 0 0 15px rgba(212, 175, 55, 0.5), 0 4px 8px rgba(0, 0, 0, 0.8);
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+/* Mejora para las tarjetas de los jugadores (Efecto Glassmorphism) */
+.account-card {
+  background: rgba(20, 15, 30, 0.8); /* Fondo oscuro semitransparente */
+  backdrop-filter: blur(10px); /* Desenfoque del fondo */
+  border: 1px solid rgba(180, 80, 140, 0.2); /* Borde sutil morado */
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.account-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(180, 80, 140, 0.5);
 }
 
 /* Pétalos animados */
