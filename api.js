@@ -11,7 +11,12 @@ const ENDPOINTS = {
   LAN:      'https://la1.api.riotgames.com',
 };
 
-const DDRAGON_VERSION = '14.10.1';
+// Version de DDragon — se actualiza automaticamente
+let DDRAGON_VERSION = '15.8.1'; // version actual, se sobreescribe al cargar
+fetch('https://ddragon.leagueoflegends.com/api/versions.json')
+  .then(r => r.json())
+  .then(versions => { DDRAGON_VERSION = versions[0]; })
+  .catch(() => {});
 
 async function riotFetch(url) {
   const proxyUrl = BASE_PROXY + '?url=' + url;
