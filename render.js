@@ -130,6 +130,8 @@ const CHAMP_NAME_FIX = {
   'TwistedFate': 'TwistedFate',
   'Velkoz': 'Velkoz',
   'XinZhao': 'XinZhao',
+  'Fiddlesticks': 'FiddleSticks',
+  'FiddleSticks': 'FiddleSticks',
 };
 
 function getChampImageName(name) {
