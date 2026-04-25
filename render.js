@@ -16,18 +16,18 @@ const RANK_COLORS = {
   UNRANKED:    '#3D5068',
 };
 
-const RANK_EMOJI = {
-  IRON:        '⬛',
-  BRONZE:      '🟫',
-  SILVER:      '⬜',
-  GOLD:        '🟨',
-  PLATINUM:    '🟦',
-  EMERALD:     '🟩',
-  DIAMOND:     '💎',
-  MASTER:      '🔮',
-  GRANDMASTER: '👑',
-  CHALLENGER:  '✨',
-  UNRANKED:    '❓',
+const RANK_ICONS = {
+  IRON:        'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-iron.png',
+  BRONZE:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-bronze.png',
+  SILVER:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-silver.png',
+  GOLD:        'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-gold.png',
+  PLATINUM:    'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-platinum.png',
+  EMERALD:     'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-emerald.png',
+  DIAMOND:     'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-diamond.png',
+  MASTER:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-master.png',
+  GRANDMASTER: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-grandmaster.png',
+  CHALLENGER:  'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-challenger.png',
+  UNRANKED:    null,
 };
 
 const MEDALS = { 0: '🥇', 1: '🥈', 2: '🥉' };
@@ -166,7 +166,7 @@ function buildCardHTML(acc, position) {
   const wr      = computeWinrate(r.wins, r.losses);
   const wrCls   = winrateClass(wr);
   const color   = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const emoji   = RANK_EMOJI[r.tier]  || '❓';
+  // rank icon handled by RANK_ICONS
   const rankStr = r.tier === 'UNRANKED'
     ? 'Sin clasificar'
     : titleCase(r.tier) + ' ' + r.division;
@@ -207,7 +207,7 @@ function buildCardHTML(acc, position) {
     '</div>' +
     '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions) + '</div></div>' +
     '<div class="rank-block">' +
-      '<div class="rank-emblem">' + emoji + '</div>' +
+      '<div class="rank-emblem">' + (RANK_ICONS[r.tier] ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />' : '❓') + '</div>' +
       '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
       '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
     '</div>' +

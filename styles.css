@@ -469,3 +469,11 @@ body::before {
 .history-content::-webkit-scrollbar-thumb:hover {
   background: rgba(212,120,154,0.6);
 }
+
+/* ---- Rank icon image ---- */
+.rank-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(212,120,154,0.3));
+}
