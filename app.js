@@ -94,10 +94,32 @@ async function handleRefresh(puuid, silent = false) {
 
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
-    // Conserva el historial si ya estaba cargado
-    updated.matches      = acc.matches      || [];
-    updated.streak       = acc.streak       || 0;
-    updated.mainPosition = acc.mainPosition || '—';
+
+    // Si ya tenia historial cargado, lo actualiza tambien
+    if (acc.matches && acc.matches.length > 0) {
+      const history = await fetchMatchHistory(acc.puuid);
+      updated.matches      = history.matches;
+      updated.streak       = history.streak;
+      updated.mainPosition = history.mainPosition;
+      if (history.matches && history.matches.length > 0) {
+        const champCount = {};
+        for (const m of history.matches) {
+          if (!champCount[m.champion]) champCount[m.champion] = 0;
+          champCount[m.champion]++;
+        }
+        updated.topChampions = Object.entries(champCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(function([name]) {
+            var image = name.replace(/[^a-zA-Z0-9]/g, '') + '.png';
+            return { name: name, image: image };
+          });
+      }
+    } else {
+      updated.matches      = acc.matches      || [];
+      updated.streak       = acc.streak       || 0;
+      updated.mainPosition = acc.mainPosition || '—';
+    }
     await updateAccountOnServer(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     renderAccounts(sortByRank(accounts));
