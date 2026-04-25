@@ -163,11 +163,10 @@ function buildTopChampsHTML(topChampions) {
 }
 
 function buildCardHTML(acc, position) {
-  const r       = getRankInfo(acc);
-  const wr      = computeWinrate(r.wins, r.losses);
-  const wrCls   = winrateClass(wr);
-  const color   = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  // rank icon handled by RANK_ICONS
+  const r        = getRankInfo(acc);
+  const wr       = computeWinrate(r.wins, r.losses);
+  const wrCls    = winrateClass(wr);
+  const color    = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
   const rankStr = r.tier === 'UNRANKED'
     ? 'Sin clasificar'
     : titleCase(r.tier) + ' ' + r.division;
@@ -179,6 +178,16 @@ function buildCardHTML(acc, position) {
     : '';
   const posLabel = acc.mainPosition || '—';
   const streak   = buildStreakHTML(acc.streak);
+
+  // --- LÓGICA DE MARCOS PARA TOP 3 ---
+  let frameHTML = '';
+  if (position < 3) {
+    // Convierte el tier a minúsculas para buscar el archivo (ej: 'gold', 'diamond')
+    const tierFile = r.tier.toLowerCase();
+    // Esto genera: <img src="/pic/gold.png" class="rank-frame">
+    frameHTML = '<img src="/pic/' + tierFile + '.png" class="rank-frame" onerror="this.style.display=\'none\'" />';
+  }
+  // ----------------------------------
 
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
@@ -192,8 +201,9 @@ function buildCardHTML(acc, position) {
 
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
+      frameHTML + // Aquí se inserta el marco si es Top 3
       (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
-      '<img src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
+      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info">' +
