@@ -454,3 +454,17 @@ body::before {
   .tracker-wrap { padding: 1.5rem 1rem 3rem; }
   .header h1 { font-size: 1.5rem; }
 }
+
+/* ---- tamaño del icono de rango ---- */
+
+.rank-icon {
+  width: 48px !important;
+  height: 48px !important;
+  object-fit: contain;
+}
+
+.rank-emblem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
