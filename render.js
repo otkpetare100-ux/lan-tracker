@@ -132,6 +132,11 @@ const CHAMP_NAME_FIX = {
   'XinZhao': 'XinZhao',
   'Fiddlesticks': 'FiddleSticks',
   'FiddleSticks': 'FiddleSticks',
+  'Renata': 'Renata',
+  'RenataGlasc': 'Renata',
+  'Nunu': 'Nunu',
+  'NunuWillump': 'Nunu',
+  'Mel': 'Mel',
 };
 
 function getChampImageName(name) {
