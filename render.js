@@ -21,9 +21,9 @@ const RANK_ICONS = {
 };
 
 const MEDALS = {
-  0: '/pic/medalla top/top1.png',
-  1: '/pic/medalla top/top2.png',
-  2: '/pic/medalla top/top3.png',
+  0: '/pic/medalla_top/top1.png',
+  1: '/pic/medalla_top/top2.png',
+  2: '/pic/medalla_top/top3.png',
 };
 
 const CHAMP_NAME_FIX = {
