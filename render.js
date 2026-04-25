@@ -93,7 +93,7 @@ function buildMatchHistoryHTML(matches) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
-    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + m.champion + '.png';
+    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(m.champion);
     return '<div class="match-item ' + cls + '">' +
       '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
       '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
