@@ -1,3 +1,3 @@
 git add .
-git commit -m "fix marco sobre icono"
+git commit -m "fix"
 git push
