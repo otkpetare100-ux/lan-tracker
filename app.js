@@ -89,7 +89,7 @@ function championsFromMatches(matches) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(function([name]) {
-      return { name: name, image: name.replace(/[^a-zA-Z0-9]/g, '') + '.png' };
+      return { name: name, image: name }; // imagen se resuelve en render con getChampImageName
     });
 }
 

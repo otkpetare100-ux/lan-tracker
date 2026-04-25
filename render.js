@@ -106,11 +106,44 @@ function buildMatchHistoryHTML(matches) {
 }
 
 
+// Mapa de nombres especiales de DDragon
+const CHAMP_NAME_FIX = {
+  'AurelionSol': 'AurelionSol',
+  'Belveth': 'Belveth',
+  'Chogath': 'Chogath',
+  'DrMundo': 'DrMundo',
+  'JarvanIV': 'JarvanIV',
+  'Kaisa': 'Kaisa',
+  'Khazix': 'Khazix',
+  'KogMaw': 'KogMaw',
+  'KSante': 'KSante',
+  'Leblanc': 'Leblanc',
+  'LeeSin': 'LeeSin',
+  'MasterYi': 'MasterYi',
+  'MissFortune': 'MissFortune',
+  'MonkeyKing': 'MonkeyKing',
+  'Wukong': 'MonkeyKing',
+  'Nunu': 'Nunu',
+  'NunuWillump': 'Nunu',
+  'RekSai': 'RekSai',
+  'TahmKench': 'TahmKench',
+  'TwistedFate': 'TwistedFate',
+  'Velkoz': 'Velkoz',
+  'XinZhao': 'XinZhao',
+};
+
+function getChampImageName(name) {
+  if (!name) return null;
+  // Limpia el nombre igual que la API
+  var clean = name.replace(/[^a-zA-Z0-9]/g, '');
+  return (CHAMP_NAME_FIX[clean] || clean) + '.png';
+}
+
 function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
     if (!c.image) return '';
-    var img = 'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/' + c.image;
+    var img = c.image ? 'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/' + getChampImageName(c.name) : '';
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
