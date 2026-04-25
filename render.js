@@ -93,7 +93,7 @@ function buildMatchHistoryHTML(matches) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
-    const img = 'https://ddragon.leagueoflegends.com/cdn/' + (typeof DDRAGON_VERSION !== 'undefined' ? DDRAGON_VERSION : '15.8.1') + '/img/champion/' + m.champion + '.png';
+    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + m.champion + '.png';
     return '<div class="match-item ' + cls + '">' +
       '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
       '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
@@ -132,6 +132,7 @@ const CHAMP_NAME_FIX = {
   'XinZhao': 'XinZhao',
   'Fiddlesticks': 'Fiddlesticks',
   'FiddleSticks': 'Fiddlesticks',
+  'fiddlesticks': 'Fiddlesticks',
   'Renata': 'Renata',
   'RenataGlasc': 'Renata',
   'Nunu': 'Nunu',
@@ -150,7 +151,7 @@ function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
     if (!c.image) return '';
-    var img = c.image ? 'https://ddragon.leagueoflegends.com/cdn/' + (typeof DDRAGON_VERSION !== 'undefined' ? DDRAGON_VERSION : '15.8.1') + '/img/champion/' + getChampImageName(c.name) : '';
+    var img = c.image ? 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name) : '';
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
