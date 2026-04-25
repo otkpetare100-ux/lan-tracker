@@ -36,6 +36,21 @@ body {
   overflow-x: hidden;
 }
 
+/* ---- boton de historial ---- */
+.history-toggle-btn {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.history-toggle-btn:hover {
+  background: rgba(255,255,255,0.14);
+}
+
 /* ---- Background & Overlay ---- */
 .bg-overlay {
   pointer-events: none;
@@ -138,9 +153,34 @@ body {
 /* ---- GRID PRINCIPAL ---- */
 .card-top {
   display: grid;
-  grid-template-columns: 90px 1fr auto auto auto 40px; /* Primera columna ancha para el marco */
+  grid-template-columns: 180px 1fr 240px;
+  gap: 24px;
   align-items: center;
-  gap: 15px;
+}
+
+.icon-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-main-icon {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+}
+
+.rank-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-icon {
+  width: 180px;
+  height: 180px;
 }
 
 /* ---- CONTENEDOR DE ICONO Y MARCO ---- */
@@ -215,8 +255,17 @@ body {
 
 /* ---- Rank & Winrate ---- */
 .rank-block {
-  text-align: center;
-  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+}
+
+.rank-icon {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
 }
 
 .rank-emblem { font-size: 1.8rem; }
@@ -277,6 +326,12 @@ body {
 }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* ---- perplexity ---- */
+.winrate-block {
+  text-align: center;
+  min-width: 120px;
+  margin-right: 10px;
+}
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
