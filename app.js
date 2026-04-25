@@ -5,6 +5,8 @@
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 let accounts = [];
+const refreshCooldowns = {}; // puuid -> timestamp ultimo refresh
+const REFRESH_COOLDOWN = 60 * 1000; // 1 minuto
 
 const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
@@ -97,6 +99,18 @@ function championsFromMatches(matches) {
 async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
+
+  // Cooldown de 1 minuto por cuenta (solo para refresh manual)
+  if (!silent) {
+    const lastRefresh = refreshCooldowns[puuid] || 0;
+    const elapsed = Date.now() - lastRefresh;
+    if (elapsed < REFRESH_COOLDOWN) {
+      const seconds = Math.ceil((REFRESH_COOLDOWN - elapsed) / 1000);
+      showError('Espera ' + seconds + ' segundos para actualizar esta cuenta.');
+      return;
+    }
+    refreshCooldowns[puuid] = Date.now();
+  }
 
   const card = document.getElementById('card-' + puuid);
   if (card) {
