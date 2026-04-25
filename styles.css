@@ -40,7 +40,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: url('/pic/bg.png') center center / cover no-repeat;
+  background: url('/pic/bg.jpg') center center / cover no-repeat;
   opacity: 0.35;
   z-index: 0;
   pointer-events: none;
@@ -244,7 +244,7 @@ body::before {
 /* ---- Card top row ---- */
 .card-top {
   display: grid;
-  grid-template-columns: 58px 1fr auto auto auto 36px;
+  grid-template-columns: 100px 1fr auto auto auto 36px;
   align-items: center;
   gap: 16px;
 }
