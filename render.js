@@ -2,7 +2,6 @@
  * render.js — DOM rendering helpers for LAN Tracker
  */
 
-// --- FUNCIÓN QUE FALTABA PARA EVITAR EL ERROR EN APP.JS ---
 function getProfileIconUrl(iconId) {
   return `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${iconId}.png`;
 }
@@ -10,107 +9,19 @@ function getProfileIconUrl(iconId) {
 const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/29.png';
 
 const RANK_COLORS = {
-  IRON:        '#6B5A4E',
-  BRONZE:      '#CD7F32',
-  SILVER:      '#A8A9AD',
-  GOLD:        '#C89B3C',
-  PLATINUM:    '#00B4B0',
-  EMERALD:     '#00C65E',
-  DIAMOND:     '#578ACA',
-  MASTER:      '#9D4DC7',
-  GRANDMASTER: '#CF4FC9',
-  CHALLENGER:  '#F4C874',
-  UNRANKED:    '#3D5068',
+  IRON: '#6B5A4E', BRONZE: '#CD7F32', SILVER: '#A8A9AD', GOLD: '#C89B3C',
+  PLATINUM: '#00B4B0', EMERALD: '#00C65E', DIAMOND: '#578ACA',
+  MASTER: '#9D4DC7', GRANDMASTER: '#CF4FC9', CHALLENGER: '#F4C874', UNRANKED: '#3D5068',
 };
 
 const RANK_ICONS = {
-  UNRANKED: '/ranks/unranked.png',
-  IRON: '/ranks/iron.png',
-  BRONZE: '/ranks/bronze.png',
-  SILVER: '/ranks/silver.png',
-  GOLD: '/ranks/gold.png',
-  PLATINUM: '/ranks/platinum.png',
-  EMERALD: '/ranks/emerald.png', // Corregido el ./ por /
-  DIAMOND: '/ranks/diamond.png',
-  MASTER: '/ranks/master.png',
-  GRANDMASTER: '/ranks/grandmaster.png',
-  CHALLENGER: '/ranks/challenger.png',
+  UNRANKED: '/ranks/unranked.png', IRON: '/ranks/iron.png', BRONZE: '/ranks/bronze.png',
+  SILVER: '/ranks/silver.png', GOLD: '/ranks/gold.png', PLATINUM: '/ranks/platinum.png',
+  EMERALD: '/ranks/emerald.png', DIAMOND: '/ranks/diamond.png', MASTER: '/ranks/master.png',
+  GRANDMASTER: '/ranks/grandmaster.png', CHALLENGER: '/ranks/challenger.png',
 };
 
 const MEDALS = { 0: '🥇', 1: '🥈', 2: '🥉' };
-
-function getRankInfo(acc) {
-  const soloQ = acc.soloQ;
-  if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
-  return {
-    tier:     soloQ.tier,
-    division: soloQ.rank,
-    lp:        soloQ.leaguePoints,
-    wins:      soloQ.wins,
-    losses:    soloQ.losses,
-  };
-}
-
-function computeWinrate(wins, losses) {
-  const total = wins + losses;
-  if (total === 0) return null;
-  return Math.round((wins / total) * 100);
-}
-
-function winrateClass(wr) {
-  if (wr === null) return 'empty';
-  if (wr >= 55)   return 'good';
-  if (wr >= 48)   return 'ok';
-  return 'bad';
-}
-
-function titleCase(str) {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function formatDuration(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return m + ':' + (s < 10 ? '0' : '') + s;
-}
-
-function buildStreakHTML(streak) {
-  if (!streak || streak === 0) return '';
-  const isWin = streak > 0;
-  const count = Math.abs(streak);
-  const cls   = isWin ? 'streak-win' : 'streak-loss';
-  const label = isWin ? count + 'V seguidas' : count + 'D seguidas';
-  return '<span class="streak-badge ' + cls + '">' + label + '</span>';
-}
-
-function buildMatchHistoryHTML(matches) {
-  if (!matches || matches.length === 0) {
-    return '<div class="match-empty">Sin partidas registradas</div>';
-  }
-  const items = matches.map(function(m) {
-    const cls = m.win ? 'match-win' : 'match-loss';
-    const kda = m.kills + '/' + m.deaths + '/' + m.assists;
-    const dur = formatDuration(m.gameDuration);
-    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(m.champion);
-    return '<div class="match-item ' + cls + '">' +
-      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
-      '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
-      '<span class="match-champ-name">' + escapeHTML(m.champion) + '</span>' +
-      '<span class="match-kda">' + kda + '</span>' +
-      '<span class="match-dur">' + dur + '</span>' +
-    '</div>';
-  });
-  return '<div class="match-history">' + items.join('') + '</div>';
-}
 
 const CHAMP_NAME_FIX = {
   'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'Chogath': 'Chogath',
@@ -124,131 +35,163 @@ const CHAMP_NAME_FIX = {
   'RenataGlasc': 'Renata', 'Mel': 'Mel',
 };
 
+/* ---- Helpers ---- */
+function getRankInfo(acc) {
+  const soloQ = acc.soloQ;
+  if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
+  return { tier: soloQ.tier, division: soloQ.rank, lp: soloQ.leaguePoints, wins: soloQ.wins, losses: soloQ.losses };
+}
+
+function computeWinrate(wins, losses) {
+  const total = wins + losses;
+  return total === 0 ? null : Math.round((wins / total) * 100);
+}
+
+function winrateClass(wr) {
+  if (wr === null) return 'empty';
+  if (wr >= 55) return 'good';
+  if (wr >= 48) return 'ok';
+  return 'bad';
+}
+
+function titleCase(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ''; }
+
+function escapeHTML(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatDuration(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
 function getChampImageName(name) {
-  if (!name) return null;
-  var base = name.replace(/\.png$/i, '');
-  var clean = base.replace(/[^a-zA-Z0-9]/g, '');
+  if (!name) return 'Unknown.png';
+  let base = name.replace(/\.png$/i, '');
+  let clean = base.replace(/[^a-zA-Z0-9]/g, '');
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
+}
+
+/* ---- Builders ---- */
+function buildStreakHTML(streak) {
+  if (!streak || streak === 0) return '';
+  const isWin = streak > 0;
+  const cls = isWin ? 'streak-win' : 'streak-loss';
+  const label = isWin ? Math.abs(streak) + 'V' : Math.abs(streak) + 'D';
+  return `<span class="streak-badge ${cls}">${label}</span>`;
+}
+
+function buildMatchHistoryHTML(matches) {
+  if (!matches || matches.length === 0) return '<div class="match-empty">Sin partidas recientes</div>';
+  return '<div class="match-history">' + matches.map(m => {
+    const cls = m.win ? 'match-win' : 'match-loss';
+    const img = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${getChampImageName(m.champion)}`;
+    return `
+      <div class="match-item ${cls}">
+        <img class="match-champ" src="${img}" onerror="this.src='${FALLBACK_ICON_URL}'">
+        <div class="dot-${m.win ? 'win' : 'loss'}"></div>
+        <span class="match-kda">${m.kills}/${m.deaths}/${m.assists}</span>
+      </div>`;
+  }).join('') + '</div>';
 }
 
 function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
-  return topChampions.map(function(c) {
-    if (!c.name) return '';
-    var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
-    return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
-      '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
-    '</div>';
+  return topChampions.map(c => {
+    const img = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${getChampImageName(c.name)}`;
+    return `<div class="top-champ"><img src="${img}" title="${c.name}"></div>`;
   }).join('');
 }
 
+/* ---- Main Card Builder ---- */
 function buildCardHTML(acc, position) {
-  const r        = getRankInfo(acc);
-  const wr       = computeWinrate(r.wins, r.losses);
-  const wrCls    = winrateClass(wr);
-  const color    = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const rankStr = r.tier === 'UNRANKED'
-    ? 'Sin clasificar'
-    : titleCase(r.tier) + ' ' + r.division;
-
-  const iconUrl    = getProfileIconUrl(acc.profileIconId); 
-  const medal      = MEDALS[position] || '';
-  const updatedStr = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
-    : '';
-  const posLabel = acc.mainPosition || '—';
-  const streak   = buildStreakHTML(acc.streak);
-
-  // --- LÓGICA DE MARCOS (TOP 3) ---
+  const r = getRankInfo(acc);
+  const wr = computeWinrate(r.wins, r.losses);
+  const color = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+  const rankStr = r.tier === 'UNRANKED' ? 'Sin Clasificar' : `${titleCase(r.tier)} ${r.division}`;
+  
+  // Marco para el Top 3
   let frameHTML = '';
   if (position < 3) {
-    const tierFile = r.tier.toLowerCase(); 
-    frameHTML = '<img src="/pic/' + tierFile + '-frame.png" class="rank-frame" onerror="this.style.display=\'none\'" />';
+    frameHTML = `<img src="/pic/${r.tier.toLowerCase()}-frame.png" class="rank-frame" onerror="this.remove()">`;
   }
 
-  const wrHTML = wr !== null
-    ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
-    : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
+  return `
+    <div class="card-top">
+      <div class="icon-wrap">
+        ${frameHTML}
+        ${MEDALS[position] ? `<div class="medal-badge">${MEDALS[position]}</div>` : ''}
+        <img class="profile-main-icon" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'">
+        <div class="icon-level">${acc.summonerLevel}</div>
+      </div>
 
-  const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
-    '<span class="history-btn-text">Ver historial</span>' +
-    '<span class="history-arrow">▾</span>' +
-  '</button>';
+      <div class="summoner-info">
+        <div class="summoner-name">${escapeHTML(acc.gameName)}</div>
+        <div class="summoner-tag">#${escapeHTML(acc.tagLine)}</div>
+        <div class="summoner-meta">
+          <span class="position-badge">${acc.mainPosition || '—'}</span>
+          ${buildStreakHTML(acc.streak)}
+        </div>
+      </div>
 
-  return '<div class="card-top">' +
-    '<div class="icon-wrap">' +
-      frameHTML + 
-      (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
-      '<span class="icon-level">' + acc.summonerLevel + '</span>' +
-    '</div>' +
-    '<div class="summoner-info">' +
-      '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
-      '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
-      '<div class="summoner-meta">' +
-        '<span class="summoner-region">LAN</span>' +
-        '<span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
-        streak +
-        (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
-      '</div>' +
-    '</div>' +
-    '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions) + '</div></div>' +
-    '<div class="rank-block">' +
-      '<div class="rank-emblem">' + (RANK_ICONS[r.tier] ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />' : '❓') + '</div>' +
-      '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
-      '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
-    '</div>' +
-    '<div class="winrate-block">' + wrHTML + '</div>' +
-    '<div class="card-actions">' +
-      '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
-      '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
-    '</div>' +
-  '</div>' +
-  '<div class="history-section">' +
-    historyBtn +
-    '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
-      buildMatchHistoryHTML(acc.matches) +
-    '</div>' +
-  '</div>';
+      <div class="top-champs-block"><div class="top-champs-inner">${buildTopChampsHTML(acc.topChampions)}</div></div>
+
+      <div class="rank-block">
+        <div class="rank-emblem">
+          ${RANK_ICONS[r.tier] ? `<img src="${RANK_ICONS[r.tier]}" class="rank-icon">` : '❓'}
+        </div>
+        <div class="rank-name" style="color:${color}">${rankStr}</div>
+        <div class="rank-lp">${r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—'}</div>
+      </div>
+
+      <div class="winrate-block">
+        <div class="wr-number ${winrateClass(wr)}">${wr !== null ? wr + '%' : '—'}</div>
+        <div class="wr-label">${wr !== null ? 'Winrate' : 'Sin datos'}</div>
+      </div>
+
+      <div class="card-actions">
+        <button class="refresh-btn" data-puuid="${acc.puuid}">↻</button>
+        <button class="remove-btn" data-puuid="${acc.puuid}">✕</button>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <button class="history-toggle-btn" data-puuid="${acc.puuid}">
+        <span class="history-btn-text">Ver historial</span> <span class="history-arrow">▾</span>
+      </button>
+      <div class="history-content" id="history-${acc.puuid}" style="display:none;">
+        ${buildMatchHistoryHTML(acc.matches)}
+      </div>
+    </div>
+  `;
 }
 
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
   if (!grid) return;
+  
   if (accounts.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
+    grid.innerHTML = '<div class="empty-state"><p>No hay cuentas en la lista.</p></div>';
     return;
   }
-  grid.innerHTML = accounts.map(function(acc, idx) {
-    var div = document.createElement('div');
-    div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
-    div.id = 'card-' + acc.puuid;
-    div.innerHTML = buildCardHTML(acc, idx);
-    return div.outerHTML;
+
+  grid.innerHTML = accounts.map((acc, idx) => {
+    const topCls = idx < 3 ? ` top-${idx + 1}` : '';
+    return `<div class="account-card${topCls}" id="card-${acc.puuid}">${buildCardHTML(acc, idx)}</div>`;
   }).join('');
 }
 
+/* ---- UI Helpers ---- */
 function showError(msg) {
   const el = document.getElementById('error-msg');
-  if(!el) return;
+  if (!el) return;
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
-  clearTimeout(window._errorTimeout);
-  if (msg) {
-    window._errorTimeout = setTimeout(function() {
-      el.style.display = 'none';
-      el.textContent = '';
-    }, 5000);
-  }
+  if (msg) setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
 function getApiErrorMessage(status) {
-  switch (status) {
-    case 400: return 'Solicitud invalida. Revisa el formato Nombre#TAG.';
-    case 403: return 'API key invalida o expirada. Renovela en developer.riotgames.com';
-    case 404: return 'Cuenta no encontrada en LAN. Verifica el nombre y tag.';
-    case 429: return 'Demasiadas solicitudes. Espera un momento e intenta de nuevo.';
-    case 503: return 'El servidor de Riot esta caido. Intenta mas tarde.';
-    default:  return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
-  }
+  const errors = { 404: "No encontrado", 429: "Límite de Riot alcanzado", 403: "API Key vencida" };
+  return errors[status] || "Error de conexión";
 }

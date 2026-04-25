@@ -24,7 +24,7 @@ function getRankScore(acc) {
   if (!soloQ) return -1;
   const tier = TIER_ORDER[soloQ.tier] ?? -1;
   const div  = DIV_ORDER[soloQ.rank]  ?? 0;
-  const lp   = soloQ.leaguePoints     || 0;
+  const lp   = soloQ.leaguePoints      || 0;
   return tier * 10000 + div * 1000 + lp;
 }
 
@@ -53,7 +53,7 @@ async function handleSearch() {
 
   const parts = raw.split('#');
   if (parts.length !== 2 || !parts[0] || !parts[1]) {
-    showError('Formato invalido. Usa Nombre#TAG  (ej: Pepitoflow#LAN1)');
+    showError('Formato invalido. Usa Nombre#TAG (ej: Pepitoflow#LAN1)');
     return;
   }
 
@@ -79,7 +79,6 @@ async function handleSearch() {
   }
 }
 
-/* ---- Helpers para actualizar campeones desde historial ---- */
 function championsFromMatches(matches) {
   if (!matches || matches.length === 0) return null;
   const champCount = {};
@@ -91,7 +90,7 @@ function championsFromMatches(matches) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(function([name]) {
-      return { name: name, image: name }; // imagen se resuelve en render con getChampImageName
+      return { name: name, image: name };
     });
 }
 
@@ -100,15 +99,12 @@ async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Cooldown de 1 minuto por cuenta (solo para refresh manual)
   if (!silent) {
     const lastRefresh = refreshCooldowns[puuid] || 0;
     const elapsed = Date.now() - lastRefresh;
     if (elapsed < REFRESH_COOLDOWN) {
       const seconds = Math.ceil((REFRESH_COOLDOWN - elapsed) / 1000);
       showError('Espera ' + seconds + ' segundos para actualizar esta cuenta.');
-      clearTimeout(window._errorTimeout);
-      window._errorTimeout = setTimeout(() => showError(''), 5000);
       return;
     }
     refreshCooldowns[puuid] = Date.now();
@@ -122,9 +118,8 @@ async function handleRefresh(puuid, silent = false) {
 
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
-
-    // Siempre actualiza el historial si ya estaba cargado antes
     const hadHistory = acc.matches && acc.matches.length > 0;
+    
     if (hadHistory) {
       const history = await fetchMatchHistory(acc.puuid);
       updated.matches      = history.matches;
@@ -142,7 +137,6 @@ async function handleRefresh(puuid, silent = false) {
     await updateAccountOnServer(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
 
-    // Si el historial estaba abierto, lo mantiene abierto tras re-render
     const wasOpen = card && document.getElementById('history-' + puuid) &&
                     document.getElementById('history-' + puuid).style.display !== 'none';
 
@@ -159,14 +153,8 @@ async function handleRefresh(puuid, silent = false) {
     }
 
   } catch (err) {
-    if (!silent) {
-      showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
-    }
-    const c = document.getElementById('card-' + puuid);
-    if (c) {
-      const btn = c.querySelector('.refresh-btn');
-      if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
-    }
+    if (!silent) showError(err.status ? getApiErrorMessage(err.status) : 'Error: ' + err.message);
+    renderAccounts(sortByRank(accounts));
   }
 }
 
@@ -177,7 +165,6 @@ async function handleHistoryToggle(puuid) {
   if (!content || !btn) return;
 
   const isOpen = content.style.display !== 'none';
-
   if (isOpen) {
     content.style.display = 'none';
     btn.querySelector('.history-arrow').textContent = '▾';
@@ -188,11 +175,9 @@ async function handleHistoryToggle(puuid) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Si no tiene historial aun, lo carga
   if (!acc.matches || acc.matches.length === 0) {
     btn.querySelector('.history-btn-text').textContent = 'Cargando...';
     btn.disabled = true;
-
     try {
       const history = await fetchMatchHistory(puuid);
       acc.matches      = history.matches;
@@ -203,40 +188,16 @@ async function handleHistoryToggle(puuid) {
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
       await updateAccountOnServer(acc);
       renderAccounts(sortByRank(accounts));
-      const newContent = document.getElementById('history-' + puuid);
-      const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
-      if (newContent) newContent.style.display = 'block';
-      if (newBtn) {
-        newBtn.querySelector('.history-arrow').textContent = '▴';
-        newBtn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
-      }
+      document.getElementById('history-' + puuid).style.display = 'block';
     } catch(e) {
       btn.querySelector('.history-btn-text').textContent = 'Ver historial';
       btn.disabled = false;
     }
     return;
   }
-
   content.style.display = 'block';
   btn.querySelector('.history-arrow').textContent = '▴';
   btn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
-}
-/* ---- frames de los tops ---- */
-
-function renderAccounts(sortedList) {
-  
-    }
-
-    return `
-      <div class="account-card" id="card-${acc.puuid}">
-        <div class="profile-container">
-           ${frameHTML} 
-           <img src="${getProfileIconUrl(acc.profileIconId)(acc.profileIconId)}" class="profile-icon">
-           <div class="level-badge">${acc.summonerLevel}</div>
-        </div>
-        </div>
-    `;
-  }).join('');
 }
 
 /* ---- Event delegation ---- */
