@@ -40,7 +40,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: url('bg.jpg') center center / cover no-repeat;
+  background: url('/pic/bg.png') center center / cover no-repeat;
   opacity: 0.35;
   z-index: 0;
   pointer-events: none;
@@ -274,7 +274,7 @@ body::before {
 
 .rank-frame {
   position: absolute;
-  top: 43%;
+  top: 41%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 110px;
