@@ -86,6 +86,10 @@ function getChampImageName(name) {
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
 
+function getProfileIconUrl(iconId) {
+  return 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/' + iconId + '.png';
+}
+
 function buildStreakHTML(streak) {
   if (!streak || streak === 0) return '';
   const isWin = streak > 0;
@@ -237,6 +241,7 @@ function getApiErrorMessage(status) {
   }
 }
 
+// Exponer funciones al objeto window para visibilidad global
 window.renderAccounts = renderAccounts;
 window.showError = showError;
 window.getApiErrorMessage = getApiErrorMessage;
