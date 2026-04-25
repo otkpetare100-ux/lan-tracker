@@ -62,7 +62,6 @@ async function handleSearch() {
   try {
     const entry  = await fetchAccountSnapshot(gameName, tagLine);
     const result = await saveAccountToServer(entry);
-
     if (!result.added) {
       showError('Esta cuenta ya esta en la lista.');
     } else {
@@ -71,14 +70,27 @@ async function handleSearch() {
       searchInput.value = '';
     }
   } catch (err) {
-    const msg = err.status
-      ? getApiErrorMessage(err.status)
-      : 'Error de red: ' + err.message;
-    showError(msg);
+    showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
   } finally {
     searchBtn.disabled = false;
     searchBtn.textContent = 'Buscar';
   }
+}
+
+/* ---- Helpers para actualizar campeones desde historial ---- */
+function championsFromMatches(matches) {
+  if (!matches || matches.length === 0) return null;
+  const champCount = {};
+  for (const m of matches) {
+    if (!champCount[m.champion]) champCount[m.champion] = 0;
+    champCount[m.champion]++;
+  }
+  return Object.entries(champCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(function([name]) {
+      return { name: name, image: name.replace(/[^a-zA-Z0-9]/g, '') + '.png' };
+    });
 }
 
 /* ---- Refresh ---- */
@@ -95,41 +107,48 @@ async function handleRefresh(puuid, silent = false) {
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
 
-    // Si ya tenia historial cargado, lo actualiza tambien
-    if (acc.matches && acc.matches.length > 0) {
+    // Siempre actualiza el historial si ya estaba cargado antes
+    const hadHistory = acc.matches && acc.matches.length > 0;
+    if (hadHistory) {
       const history = await fetchMatchHistory(acc.puuid);
       updated.matches      = history.matches;
       updated.streak       = history.streak;
       updated.mainPosition = history.mainPosition;
-      if (history.matches && history.matches.length > 0) {
-        const champCount = {};
-        for (const m of history.matches) {
-          if (!champCount[m.champion]) champCount[m.champion] = 0;
-          champCount[m.champion]++;
-        }
-        updated.topChampions = Object.entries(champCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(function([name]) {
-            var image = name.replace(/[^a-zA-Z0-9]/g, '') + '.png';
-            return { name: name, image: image };
-          });
-      }
+      const champs = championsFromMatches(history.matches);
+      if (champs) updated.topChampions = champs;
     } else {
-      updated.matches      = acc.matches      || [];
-      updated.streak       = acc.streak       || 0;
+      updated.matches      = [];
+      updated.streak       = 0;
       updated.mainPosition = acc.mainPosition || '—';
+      updated.topChampions = acc.topChampions || [];
     }
+
     await updateAccountOnServer(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
+
+    // Si el historial estaba abierto, lo mantiene abierto tras re-render
+    const wasOpen = card && document.getElementById('history-' + puuid) &&
+                    document.getElementById('history-' + puuid).style.display !== 'none';
+
     renderAccounts(sortByRank(accounts));
+
+    if (wasOpen) {
+      const newContent = document.getElementById('history-' + puuid);
+      const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
+      if (newContent) newContent.style.display = 'block';
+      if (newBtn) {
+        newBtn.querySelector('.history-arrow').textContent = '▴';
+        newBtn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
+      }
+    }
+
   } catch (err) {
     if (!silent) {
       showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
     }
-    const card = document.getElementById('card-' + puuid);
-    if (card) {
-      const btn = card.querySelector('.refresh-btn');
+    const c = document.getElementById('card-' + puuid);
+    if (c) {
+      const btn = c.querySelector('.refresh-btn');
       if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
     }
   }
@@ -150,10 +169,10 @@ async function handleHistoryToggle(puuid) {
     return;
   }
 
-  // Abre y carga si no tiene datos aun
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
+  // Si no tiene historial aun, lo carga
   if (!acc.matches || acc.matches.length === 0) {
     btn.querySelector('.history-btn-text').textContent = 'Cargando...';
     btn.disabled = true;
@@ -163,27 +182,11 @@ async function handleHistoryToggle(puuid) {
       acc.matches      = history.matches;
       acc.streak       = history.streak;
       acc.mainPosition = history.mainPosition;
-
-      // Actualiza campeones mas jugados en SoloQ
-      if (history.matches && history.matches.length > 0) {
-        const champCount = {};
-        for (const m of history.matches) {
-          if (!champCount[m.champion]) champCount[m.champion] = 0;
-          champCount[m.champion]++;
-        }
-        acc.topChampions = Object.entries(champCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(function([name]) {
-            // Convierte nombre a imagen DDragon (nombre sin espacios)
-            var image = name.replace(/[^a-zA-Z0-9]/g, '') + '.png';
-            return { name: name, image: image };
-          });
-      }
+      const champs = championsFromMatches(history.matches);
+      if (champs) acc.topChampions = champs;
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
       await updateAccountOnServer(acc);
       renderAccounts(sortByRank(accounts));
-      // Reabre el historial despues de re-render
       const newContent = document.getElementById('history-' + puuid);
       const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
       if (newContent) newContent.style.display = 'block';
@@ -205,9 +208,9 @@ async function handleHistoryToggle(puuid) {
 
 /* ---- Event delegation ---- */
 accountsGrid.addEventListener('click', async (e) => {
-  const removeBtn     = e.target.closest('.remove-btn');
-  const refreshBtn    = e.target.closest('.refresh-btn');
-  const historyBtn    = e.target.closest('.history-toggle-btn');
+  const removeBtn  = e.target.closest('.remove-btn');
+  const refreshBtn = e.target.closest('.refresh-btn');
+  const historyBtn = e.target.closest('.history-toggle-btn');
 
   if (removeBtn) {
     const puuid = removeBtn.dataset.puuid;
