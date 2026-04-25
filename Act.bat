@@ -1,3 +1,3 @@
 git add .
-git commit -m "actualizar fondo"
+git commit -m "fix marco sobre icono"
 git push
