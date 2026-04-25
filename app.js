@@ -221,6 +221,33 @@ async function handleHistoryToggle(puuid) {
   btn.querySelector('.history-arrow').textContent = '▴';
   btn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
 }
+/* ---- frames de los tops ---- */
+
+function renderAccounts(sortedList) {
+  accountsGrid.innerHTML = sortedList.map((acc, index) => {
+    let frameHTML = '';
+    
+    // Solo aplicamos marcos a los top 3
+    if (index < 3) {
+      // Obtenemos el rango (ej: 'MASTER', 'DIAMOND', 'GOLD')
+      const tier = acc.soloQ ? acc.soloQ.tier.toLowerCase() : 'unranked';
+      
+      // Construimos la ruta dinámicamente: /pic/master-frame.png
+      // Asegúrate de que tus archivos en /pic se llamen así
+      frameHTML = `<img src="/pic/${tier}-frame.png" class="rank-frame top-${index + 1}">`;
+    }
+
+    return `
+      <div class="account-card" id="card-${acc.puuid}">
+        <div class="profile-container">
+           ${frameHTML} 
+           <img src="${getIconUrl(acc.profileIconId)}" class="profile-icon">
+           <div class="level-badge">${acc.summonerLevel}</div>
+        </div>
+        </div>
+    `;
+  }).join('');
+}
 
 /* ---- Event delegation ---- */
 accountsGrid.addEventListener('click', async (e) => {

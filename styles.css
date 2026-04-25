@@ -101,7 +101,37 @@ h1 {
   from { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
   to   { transform: translateY(-15px) rotate(3deg); opacity: 1; }
 }
+/* ---- frame de tops ---- */
+.profile-container {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.rank-frame {
+  position: absolute;
+  width: 140%; /* El marco suele ser más grande que la foto */
+  height: 140%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Efecto especial solo para el Top 1 */
+.top-1 {
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
+  transform: scale(1.1); /* Un poquito más grande */
+}
+
+.profile-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 /* ---- Layout ---- */
 .tracker-wrap {
   position: relative;
