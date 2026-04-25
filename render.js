@@ -131,6 +131,8 @@ const CHAMP_NAME_FIX = {
   'Velkoz': 'Velkoz',
   'XinZhao': 'XinZhao',
   'Fiddlesticks': 'Fiddlesticks',
+  'FiddleSticks': 'Fiddlesticks',
+  'fiddlesticks': 'Fiddlesticks',
   'Renata': 'Renata',
   'RenataGlasc': 'Renata',
   'Nunu': 'Nunu',
@@ -140,16 +142,19 @@ const CHAMP_NAME_FIX = {
 
 function getChampImageName(name) {
   if (!name) return null;
-  // Limpia el nombre igual que la API
-  var clean = name.replace(/[^a-zA-Z0-9]/g, '');
-  return (CHAMP_NAME_FIX[clean] || clean) + '.png';
+  // Quita .png si ya viene con extension
+  var base = name.replace(/\.png$/i, '');
+  // Limpia caracteres especiales
+  var clean = base.replace(/[^a-zA-Z0-9]/g, '');
+  // Busca en el mapa, si no esta usa el nombre limpio
+  return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
 
 function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
-    if (!c.image) return '';
-    var img = c.image ? 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name) : '';
+    if (!c.name) return '';
+    var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
