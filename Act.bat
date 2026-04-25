@@ -1,3 +1,3 @@
 git add .
-git commit -m "fondo fix + info fix"
+git commit -m "fix"
 git push
