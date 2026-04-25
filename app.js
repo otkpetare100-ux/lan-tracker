@@ -55,8 +55,7 @@
     accountsGrid = document.getElementById('accounts-grid');
     if (!searchInput || !searchBtn || !accountsGrid) return;
 
-    accounts = await loadAccounts();
-    renderAccounts(sortByRank(accounts));
+    accounts = await loadAccounts();    
 
     setInterval(async () => {
       if (accounts.length === 0) return;
