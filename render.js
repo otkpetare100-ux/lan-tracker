@@ -1,7 +1,3 @@
-/**
- * render.js — DOM rendering helpers for LAN Tracker
- */
-
 const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/0.png';
 
 const RANK_COLORS = {
