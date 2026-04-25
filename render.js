@@ -2,6 +2,13 @@
  * render.js — DOM rendering helpers for LAN Tracker
  */
 
+// --- FUNCIÓN QUE FALTABA PARA EVITAR EL ERROR EN APP.JS ---
+function getProfileIconUrl(iconId) {
+  return `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${iconId}.png`;
+}
+
+const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/29.png';
+
 const RANK_COLORS = {
   IRON:        '#6B5A4E',
   BRONZE:      '#CD7F32',
@@ -23,12 +30,11 @@ const RANK_ICONS = {
   SILVER: '/ranks/silver.png',
   GOLD: '/ranks/gold.png',
   PLATINUM: '/ranks/platinum.png',
-  EMERALD: './ranks/emerald.png',
+  EMERALD: '/ranks/emerald.png', // Corregido el ./ por /
   DIAMOND: '/ranks/diamond.png',
   MASTER: '/ranks/master.png',
   GRANDMASTER: '/ranks/grandmaster.png',
   CHALLENGER: '/ranks/challenger.png',
-  
 };
 
 const MEDALS = { 0: '🥇', 1: '🥈', 2: '🥉' };
@@ -39,9 +45,9 @@ function getRankInfo(acc) {
   return {
     tier:     soloQ.tier,
     division: soloQ.rank,
-    lp:       soloQ.leaguePoints,
-    wins:     soloQ.wins,
-    losses:   soloQ.losses,
+    lp:        soloQ.leaguePoints,
+    wins:      soloQ.wins,
+    losses:    soloQ.losses,
   };
 }
 
@@ -106,48 +112,22 @@ function buildMatchHistoryHTML(matches) {
   return '<div class="match-history">' + items.join('') + '</div>';
 }
 
-
-// Mapa de nombres especiales de DDragon
 const CHAMP_NAME_FIX = {
-  'AurelionSol': 'AurelionSol',
-  'Belveth': 'Belveth',
-  'Chogath': 'Chogath',
-  'DrMundo': 'DrMundo',
-  'JarvanIV': 'JarvanIV',
-  'Kaisa': 'Kaisa',
-  'Khazix': 'Khazix',
-  'KogMaw': 'KogMaw',
-  'KSante': 'KSante',
-  'Leblanc': 'Leblanc',
-  'LeeSin': 'LeeSin',
-  'MasterYi': 'MasterYi',
-  'MissFortune': 'MissFortune',
-  'MonkeyKing': 'MonkeyKing',
-  'Wukong': 'MonkeyKing',
-  'Nunu': 'Nunu',
-  'NunuWillump': 'Nunu',
-  'RekSai': 'RekSai',
-  'TahmKench': 'TahmKench',
-  'TwistedFate': 'TwistedFate',
-  'Velkoz': 'Velkoz',
-  'XinZhao': 'XinZhao',
-  'Fiddlesticks': 'Fiddlesticks',
-  'FiddleSticks': 'Fiddlesticks',
-  'fiddlesticks': 'Fiddlesticks',
-  'Renata': 'Renata',
-  'RenataGlasc': 'Renata',
-  'Nunu': 'Nunu',
-  'NunuWillump': 'Nunu',
-  'Mel': 'Mel',
+  'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'Chogath': 'Chogath',
+  'DrMundo': 'DrMundo', 'JarvanIV': 'JarvanIV', 'Kaisa': 'Kaisa',
+  'Khazix': 'Khazix', 'KogMaw': 'KogMaw', 'KSante': 'KSante',
+  'Leblanc': 'Leblanc', 'LeeSin': 'LeeSin', 'MasterYi': 'MasterYi',
+  'MissFortune': 'MissFortune', 'MonkeyKing': 'MonkeyKing', 'Wukong': 'MonkeyKing',
+  'Nunu': 'Nunu', 'NunuWillump': 'Nunu', 'RekSai': 'RekSai',
+  'TahmKench': 'TahmKench', 'TwistedFate': 'TwistedFate', 'Velkoz': 'Velkoz',
+  'XinZhao': 'XinZhao', 'Fiddlesticks': 'Fiddlesticks', 'Renata': 'Renata',
+  'RenataGlasc': 'Renata', 'Mel': 'Mel',
 };
 
 function getChampImageName(name) {
   if (!name) return null;
-  // Quita .png si ya viene con extension
   var base = name.replace(/\.png$/i, '');
-  // Limpia caracteres especiales
   var clean = base.replace(/[^a-zA-Z0-9]/g, '');
-  // Busca en el mapa, si no esta usa el nombre limpio
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
 
@@ -171,7 +151,7 @@ function buildCardHTML(acc, position) {
     ? 'Sin clasificar'
     : titleCase(r.tier) + ' ' + r.division;
 
-  const iconUrl    = getProfileIconUrl(acc.profileIconId); // Nombre correcto
+  const iconUrl    = getProfileIconUrl(acc.profileIconId); 
   const medal      = MEDALS[position] || '';
   const updatedStr = acc.updatedAt
     ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
@@ -179,15 +159,11 @@ function buildCardHTML(acc, position) {
   const posLabel = acc.mainPosition || '—';
   const streak   = buildStreakHTML(acc.streak);
 
-  // --- LÓGICA DE MARCOS (Ya automatizada) ---
+  // --- LÓGICA DE MARCOS (TOP 3) ---
   let frameHTML = '';
   if (position < 3) {
-    // Si tu archivo se llama "iron.png", usa esto:
     const tierFile = r.tier.toLowerCase(); 
-    frameHTML = '<img src="/pic/' + tierFile + '.png" class="rank-frame" onerror="this.style.display=\'none\'" />';
-    
-    // NOTA: Si tus archivos se llaman "iron-frame.png", cambia la línea de arriba por:
-    // frameHTML = '<img src="/pic/' + tierFile + '-frame.png" class="rank-frame" />';
+    frameHTML = '<img src="/pic/' + tierFile + '-frame.png" class="rank-frame" onerror="this.style.display=\'none\'" />';
   }
 
   const wrHTML = wr !== null
@@ -199,12 +175,11 @@ function buildCardHTML(acc, position) {
     '<span class="history-arrow">▾</span>' +
   '</button>';
 
-  // RETORNO ÚNICO DE LA FUNCIÓN
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
       frameHTML + 
       (medal ? '<div class="medal-badge">' + medal + '</div>' : '') +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" />' +
+      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info">' +
@@ -239,6 +214,7 @@ function buildCardHTML(acc, position) {
 
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
+  if (!grid) return;
   if (accounts.length === 0) {
     grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
     return;
@@ -254,6 +230,7 @@ function renderAccounts(accounts) {
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
+  if(!el) return;
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
   clearTimeout(window._errorTimeout);

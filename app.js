@@ -224,17 +224,7 @@ async function handleHistoryToggle(puuid) {
 /* ---- frames de los tops ---- */
 
 function renderAccounts(sortedList) {
-  accountsGrid.innerHTML = sortedList.map((acc, index) => {
-    let frameHTML = '';
-    
-    // Solo aplicamos marcos a los top 3
-    if (index < 3) {
-      // Obtenemos el rango (ej: 'MASTER', 'DIAMOND', 'GOLD')
-      const tier = acc.soloQ ? acc.soloQ.tier.toLowerCase() : 'unranked';
-      
-      // Construimos la ruta dinámicamente: /pic/master-frame.png
-      // Asegúrate de que tus archivos en /pic se llamen así
-      frameHTML = `<img src="/pic/${tier}-frame.png" class="rank-frame top-${index + 1}">`;
+  
     }
 
     return `
