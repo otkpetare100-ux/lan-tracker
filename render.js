@@ -17,16 +17,16 @@ const RANK_COLORS = {
 };
 
 const RANK_ICONS = {
-  IRON:        'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-iron.png',
-  BRONZE:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-bronze.png',
-  SILVER:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-silver.png',
-  GOLD:        'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-gold.png',
-  PLATINUM:    'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-platinum.png',
-  EMERALD:     'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-emerald.png',
-  DIAMOND:     'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-diamond.png',
-  MASTER:      'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-master.png',
-  GRANDMASTER: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-grandmaster.png',
-  CHALLENGER:  'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/images/ranked-emblem/emblem-challenger.png',
+  IRON:        'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Iron.png',
+  BRONZE:      'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Bronze.png',
+  SILVER:      'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Silver.png',
+  GOLD:        'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Gold.png',
+  PLATINUM:    'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Platinum.png',
+  EMERALD:     'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Emerald.png',
+  DIAMOND:     'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Diamond.png',
+  MASTER:      'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Master.png',
+  GRANDMASTER: 'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Grandmaster.png',
+  CHALLENGER:  'https://opgg-static.akamaized.net/meta/images/profile_icons/position/Season_2023_-_Challenger.png',
   UNRANKED:    null,
 };
 
