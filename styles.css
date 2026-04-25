@@ -468,3 +468,27 @@ body::before {
   justify-content: center;
   align-items: center;
 }
+
+.icon-wrap {
+  position: relative;
+}
+
+.profile-main-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: block;
+  object-fit: cover;
+}
+
+.rank-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
+}
