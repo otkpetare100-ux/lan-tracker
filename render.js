@@ -2,7 +2,7 @@
  * render.js — DOM rendering helpers for LAN Tracker
  */
 
-const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/0.png';
+/const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/0.png';/
 
 const RANK_COLORS = {
   IRON: '#6B5A4E', BRONZE: '#CD7F32', SILVER: '#A8A9AD', GOLD: '#C89B3C',
@@ -96,7 +96,7 @@ function buildStreakHTML(streak) {
 
 function buildMatchHistoryHTML(matches) {
   if (!matches || matches.length === 0) return '<div class="match-empty">Sin partidas registradas</div>';
-  return '<div class="match-history">' + matches.map(function (m) {
+  return '<div class="match-history">' + matches.map(function(m) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
@@ -113,7 +113,7 @@ function buildMatchHistoryHTML(matches) {
 
 function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
-  return topChampions.map(function (c) {
+  return topChampions.map(function(c) {
     if (!c.name) return '';
     const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
@@ -203,7 +203,7 @@ function renderAccounts(accounts) {
     return;
   }
 
-  grid.innerHTML = accounts.map(function (acc, idx) {
+  grid.innerHTML = accounts.map(function(acc, idx) {
     var div = document.createElement('div');
     div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
     div.id = 'card-' + acc.puuid;
@@ -219,7 +219,7 @@ function showError(msg) {
   el.style.display = msg ? 'block' : 'none';
   clearTimeout(window._errorTimeout);
   if (msg) {
-    window._errorTimeout = setTimeout(function () {
+    window._errorTimeout = setTimeout(function() {
       el.style.display = 'none';
       el.textContent = '';
     }, 5000);
