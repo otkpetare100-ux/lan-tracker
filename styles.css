@@ -454,3 +454,18 @@ body::before {
   .tracker-wrap { padding: 1.5rem 1rem 3rem; }
   .header h1 { font-size: 1.5rem; }
 }
+
+/* ---- Scrollbar historial ---- */
+.history-content::-webkit-scrollbar {
+  height: 4px;
+}
+.history-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.history-content::-webkit-scrollbar-thumb {
+  background: rgba(212,120,154,0.3);
+  border-radius: 4px;
+}
+.history-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(212,120,154,0.6);
+}
