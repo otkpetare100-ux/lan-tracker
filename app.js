@@ -251,4 +251,4 @@
   }
 
   window.addEventListener('DOMContentLoaded', init);
-})();
+
