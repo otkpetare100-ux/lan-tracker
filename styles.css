@@ -296,7 +296,7 @@ body::before {
 
 .icon-wrap .profile-main-icon {
   position: absolute;
-  top: 40;
+  top: 100;
   left: 100;
   z-index: 2;
   width: 50px;
