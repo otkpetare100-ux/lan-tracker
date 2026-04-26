@@ -97,7 +97,7 @@
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSearch();
     });
-  
+  }
 
   async function handleSearch() {
     const raw = searchInput.value.trim();
@@ -251,4 +251,4 @@
   }
 
   window.addEventListener('DOMContentLoaded', init);
-}
+})();
