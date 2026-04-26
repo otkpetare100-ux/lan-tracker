@@ -146,7 +146,7 @@ function buildCardHTML(acc, position) {
   const medalHTML = MEDALS[position]
     ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position + 1) + '">'
     : '';
-  const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame" onerror="this.remove()">';
+  const frameHTML = '';
   const rankIconHTML = RANK_ICONS[r.tier]
     ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />'
     : '❓';
