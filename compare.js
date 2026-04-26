@@ -56,26 +56,46 @@
     if (!stats) {
       return '<div class="compare-stat" style="color: #7a84aa; padding: 20px;">Sin datos de partidas</div>';
     }
-    
-    return METRICS.map(m => {
+
+    return METRICS.map(function(m) {
       const valA = stats[m.key];
-      const valB = statsOther ? statsOther[m.key] : null;
-      
-      // Si ambos tienen datos, comparar; si no, no marcar como mejor
+      const valB = (statsOther && statsOther[m.key] !== undefined) ? statsOther[m.key] : null;
+
       let isBetter = false;
+      let diffBadge = '';
+      let barPct = 50;
+
       if (valB !== null && valA !== null) {
-        isBetter = ['kda', 'csMin', 'damage', 'vision', 'gold', 'kp'].includes(m.key) 
-          ? parseFloat(valA) > parseFloat(valB)
-          : valA < valB; // Para duración, menor es mejor
+        const isLowerBetter = m.key === 'duration';
+        const fA = parseFloat(valA);
+        const fB = parseFloat(valB);
+        isBetter = isLowerBetter ? fA < fB : fA > fB;
+
+        if (fA + fB > 0) {
+          barPct = isLowerBetter
+            ? Math.round((fB / (fA + fB)) * 100)
+            : Math.round((fA / (fA + fB)) * 100);
+        }
+
+        if (isBetter && fB > 0) {
+          const diff = Math.round(Math.abs((fA - fB) / fB) * 100);
+          if (diff > 0) diffBadge = '<span class="compare-diff-badge">+' + diff + '%</span>';
+        }
+      } else if (valA !== null) {
+        barPct = 100;
       }
-      
-      return `
-        <div class="compare-stat ${isBetter ? 'compare-stat--better' : ''}">
-          <span class="compare-label">${m.label}</span>
-          <span class="compare-value ${['damage','gold'].includes(m.key) ? 'compare-value--xl' : ''}">
-            ${valA !== null && valA !== undefined ? m.format(valA) : '—'}
-          </span>
-        </div>`;
+
+      const barHTML = valB !== null
+        ? '<div class="compare-bar-track"><div class="compare-bar-fill ' + (isBetter ? 'compare-bar-fill--better' : 'compare-bar-fill--worse') + '" style="--bar-pct:' + barPct + '%"></div></div>'
+        : '';
+
+      return '<div class="compare-stat ' + (isBetter ? 'compare-stat--better' : '') + '">' +
+        '<div class="compare-stat__header"><span class="compare-label">' + m.label + '</span>' + diffBadge + '</div>' +
+        '<span class="compare-value ' + (['damage','gold'].includes(m.key) ? 'compare-value--xl' : '') + '">' +
+          (valA !== null && valA !== undefined ? m.format(valA) : '—') +
+        '</span>' +
+        barHTML +
+      '</div>';
     }).join('');
   }
 
@@ -145,19 +165,35 @@
     
     const statsA = getStatsAverages(accs[0].matches);
     const statsB = getStatsAverages(accs[1].matches);
-    
+
+    let scoreA = 0, scoreB = 0;
+    if (statsA && statsB) {
+      METRICS.forEach(function(m) {
+        const fA = parseFloat(statsA[m.key]);
+        const fB = parseFloat(statsB[m.key]);
+        if (!isNaN(fA) && !isNaN(fB) && fA !== fB) {
+          if (m.key === 'duration' ? fA < fB : fA > fB) scoreA++;
+          else scoreB++;
+        }
+      });
+    }
+
     const modal = document.createElement('div');
     modal.id = 'compare-modal';
-    modal.innerHTML = `
-      <div class="compare-modal__box">
-        <button class="compare-modal__close" onclick="closeCompareModal()">✕</button>
-        <h2 class="compare-modal__title">⚖ Comparación</h2>
-        <div class="compare-modal__grid">
-          ${buildColumn(accs[0], statsA, statsB)}
-          <div class="compare-modal__vs">VS</div>
-          ${buildColumn(accs[1], statsB, statsA)}
-        </div>
-      </div>`;
+    modal.innerHTML =
+      '<div class="compare-modal__box">' +
+        '<button class="compare-modal__close" onclick="closeCompareModal()">✕</button>' +
+        '<h2 class="compare-modal__title">⚖ Comparación</h2>' +
+        '<div class="compare-modal__grid">' +
+          buildColumn(accs[0], statsA, statsB) +
+          '<div class="compare-modal__vs">' +
+            '<div class="compare-vs-score ' + (scoreA > scoreB ? 'compare-vs-score--win' : scoreA < scoreB ? 'compare-vs-score--lose' : '') + '">' + scoreA + '</div>' +
+            '<div class="compare-vs-label">VS</div>' +
+            '<div class="compare-vs-score ' + (scoreB > scoreA ? 'compare-vs-score--win' : scoreB < scoreA ? 'compare-vs-score--lose' : '') + '">' + scoreB + '</div>' +
+          '</div>' +
+          buildColumn(accs[1], statsB, statsA) +
+        '</div>' +
+      '</div>';
     
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('compare-modal--open'));
@@ -194,21 +230,32 @@
 
   function getRankInfoForCompare(acc) {
     if (!acc.soloQ) {
-      return '<div style="color: #7a84aa; font-size: 0.8rem; margin: 5px 0;">Sin clasificar</div>';
+      return '<div class="compare-rank-row"><span style="color:#7a84aa;font-size:0.78rem;">Sin clasificar</span></div>';
     }
-    
-    const tier = titleCase(acc.soloQ.tier || '');
-    const rank = acc.soloQ.rank || '';
-    const lp = acc.soloQ.leaguePoints || 0;
-    const color = RANK_COLORS[acc.soloQ.tier] || '#7a84aa';
-    
-    return `
-      <div style="color: ${color}; font-weight: 700; font-size: 0.85rem;">
-        ${tier} ${rank}
-      </div>
-      <div style="color: #7a84aa; font-size: 0.7rem;">
-        ${lp} LP
-      </div>`;
+
+    const tier   = titleCase(acc.soloQ.tier || '');
+    const rank   = acc.soloQ.rank || '';
+    const lp     = acc.soloQ.leaguePoints || 0;
+    const wins   = acc.soloQ.wins   || 0;
+    const losses = acc.soloQ.losses || 0;
+    const total  = wins + losses;
+    const wr     = total > 0 ? Math.round((wins / total) * 100) : null;
+    const color  = RANK_COLORS[acc.soloQ.tier] || '#7a84aa';
+
+    var iconSrc = (typeof RANK_ICONS !== 'undefined' && RANK_ICONS[acc.soloQ.tier]) || null;
+    var iconHTML = iconSrc ? '<img class="compare-rank-icon" src="' + iconSrc + '" alt="' + tier + '" />' : '';
+    var wrClass  = wr === null ? '' : wr >= 55 ? 'compare-wr--good' : wr >= 48 ? 'compare-wr--ok' : 'compare-wr--bad';
+    var wrHTML   = wr !== null
+      ? '<div class="compare-wr ' + wrClass + '">' + wr + '% <span class="compare-wr-record">' + wins + 'V ' + losses + 'D</span></div>'
+      : '';
+
+    return '<div class="compare-rank-row">' +
+        iconHTML +
+        '<div class="compare-rank-text">' +
+          '<div style="color:' + color + ';font-weight:700;font-size:0.82rem;">' + tier + ' ' + rank + '</div>' +
+          '<div class="compare-lp">' + lp + ' LP</div>' +
+        '</div>' +
+      '</div>' + wrHTML;
   }
 
   function buildChampsHTMLForCompare(champions) {
