@@ -1,4 +1,6 @@
-window.FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/0.png';
+/**
+ * render.js — DOM rendering helpers for LAN Tracker
+ */
 
 const RANK_COLORS = {
   IRON: '#6B5A4E', BRONZE: '#CD7F32', SILVER: '#A8A9AD', GOLD: '#C89B3C',
@@ -7,51 +9,41 @@ const RANK_COLORS = {
 };
 
 const RANK_ICONS = {
-  IRON: '/pic/ranks/iron.png',
-  BRONZE: '/pic/ranks/bronze.png',
-  SILVER: '/pic/ranks/silver.png',
-  GOLD: '/pic/ranks/gold.png',
-  PLATINUM: '/pic/ranks/platinum.png',
-  EMERALD: '/pic/ranks/emerald.png',
-  DIAMOND: '/pic/ranks/diamond.png',
-  MASTER: '/pic/ranks/master.png',
+  IRON:        '/pic/ranks/iron.png',
+  BRONZE:      '/pic/ranks/bronze.png',
+  SILVER:      '/pic/ranks/silver.png',
+  GOLD:        '/pic/ranks/gold.png',
+  PLATINUM:    '/pic/ranks/platinum.png',
+  EMERALD:     '/pic/ranks/emerald.png',
+  DIAMOND:     '/pic/ranks/diamond.png',
+  MASTER:      '/pic/ranks/master.png',
   GRANDMASTER: '/pic/ranks/grandmaster.png',
-  CHALLENGER: '/pic/ranks/challenger.png',
-  UNRANKED: null,
+  CHALLENGER:  '/pic/ranks/challenger.png',
+  UNRANKED:    null,
 };
 
 const MEDALS = {
-  0: '/pic/medalla_top/top1.png',
-  1: '/pic/medalla_top/top2.png',
-  2: '/pic/medalla_top/top3.png',
+  0: '/pic/medalla top/top1.png',
+  1: '/pic/medalla top/top2.png',
+  2: '/pic/medalla top/top3.png',
 };
 
 const CHAMP_NAME_FIX = {
-  AurelionSol: 'AurelionSol', Belveth: 'Belveth', Chogath: 'Chogath',
-  DrMundo: 'DrMundo', JarvanIV: 'JarvanIV', Kaisa: 'Kaisa',
-  Khazix: 'Khazix', KogMaw: 'KogMaw', KSante: 'KSante',
-  Leblanc: 'Leblanc', LeeSin: 'LeeSin', MasterYi: 'MasterYi',
-  MissFortune: 'MissFortune', MonkeyKing: 'MonkeyKing', Wukong: 'MonkeyKing',
-  Nunu: 'Nunu', NunuWillump: 'Nunu', RekSai: 'RekSai',
-  TahmKench: 'TahmKench', TwistedFate: 'TwistedFate', Velkoz: 'Velkoz',
-  XinZhao: 'XinZhao', Fiddlesticks: 'Fiddlesticks', FiddleSticks: 'Fiddlesticks',
-  fiddlesticks: 'Fiddlesticks', Renata: 'Renata', RenataGlasc: 'Renata', Mel: 'Mel',
+  'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'Chogath': 'Chogath',
+  'DrMundo': 'DrMundo', 'JarvanIV': 'JarvanIV', 'Kaisa': 'Kaisa',
+  'Khazix': 'Khazix', 'KogMaw': 'KogMaw', 'KSante': 'KSante',
+  'Leblanc': 'Leblanc', 'LeeSin': 'LeeSin', 'MasterYi': 'MasterYi',
+  'MissFortune': 'MissFortune', 'MonkeyKing': 'MonkeyKing', 'Wukong': 'MonkeyKing',
+  'Nunu': 'Nunu', 'NunuWillump': 'Nunu', 'RekSai': 'RekSai',
+  'TahmKench': 'TahmKench', 'TwistedFate': 'TwistedFate', 'Velkoz': 'Velkoz',
+  'XinZhao': 'XinZhao', 'Fiddlesticks': 'Fiddlesticks', 'FiddleSticks': 'Fiddlesticks',
+  'fiddlesticks': 'Fiddlesticks', 'Renata': 'Renata', 'RenataGlasc': 'Renata', 'Mel': 'Mel',
 };
-
-function getProfileIconUrl(iconId) {
-  return `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${iconId}.png`;
-}
 
 function getRankInfo(acc) {
   const soloQ = acc.soloQ;
   if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
-  return {
-    tier: soloQ.tier,
-    division: soloQ.rank,
-    lp: soloQ.leaguePoints,
-    wins: soloQ.wins,
-    losses: soloQ.losses,
-  };
+  return { tier: soloQ.tier, division: soloQ.rank, lp: soloQ.leaguePoints, wins: soloQ.wins, losses: soloQ.losses };
 }
 
 function computeWinrate(wins, losses) {
@@ -71,12 +63,7 @@ function titleCase(str) {
 }
 
 function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function formatDuration(seconds) {
@@ -87,15 +74,15 @@ function formatDuration(seconds) {
 
 function getChampImageName(name) {
   if (!name) return 'Unknown.png';
-  const base = name.replace(/\.png$/i, '');
-  const clean = base.replace(/[^a-zA-Z0-9]/g, '');
+  var base  = name.replace(/\.png$/i, '');
+  var clean = base.replace(/[^a-zA-Z0-9]/g, '');
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
 
 function buildStreakHTML(streak) {
   if (!streak || streak === 0) return '';
   const isWin = streak > 0;
-  const cls = isWin ? 'streak-win' : 'streak-loss';
+  const cls   = isWin ? 'streak-win' : 'streak-loss';
   const label = Math.abs(streak) + (isWin ? 'V seguidas' : 'D seguidas');
   return '<span class="streak-badge ' + cls + '">' + label + '</span>';
 }
@@ -121,7 +108,7 @@ function buildTopChampsHTML(topChampions) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
     if (!c.name) return '';
-    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
+    var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
@@ -129,27 +116,33 @@ function buildTopChampsHTML(topChampions) {
 }
 
 function buildCardHTML(acc, position) {
-  const r = getRankInfo(acc);
-  const wr = computeWinrate(r.wins, r.losses);
-  const wrCls = winrateClass(wr);
-  const color = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+  const r       = getRankInfo(acc);
+  const wr      = computeWinrate(r.wins, r.losses);
+  const wrCls   = winrateClass(wr);
+  const color   = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
   const rankStr = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + r.division;
   const iconUrl = getProfileIconUrl(acc.profileIconId);
+
   const updatedStr = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
     : '';
   const posLabel = acc.mainPosition || '—';
-  const streak = buildStreakHTML(acc.streak);
+  const streak   = buildStreakHTML(acc.streak);
+
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
+
   const medalHTML = MEDALS[position]
-    ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position + 1) + '">'
+    ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position+1) + '">'
     : '';
-  const frameHTML = '';
+
+  const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame" onerror="this.remove()">';
+
   const rankIconHTML = RANK_ICONS[r.tier]
     ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />'
     : '❓';
+
   const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
     '<span class="history-btn-text">Ver historial</span><span class="history-arrow">▾</span>' +
   '</button>';
@@ -158,7 +151,7 @@ function buildCardHTML(acc, position) {
     '<div class="icon-wrap">' +
       frameHTML +
       medalHTML +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'"/>' +
+      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info">' +
@@ -182,6 +175,9 @@ function buildCardHTML(acc, position) {
       '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
       '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
     '</div>' +
+    '<div class="compare-btn-wrap">' +
+      '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
+    '</div>' +
   '</div>' +
   '<div class="history-section">' +
     historyBtn +
@@ -193,13 +189,12 @@ function buildCardHTML(acc, position) {
 
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
-  if (!grid) return;
   if (accounts.length === 0) {
     grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
     return;
   }
   grid.innerHTML = accounts.map(function(acc, idx) {
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
     div.id = 'card-' + acc.puuid;
     div.innerHTML = buildCardHTML(acc, idx);
@@ -209,7 +204,6 @@ function renderAccounts(accounts) {
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
-  if (!el) return;
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
   clearTimeout(window._errorTimeout);
@@ -228,10 +222,6 @@ function getApiErrorMessage(status) {
     case 404: return 'Cuenta no encontrada en LAN. Verifica el nombre y tag.';
     case 429: return 'Demasiadas solicitudes. Espera un momento e intenta de nuevo.';
     case 503: return 'El servidor de Riot esta caido. Intenta mas tarde.';
-    default: return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
+    default:  return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
   }
 }
-
-window.renderAccounts = renderAccounts;
-window.showError = showError;
-window.getApiErrorMessage = getApiErrorMessage;
