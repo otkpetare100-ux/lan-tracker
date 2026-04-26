@@ -56,7 +56,9 @@
     if (!searchInput || !searchBtn || !accountsGrid) return;
 
     accounts = await loadAccounts();    
-
+    if (accounts && accounts.length >0) {
+       renderAccounts(sortByRank(accounts));
+       } 
     setInterval(async () => {
       if (accounts.length === 0) return;
       for (const acc of accounts) {
@@ -95,7 +97,7 @@
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSearch();
     });
-  }
+  
 
   async function handleSearch() {
     const raw = searchInput.value.trim();
