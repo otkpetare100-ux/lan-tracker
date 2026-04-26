@@ -34,6 +34,7 @@ function sortByRank(list) {
 
 async function init() {
   accounts = await loadAccounts();
+  window._accounts_ref = accounts;
   renderAccounts(sortByRank(accounts));
 }
 init();
@@ -68,6 +69,7 @@ async function handleSearch() {
       showError('Esta cuenta ya esta en la lista.');
     } else {
       accounts.push(entry);
+      window._accounts_ref = accounts;
       renderAccounts(sortByRank(accounts));
       searchInput.value = '';
     }
@@ -141,7 +143,7 @@ async function handleRefresh(puuid, silent = false) {
 
     await updateAccountOnServer(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
-
+    window._accounts_ref = accounts;
     // Si el historial estaba abierto, lo mantiene abierto tras re-render
     const wasOpen = card && document.getElementById('history-' + puuid) &&
                     document.getElementById('history-' + puuid).style.display !== 'none';
@@ -232,6 +234,7 @@ accountsGrid.addEventListener('click', async (e) => {
     const puuid = removeBtn.dataset.puuid;
     await deleteAccountFromServer(puuid);
     accounts = accounts.filter(a => a.puuid !== puuid);
+    window._accounts_ref = accounts;
     renderAccounts(sortByRank(accounts));
   }
 
