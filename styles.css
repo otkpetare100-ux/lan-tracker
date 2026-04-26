@@ -929,8 +929,51 @@ body::before {
     gap: 5px;
   }
 }
+/* Forzar scroll y contenedor */
 #compare-modal {
   position: fixed !important;
   inset: 0 !important;
   z-index: 9999 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 5, 12, 0.85);
+  backdrop-filter: blur(10px);
+}
+
+.compare-modal__box {
+  width: 90% !important;
+  max-width: 680px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important; /* Habilita el scroll */
+  background: #1a1523 !important;
+  border-radius: 20px !important;
+  padding: 2rem !important;
+}
+
+/* Aislamiento de imágenes: elimina la influencia de styles.css */
+#compare-modal img {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+}
+
+#compare-modal .compare-col__avatar {
+  width: 64px !important;
+  height: 64px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+#compare-modal .compare-rank-icon {
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain !important;
+}
+
+#compare-modal .compare-champ-icon {
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: cover !important;
 }
