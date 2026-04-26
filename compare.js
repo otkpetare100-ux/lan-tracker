@@ -1,5 +1,5 @@
 /**
- * compare.js — Sistema de comparación de cuentas (Versión Completa)
+ * compare.js — Sistema de comparación de cuentas (Versión Corregida)
  */
 (function () {
   if (window.__LAN_TRACKER_COMPARE_LOADED__) return;
@@ -16,12 +16,11 @@
     { key: 'duration', label: 'Dur. Prom.',  format: v => Math.floor(v/60) + ':' + (v%60).toString().padStart(2, '0') }
   ];
 
-    function getStatsAverages(matches) {
+  function getStatsAverages(matches) {
     if (!matches || !Array.isArray(matches) || matches.length === 0) return null;
     
     const t = matches.length;
     const s = matches.reduce((acc, m) => {
-      // Usamos (m.campo || 0) para asegurar que siempre haya un número
       acc.k += (m.kills || 0);
       acc.d += (m.deaths || 0);
       acc.a += (m.assists || 0);
@@ -34,14 +33,17 @@
       return acc;
     }, { k:0, d:0, a:0, cs:0, dmg:0, vis:0, g:0, kp:0, dur:0 });
 
-    // Prevenir división por cero en duración y muertes
-    const safeDuration = (s.dur > 0) ? s.dur : 1; 
-    const safeDeaths = (s.d > 0) ? s.d : 1;
+    // Si no hay datos reales, devolver null para mostrar "Sin datos"
+    if (s.k === 0 && s.d === 0 && s.a === 0 && s.cs === 0 && s.dmg === 0) {
+      return null;
+    }
+
+    const safeDeaths = s.d > 0 ? s.d : 1;
+    const safeDuration = s.dur > 0 ? s.dur : t * 60; // Asumir 1 min por partida si no hay duración
 
     return {
       kda: ((s.k + s.a) / safeDeaths).toFixed(2),
-      // Si la duración es 0, CS/Min se fuerza a 0
-      csMin: (s.dur > 0) ? (s.cs / (s.dur / 60)).toFixed(1) : "0.0",
+      csMin: s.dur > 0 ? (s.cs / (s.dur / 60)).toFixed(1) : "0.0",
       damage: Math.round(s.dmg / t),
       vision: Math.round(s.vis / t),
       gold: Math.round(s.g / t),
@@ -51,16 +53,27 @@
   }
 
   function buildStatRows(stats, statsOther) {
-    if (!stats) return '';
+    if (!stats) {
+      return '<div class="compare-stat" style="color: #7a84aa; padding: 20px;">Sin datos de partidas</div>';
+    }
+    
     return METRICS.map(m => {
       const valA = stats[m.key];
-      const valB = statsOther ? statsOther[m.key] : 0;
-      const isBetter = valA > valB;
+      const valB = statsOther ? statsOther[m.key] : null;
+      
+      // Si ambos tienen datos, comparar; si no, no marcar como mejor
+      let isBetter = false;
+      if (valB !== null && valA !== null) {
+        isBetter = ['kda', 'csMin', 'damage', 'vision', 'gold', 'kp'].includes(m.key) 
+          ? parseFloat(valA) > parseFloat(valB)
+          : valA < valB; // Para duración, menor es mejor
+      }
+      
       return `
         <div class="compare-stat ${isBetter ? 'compare-stat--better' : ''}">
           <span class="compare-label">${m.label}</span>
-          <span class="compare-value ${['damage','kda'].includes(m.key) ? 'compare-value--xl' : ''}">
-            ${valA !== null ? m.format(valA) : '—'}
+          <span class="compare-value ${['damage','gold'].includes(m.key) ? 'compare-value--xl' : ''}">
+            ${valA !== null && valA !== undefined ? m.format(valA) : '—'}
           </span>
         </div>`;
     }).join('');
@@ -68,12 +81,31 @@
 
   window.toggleCompare = function (puuid) {
     const idx = selectedToCompare.indexOf(puuid);
-    if (idx !== -1) selectedToCompare.splice(idx, 1);
-    else {
-      if (selectedToCompare.length >= 2) { showError('Solo puedes comparar 2 cuentas.'); return; }
+    if (idx !== -1) {
+      selectedToCompare.splice(idx, 1);
+    } else {
+      if (selectedToCompare.length >= 2) {
+        showError('Solo puedes comparar 2 cuentas.');
+        return;
+      }
       selectedToCompare.push(puuid);
     }
-    updateCompareButtons(); updateCompareBar();
+    
+    // Verificar que las cuentas tengan historial cargado
+    if (selectedToCompare.length === 2) {
+      const accs = selectedToCompare
+        .map(p => window._accounts_ref?.find(a => a.puuid === p))
+        .filter(Boolean);
+      
+      const sinHistorial = accs.filter(acc => !acc.matches || acc.matches.length === 0);
+      if (sinHistorial.length > 0) {
+        const nombres = sinHistorial.map(a => a.gameName).join(' y ');
+        showError(`${nombres} no tienen historial cargado. Haz clic en "Ver historial" primero.`);
+      }
+    }
+    
+    updateCompareButtons();
+    updateCompareBar();
   };
 
   function updateCompareButtons() {
@@ -86,18 +118,34 @@
 
   function updateCompareBar() {
     let bar = document.getElementById('compare-bar');
-    if (selectedToCompare.length === 0) { bar?.remove(); return; }
-    if (!bar) { bar = document.createElement('div'); bar.id = 'compare-bar'; document.body.appendChild(bar); }
+    if (selectedToCompare.length === 0) {
+      bar?.remove();
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'compare-bar';
+      document.body.appendChild(bar);
+    }
+    
     bar.innerHTML = selectedToCompare.length === 1 
-      ? '<span>1 cuenta seleccionada</span><button onclick="window.selectedToCompare=[];this.closest(\'#compare-bar\').remove()">✕</button>'
-      : '<span>2 cuentas</span><button class="compare-bar__go" onclick="openCompareModal()">Ver comparación</button><button onclick="window.selectedToCompare=[];location.reload()">✕</button>';
+      ? `<span>1 cuenta seleccionada — Selecciona otra</span>
+         <button onclick="window.selectedToCompare=[];document.getElementById('compare-bar')?.remove();updateCompareButtons()">✕ Cancelar</button>`
+      : `<span>2 cuentas listas</span>
+         <button class="compare-bar__go" onclick="openCompareModal()">⚔ Ver comparación</button>
+         <button onclick="window.selectedToCompare=[];document.getElementById('compare-bar')?.remove();updateCompareButtons()">✕ Cancelar</button>`;
   }
 
   window.openCompareModal = function () {
-    const accs = selectedToCompare.map(p => window._accounts_ref?.find(a => a.puuid === p)).filter(Boolean);
+    const accs = selectedToCompare
+      .map(p => window._accounts_ref?.find(a => a.puuid === p))
+      .filter(Boolean);
+    
     if (accs.length !== 2) return;
+    
     const statsA = getStatsAverages(accs[0].matches);
     const statsB = getStatsAverages(accs[1].matches);
+    
     const modal = document.createElement('div');
     modal.id = 'compare-modal';
     modal.innerHTML = `
@@ -110,20 +158,114 @@
           ${buildColumn(accs[1], statsB, statsA)}
         </div>
       </div>`;
+    
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('compare-modal--open'));
+    
+    // Evento para cerrar con Escape
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        closeCompareModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
   };
 
   function buildColumn(acc, stats, statsOther) {
+    const rankInfo = getRankInfoForCompare(acc);
+    const champsHTML = buildChampsHTMLForCompare(acc.topChampions);
+    
     return `
       <div class="compare-col">
-        <img class="compare-col__avatar" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png">
-        <div class="compare-col__name">${escapeHTMLLocal(acc.gameName)}</div>
-        <div class="compare-stats-container">${buildStatRows(stats, statsOther)}</div>
+        <img class="compare-col__avatar" 
+             src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png"
+             alt="${escapeHTML(acc.gameName)}"
+             onerror="this.src='${FALLBACK_ICON_URL}'" />
+        <div class="compare-col__name">${escapeHTML(acc.gameName)}</div>
+        <div class="compare-col__tag">#${escapeHTML(acc.tagLine)}</div>
+        ${rankInfo}
+        ${champsHTML}
+        <div class="compare-stats-container">
+          ${buildStatRows(stats, statsOther)}
+        </div>
       </div>`;
   }
 
-  window.closeCompareModal = () => document.getElementById('compare-modal')?.remove();
-  function escapeHTMLLocal(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeCompareModal(); });
+  function getRankInfoForCompare(acc) {
+    if (!acc.soloQ) {
+      return '<div style="color: #7a84aa; font-size: 0.8rem; margin: 5px 0;">Sin clasificar</div>';
+    }
+    
+    const tier = titleCase(acc.soloQ.tier || '');
+    const rank = acc.soloQ.rank || '';
+    const lp = acc.soloQ.leaguePoints || 0;
+    const color = RANK_COLORS[acc.soloQ.tier] || '#7a84aa';
+    
+    return `
+      <div style="color: ${color}; font-weight: 700; font-size: 0.85rem;">
+        ${tier} ${rank}
+      </div>
+      <div style="color: #7a84aa; font-size: 0.7rem;">
+        ${lp} LP
+      </div>`;
+  }
+
+  function buildChampsHTMLForCompare(champions) {
+    if (!champions || champions.length === 0) return '';
+    
+    const icons = champions
+      .filter(c => c.name)
+      .slice(0, 3)
+      .map(c => {
+        const imgName = getChampImageName(c.name);
+        return `<img class="compare-champ-icon" 
+                     src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${imgName}"
+                     alt="${escapeHTML(c.name)}"
+                     title="${escapeHTML(c.name)}"
+                     onerror="this.remove()" />`;
+      })
+      .join('');
+    
+    return `<div class="compare-champs">
+      <div class="compare-label" style="margin-top: 8px;">Top Campeones</div>
+      <div class="compare-champs__icons">${icons}</div>
+    </div>`;
+  }
+
+  window.closeCompareModal = () => {
+    const modal = document.getElementById('compare-modal');
+    if (modal) {
+      modal.classList.remove('compare-modal--open');
+      setTimeout(() => modal.remove(), 300);
+    }
+  };
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  function titleCase(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+  }
+
+  function getChampImageName(name) {
+    if (!name) return 'Unknown.png';
+    var base = name.replace(/\.png$/i, '');
+    var clean = base.replace(/[^a-zA-Z0-9]/g, '');
+    const CHAMP_NAME_FIX = {
+      'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'Chogath': 'Chogath',
+      'DrMundo': 'DrMundo', 'JarvanIV': 'JarvanIV', 'Kaisa': 'Kaisa',
+      'Khazix': 'Khazix', 'KogMaw': 'KogMaw', 'KSante': 'KSante',
+      'Leblanc': 'Leblanc', 'LeeSin': 'LeeSin', 'MasterYi': 'MasterYi',
+      'MissFortune': 'MissFortune', 'MonkeyKing': 'MonkeyKing', 'Wukong': 'MonkeyKing',
+      'Nunu': 'Nunu', 'NunuWillump': 'Nunu', 'RekSai': 'RekSai',
+      'TahmKench': 'TahmKench', 'TwistedFate': 'TwistedFate', 'Velkoz': 'Velkoz',
+      'XinZhao': 'XinZhao', 'Fiddlesticks': 'Fiddlesticks', 'FiddleSticks': 'Fiddlesticks',
+      'fiddlesticks': 'Fiddlesticks', 'Renata': 'Renata', 'RenataGlasc': 'Renata', 'Mel': 'Mel',
+    };
+    return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
+  }
 })();
