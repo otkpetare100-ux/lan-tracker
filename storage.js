@@ -1,52 +1,46 @@
 /**
- * storage.js — Cuentas compartidas guardadas en el servidor
+ * storage.js — Manejo de persistencia y API local
  */
 
-const SERVER = window.location.origin;
-
 async function loadAccounts() {
-  try {
-    const res  = await fetch(SERVER + '/accounts');
-    if (!res.ok) return [];
-    return await res.json();
-  } catch(e) {
-    console.warn('[Storage] Error cargando cuentas:', e);
-    return [];
-  }
+    try {
+        // Usamos ruta relativa para que Railway sepa que es el mismo servidor
+        const response = await fetch('/accounts');
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Cuentas cargadas desde el servidor:', data);
+        return data;
+    } catch (err) {
+        console.error('[Storage] Error cargando cuentas:', err);
+        return [];
+    }
 }
 
-async function saveAccountToServer(entry) {
-  try {
-    const res = await fetch(SERVER + '/accounts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
-    });
-    if (res.status === 409) return { added: false };
-    if (!res.ok) return { added: false };
-    return { added: true };
-  } catch(e) {
-    console.warn('[Storage] Error guardando cuenta:', e);
-    return { added: false };
-  }
+async function saveAccount(accountData) {
+    try {
+        const response = await fetch('/accounts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(accountData)
+        });
+        return await response.json();
+    } catch (err) {
+        console.error('[Storage] Error al guardar:', err);
+    }
 }
 
-async function deleteAccountFromServer(puuid) {
-  try {
-    await fetch(SERVER + '/accounts/' + puuid, { method: 'DELETE' });
-  } catch(e) {
-    console.warn('[Storage] Error eliminando cuenta:', e);
-  }
+async function deleteAccount(puuid) {
+    try {
+        await fetch(`/accounts/${puuid}`, { method: 'DELETE' });
+    } catch (err) {
+        console.error('[Storage] Error al eliminar:', err);
+    }
 }
 
-async function updateAccountOnServer(entry) {
-  try {
-    await fetch(SERVER + '/accounts/' + entry.puuid, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
-    });
-  } catch(e) {
-    console.warn('[Storage] Error actualizando cuenta:', e);
-  }
-}
+window.loadAccounts = loadAccounts;
+window.saveAccount = saveAccount;
+window.deleteAccount = deleteAccount;
