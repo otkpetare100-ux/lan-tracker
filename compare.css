@@ -72,9 +72,9 @@
 
 /* ---- Modal overlay ---- */
 #compare-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,12 +93,18 @@
   max-width: 720px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 20px;
   border: 1px solid rgba(157,108,255,0.2);
   background: linear-gradient(180deg, rgba(20,22,40,0.97), rgba(12,14,26,0.98));
   box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
   padding: 2rem 1.5rem 1.5rem;
   animation: compareSlideIn 0.28s ease both;
+}
+
+.compare-modal__box img {
+  max-width: 100%;
+  height: auto;
 }
 
 @keyframes compareSlideIn {
@@ -131,7 +137,7 @@
   margin-bottom: 1.5rem;
 }
 
-/* ---- Grid: two columns + VS ---- */
+/* ---- Grid ---- */
 .compare-modal__grid {
   display: grid;
   grid-template-columns: 1fr 40px 1fr;
@@ -160,12 +166,16 @@
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.06);
   background: rgba(255,255,255,0.025);
+  overflow: hidden;
+  min-width: 0;
 }
 
 .compare-col__avatar {
-  width: 64px; height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
   border: 2px solid rgba(215,122,168,0.4);
   box-shadow: 0 0 18px rgba(215,122,168,0.15);
 }
@@ -175,6 +185,7 @@
   font-weight: 800;
   color: #fff7fb;
   text-align: center;
+  word-break: break-word;
 }
 
 .compare-col__tag {
@@ -195,44 +206,24 @@
   border: 1px solid rgba(255,255,255,0.05);
   background: rgba(255,255,255,0.02);
   text-align: center;
-  transition: border-color 0.15s, background 0.15s;
 }
-
 .compare-stat--better {
   border-color: rgba(115,211,138,0.25);
   background: rgba(115,211,138,0.06);
 }
 
 .compare-rank-icon {
-  width: 36px; height: 36px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
-.compare-lp {
-  font-size: 0.72rem;
-  color: #7a84aa;
-}
-
-.compare-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #7a84aa;
-}
-
-.compare-value {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #f2f4ff;
-}
-
+.compare-lp { font-size: 0.72rem; color: #7a84aa; }
+.compare-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7a84aa; }
+.compare-value { font-size: 1.1rem; font-weight: 800; color: #f2f4ff; }
 .compare-value--good { color: #73d38a; }
-
-.compare-sub {
-  font-size: 0.68rem;
-  color: #7a84aa;
-}
+.compare-sub { font-size: 0.68rem; color: #7a84aa; }
 
 /* ---- Champions ---- */
 .compare-champs {
@@ -249,9 +240,11 @@
   justify-content: center;
 }
 .compare-champ-icon {
-  width: 36px; height: 36px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
   border: 2px solid rgba(215,122,168,0.3);
 }
 
@@ -266,65 +259,3 @@
   .compare-modal__vs { padding-top: 0; }
   .compare-modal__box { padding: 1.25rem 1rem; }
 }
-/* ---- Fix imágenes gigantes ---- */
-.compare-col__avatar {
-  width: 64px !important;
-  height: 64px !important;
-  object-fit: cover !important;
-  flex-shrink: 0;
-}
-
-.compare-rank-icon {
-  width: 40px !important;
-  height: 40px !important;
-  object-fit: contain !important;
-  flex-shrink: 0;
-}
-
-.compare-champ-icon {
-  width: 36px !important;
-  height: 36px !important;
-  object-fit: cover !important;
-  flex-shrink: 0;
-}
-
-.compare-col {
-  overflow: hidden;
-  min-width: 0;
-}
-
-.compare-modal__box {
-  overflow: hidden;
-  overflow-y: auto;
-}
-
-.compare-modal__grid img {
-  max-width: 100%;
-  height: auto;
-}
-/* ---- Fix layout modal ---- */
-.compare-modal__box {
-  max-width: 90% !important;
-  overflow: hidden;
-  overflow-y: auto;
-}
-
-.compare-modal__box img {
-  max-width: 100%;
-  height: auto;
-}
-
-.compare-col__avatar {
-  width: 80px !important;
-  height: 80px !important;
-  border-radius: 50% !important;
-  object-fit: cover !important;
-  flex-shrink: 0;
-}
-
-.compare-rank-icon {
-  width: 60px !important;
-  height: 60px !important;
-  object-fit: contain !important;
-  flex-shrink: 0;
-  }
