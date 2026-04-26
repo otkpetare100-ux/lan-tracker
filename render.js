@@ -189,10 +189,7 @@ function buildCardHTML(acc, position) {
 
 function renderAccounts(accounts) {
   const grid = document.getElementById('accounts-grid');
-  if (!grid) {
-    console.error('No se encontró #accounts-grid');
-    return;
-  }
+  if (!grid) return;
 
   if (accounts.length === 0) {
     grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
@@ -200,7 +197,7 @@ function renderAccounts(accounts) {
   }
 
   grid.innerHTML = accounts.map(function(acc, idx) {
-    var div = document.createElement('div');
+    const div = document.createElement('div');
     div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
     div.id = 'card-' + acc.puuid;
     div.innerHTML = buildCardHTML(acc, idx);
