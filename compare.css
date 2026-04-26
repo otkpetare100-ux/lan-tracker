@@ -264,8 +264,10 @@
     border-color: rgba(215, 122, 168, 0.3) !important;
 }
 .compare-stat--better {
+  background: linear-gradient(90deg, rgba(115, 211, 138, 0.1) 0%, transparent 100%) !important;  
+  border-left: 3px solid #73d38a !important;
   border-color: rgba(115,211,138,0.25);
-  background: rgba(115,211,138,0.06);
+  box-shadow: inset 10px 0 20px rgba(115, 211, 138, 0.05);
 }
 
 /* Icono de rango — tamaño fijo siempre */

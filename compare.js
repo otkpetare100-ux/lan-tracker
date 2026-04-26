@@ -16,18 +16,32 @@
     { key: 'duration', label: 'Dur. Prom.',  format: v => Math.floor(v/60) + ':' + (v%60).toString().padStart(2, '0') }
   ];
 
-  function getStatsAverages(matches) {
-    if (!matches || matches.length === 0) return null;
+    function getStatsAverages(matches) {
+    if (!matches || !Array.isArray(matches) || matches.length === 0) return null;
+    
     const t = matches.length;
     const s = matches.reduce((acc, m) => {
-      acc.k += m.kills; acc.d += m.deaths; acc.a += m.assists;
-      acc.cs += m.cs; acc.dmg += m.damage; acc.vis += m.vision;
-      acc.g += m.gold; acc.kp += m.kp; acc.dur += m.gameDuration;
+      // Usamos (m.campo || 0) para asegurar que siempre haya un número
+      acc.k += (m.kills || 0);
+      acc.d += (m.deaths || 0);
+      acc.a += (m.assists || 0);
+      acc.cs += (m.cs || 0);
+      acc.dmg += (m.damage || 0);
+      acc.vis += (m.vision || 0);
+      acc.g += (m.gold || 0);
+      acc.kp += (m.kp || 0);
+      acc.dur += (m.gameDuration || 0);
       return acc;
     }, { k:0, d:0, a:0, cs:0, dmg:0, vis:0, g:0, kp:0, dur:0 });
+
+    // Prevenir división por cero en duración y muertes
+    const safeDuration = (s.dur > 0) ? s.dur : 1; 
+    const safeDeaths = (s.d > 0) ? s.d : 1;
+
     return {
-      kda: ((s.k + s.a) / (s.d || 1)).toFixed(2),
-      csMin: (s.cs / (s.dur / 60)).toFixed(1),
+      kda: ((s.k + s.a) / safeDeaths).toFixed(2),
+      // Si la duración es 0, CS/Min se fuerza a 0
+      csMin: (s.dur > 0) ? (s.cs / (s.dur / 60)).toFixed(1) : "0.0",
       damage: Math.round(s.dmg / t),
       vision: Math.round(s.vis / t),
       gold: Math.round(s.g / t),
