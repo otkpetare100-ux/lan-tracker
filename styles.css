@@ -296,12 +296,12 @@ body::before {
 
 .icon-wrap .profile-main-icon {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50;
+  left: 50;
   z-index: 2;
   width: 50px;
   height: 50px;
-  object-fit: cover;
+  object-fit: scale-down;
   display: block;
   border-radius: 50%;
   border: 2px solid rgba(212, 120, 154, 0.4);
