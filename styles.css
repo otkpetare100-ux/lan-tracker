@@ -295,7 +295,7 @@ body::before {
 
 .icon-wrap .profile-main-icon {
   position: absolute;
-  top: 55%;
+  top: 50%;
   left: 50%;
   width: 48px;
   height: 48px;
@@ -308,7 +308,7 @@ body::before {
 
 .icon-wrap .rank-frame {
   position: absolute;
-  top: 0;
+  top: -5%;
   left: 0;
   width: 100%;
   height: 100%;
