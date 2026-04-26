@@ -302,3 +302,29 @@
   max-width: 100%;
   height: auto;
 }
+/* ---- Fix layout modal ---- */
+.compare-modal__box {
+  max-width: 90% !important;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.compare-modal__box img {
+  max-width: 100%;
+  height: auto;
+}
+
+.compare-col__avatar {
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  flex-shrink: 0;
+}
+
+.compare-rank-icon {
+  width: 60px !important;
+  height: 60px !important;
+  object-fit: contain !important;
+  flex-shrink: 0;
+  }
