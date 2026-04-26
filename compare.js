@@ -1,189 +1,281 @@
-/**
- * compare.js — Sistema de comparación de cuentas
- */
+/* =============================================
+   COMPARE MODAL — compare.css
+   ============================================= */
 
-(function () {
-  if (window.__LAN_TRACKER_COMPARE_LOADED__) return;
-  window.__LAN_TRACKER_COMPARE_LOADED__ = true;
+/* ---- Compare button ---- */
+.compare-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: #9aa3c7;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+.compare-btn:hover {
+  border-color: rgba(157,108,255,0.4);
+  background: rgba(157,108,255,0.1);
+  color: #e0d4ff;
+  transform: translateY(-1px);
+}
+.compare-btn--active {
+  border-color: rgba(157,108,255,0.6);
+  background: rgba(157,108,255,0.18);
+  color: #c8b8ff;
+}
 
-  window.selectedToCompare = [];
+/* ---- Compare bar ---- */
+#compare-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(157,108,255,0.3);
+  background: rgba(14,16,28,0.92);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  color: #d4caff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  z-index: 999;
+  white-space: nowrap;
+}
+#compare-bar button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #ccc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+#compare-bar button:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.compare-bar__go {
+  background: linear-gradient(135deg, rgba(110,60,200,0.9), rgba(70,30,140,0.95)) !important;
+  border-color: rgba(157,108,255,0.4) !important;
+  color: #e8dcff !important;
+}
 
-  // ---- Toggle selección ----
-  window.toggleCompare = function (puuid) {
-    const idx = selectedToCompare.indexOf(puuid);
-    if (idx !== -1) {
-      selectedToCompare.splice(idx, 1);
-    } else {
-      if (selectedToCompare.length >= 2) {
-        showError('Solo puedes comparar 2 cuentas a la vez.');
-        return;
-      }
-      selectedToCompare.push(puuid);
-    }
-    updateCompareButtons();
-    updateCompareBar();
-  };
+/* ---- Modal overlay ---- */
+#compare-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4,5,12,0.82);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+#compare-modal.compare-modal--open { opacity: 1; }
 
-  function updateCompareButtons() {
-    document.querySelectorAll('.compare-btn').forEach(btn => {
-      const puuid = btn.dataset.puuid;
-      const selected = selectedToCompare.includes(puuid);
-      btn.classList.toggle('compare-btn--active', selected);
-      btn.textContent = selected ? '✓ Comparar' : '⚖ Comparar';
-    });
-  }
+/* ---- Modal box ---- */
+.compare-modal__box {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  max-height: 88vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(157,108,255,0.2);
+  background: linear-gradient(180deg, rgba(20,22,40,0.98), rgba(12,14,26,0.99));
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  padding: 2rem 1.25rem 1.5rem;
+  animation: compareSlideIn 0.28s ease both;
+  box-sizing: border-box;
+}
 
-  function updateCompareBar() {
-    let bar = document.getElementById('compare-bar');
-    if (selectedToCompare.length === 0) {
-      if (bar) bar.remove();
-      return;
-    }
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = 'compare-bar';
-      document.body.appendChild(bar);
-    }
-    if (selectedToCompare.length === 1) {
-      bar.innerHTML = '<span>1 cuenta seleccionada — elige otra para comparar</span>' +
-        '<button onclick="window.selectedToCompare=[];updateCompareButtons&&updateCompareButtons();this.closest(\'#compare-bar\').remove()">✕</button>';
-    } else {
-      bar.innerHTML = '<span>2 cuentas seleccionadas</span>' +
-        '<button class="compare-bar__go" onclick="openCompareModal()">Ver comparación</button>' +
-        '<button onclick="window.selectedToCompare=[];document.querySelectorAll(\'.compare-btn\').forEach(b=>{b.classList.remove(\'compare-btn--active\');b.textContent=\'⚖ Comparar\'});this.closest(\'#compare-bar\').remove()">✕</button>';
-    }
-  }
+/* Reset de imágenes dentro del modal */
+.compare-modal__box img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
 
-  // ---- Modal ----
-  window.openCompareModal = function () {
-    const accs = selectedToCompare.map(puuid => window._accounts_ref && window._accounts_ref.find(a => a.puuid === puuid)).filter(Boolean);
-    if (accs.length !== 2) { showError('Selecciona 2 cuentas para comparar.'); return; }
+@keyframes compareSlideIn {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
 
-    const existing = document.getElementById('compare-modal');
-    if (existing) existing.remove();
+.compare-modal__close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #aaa;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.compare-modal__close:hover { background: rgba(224,100,116,0.2); color: #ffb7c0; }
 
-    const modal = document.createElement('div');
-    modal.id = 'compare-modal';
-    modal.innerHTML = buildModalHTML(accs[0], accs[1]);
-    document.body.appendChild(modal);
+.compare-modal__title {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e8e0ff;
+  margin-bottom: 1.25rem;
+}
 
-    requestAnimationFrame(() => modal.classList.add('compare-modal--open'));
+/* ---- Grid ---- */
+.compare-modal__grid {
+  display: grid;
+  grid-template-columns: 1fr 36px 1fr;
+  gap: 10px;
+  align-items: start;
+}
 
-    modal.addEventListener('click', e => {
-      if (e.target === modal) closeCompareModal();
-    });
-  };
+.compare-modal__vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: rgba(157,108,255,0.7);
+}
 
-  window.closeCompareModal = function () {
-    const modal = document.getElementById('compare-modal');
-    if (!modal) return;
-    modal.classList.remove('compare-modal--open');
-    setTimeout(() => modal.remove(), 280);
-  };
+/* ---- Column ---- */
+.compare-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0.9rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.025);
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
+}
 
-  function buildModalHTML(a, b) {
-    const rA = getRankInfoLocal(a);
-    const rB = getRankInfoLocal(b);
-    const wrA = computeWRLocal(rA.wins, rA.losses);
-    const wrB = computeWRLocal(rB.wins, rB.losses);
-    const wrABetter = wrA !== null && wrB !== null && wrA > wrB;
-    const wrBBetter = wrA !== null && wrB !== null && wrB > wrA;
-    const scoreA = getRankScoreLocal(a);
-    const scoreB = getRankScoreLocal(b);
+/* Avatar — tamaño fijo siempre */
+.compare-col__avatar {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px;
+  min-height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(215,122,168,0.4);
+  box-shadow: 0 0 14px rgba(215,122,168,0.15);
+}
 
-    return `
-      <div class="compare-modal__box">
-        <button class="compare-modal__close" onclick="closeCompareModal()">✕</button>
-        <h2 class="compare-modal__title">⚖ Comparación</h2>
-        <div class="compare-modal__grid">
-          ${buildColumn(a, rA, wrA, wrABetter, scoreA > scoreB)}
-          <div class="compare-modal__vs">VS</div>
-          ${buildColumn(b, rB, wrB, wrBBetter, scoreB > scoreA)}
-        </div>
-      </div>`;
-  }
+.compare-col__name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff7fb;
+  text-align: center;
+  word-break: break-word;
+  max-width: 100%;
+}
 
-  function buildColumn(acc, r, wr, wrBetter, rankBetter) {
-    const RANK_COLORS = window.RANK_COLORS || {};
-    const color = RANK_COLORS[r.tier] || '#aaa';
-    const rankStr = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCaseLocal(r.tier) + ' ' + r.division;
-    const rankIcon = `/pic/ranks/${r.tier.toLowerCase()}.png`;
-    const iconUrl = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png`;
-    const champsHTML = buildChampsLocal(acc.topChampions);
+.compare-col__tag {
+  font-size: 0.74rem;
+  color: #7a84aa;
+  margin-top: -4px;
+}
 
-    return `
-      <div class="compare-col">
-        <img class="compare-col__avatar" src="${iconUrl}" onerror="this.src='${window.FALLBACK_ICON_URL}'">
-        <div class="compare-col__name">${escapeHTMLLocal(acc.gameName)}</div>
-        <div class="compare-col__tag">#${escapeHTMLLocal(acc.tagLine)}</div>
+/* ---- Stats ---- */
+.compare-stat {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.02);
+  text-align: center;
+}
+.compare-stat--better {
+  border-color: rgba(115,211,138,0.25);
+  background: rgba(115,211,138,0.06);
+}
 
-        <div class="compare-stat ${rankBetter ? 'compare-stat--better' : ''}">
-          <img src="${rankIcon}" class="compare-rank-icon" onerror="this.style.display='none'">
-          <span style="color:${color};font-weight:800">${rankStr}</span>
-          <span class="compare-lp">${r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—'}</span>
-        </div>
+/* Icono de rango — tamaño fijo siempre */
+.compare-rank-icon {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 44px;
+  max-height: 44px;
+  object-fit: contain;
+}
 
-        <div class="compare-stat ${wrBetter ? 'compare-stat--better' : ''}">
-          <span class="compare-label">Winrate</span>
-          <span class="compare-value ${wrBetter ? 'compare-value--good' : ''}">${wr !== null ? wr + '%' : '—'}</span>
-          <span class="compare-sub">${r.wins}V ${r.losses}D</span>
-        </div>
+.compare-lp { font-size: 0.7rem; color: #7a84aa; }
+.compare-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7a84aa; }
+.compare-value { font-size: 1.05rem; font-weight: 800; color: #f2f4ff; }
+.compare-value--good { color: #73d38a; }
+.compare-sub { font-size: 0.66rem; color: #7a84aa; }
 
-        <div class="compare-stat ${acc.summonerLevel >= (acc._otherLevel || 0) ? '' : ''}">
-          <span class="compare-label">Nivel</span>
-          <span class="compare-value">${acc.summonerLevel}</span>
-        </div>
+/* ---- Champions ---- */
+.compare-champs {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.compare-champs__icons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
-        <div class="compare-champs">
-          <span class="compare-label">Top campeones</span>
-          <div class="compare-champs__icons">${champsHTML}</div>
-        </div>
-      </div>`;
-  }
+/* Iconos de campeones — tamaño fijo siempre */
+.compare-champ-icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(215,122,168,0.3);
+}
 
-  function buildChampsLocal(topChampions) {
-    if (!topChampions || topChampions.length === 0) return '<span style="color:#666;font-size:0.75rem">Sin datos</span>';
-    const fix = window.CHAMP_NAME_FIX || {};
-    return topChampions.map(c => {
-      if (!c.name) return '';
-      const base = c.name.replace(/\.png$/i, '');
-      const clean = base.replace(/[^a-zA-Z0-9]/g, '');
-      const imgName = (fix[clean] || fix[base] || clean) + '.png';
-      const img = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${imgName}`;
-      return `<img src="${img}" title="${escapeHTMLLocal(c.name)}" class="compare-champ-icon" onerror="this.style.display='none'">`;
-    }).join('');
-  }
+/* ---- Scrollbar ---- */
+.compare-modal__box::-webkit-scrollbar { width: 4px; }
+.compare-modal__box::-webkit-scrollbar-track { background: transparent; }
+.compare-modal__box::-webkit-scrollbar-thumb { background: rgba(157,108,255,0.3); border-radius: 4px; }
 
-  function getRankInfoLocal(acc) {
-    const soloQ = acc.soloQ;
-    if (!soloQ) return { tier: 'UNRANKED', division: '', lp: 0, wins: 0, losses: 0 };
-    return { tier: soloQ.tier, division: soloQ.rank, lp: soloQ.leaguePoints, wins: soloQ.wins, losses: soloQ.losses };
-  }
-
-  function computeWRLocal(wins, losses) {
-    const total = wins + losses;
-    return total === 0 ? null : Math.round((wins / total) * 100);
-  }
-
-  function getRankScoreLocal(acc) {
-    const TIER_ORDER = { CHALLENGER:9,GRANDMASTER:8,MASTER:7,DIAMOND:6,EMERALD:5,PLATINUM:4,GOLD:3,SILVER:2,BRONZE:1,IRON:0,UNRANKED:-1 };
-    const DIV_ORDER  = { I:4,II:3,III:2,IV:1 };
-    const soloQ = acc.soloQ;
-    if (!soloQ) return -1;
-    return (TIER_ORDER[soloQ.tier]??-1)*10000 + (DIV_ORDER[soloQ.rank]??0)*1000 + (soloQ.leaguePoints||0);
-  }
-
-  function titleCaseLocal(str) {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
-  }
-
-  function escapeHTMLLocal(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // Keyboard close
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeCompareModal();
-  });
-
-})();
+/* ---- Responsive ---- */
+@media (max-width: 560px) {
+  .compare-modal__grid { grid-template-columns: 1fr; gap: 8px; }
+  .compare-modal__vs { padding-top: 0; font-size: 1.2rem; }
+  .compare-modal__box { padding: 1.25rem 0.9rem; }
+}
