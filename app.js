@@ -5,8 +5,8 @@
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 let accounts = [];
-const refreshCooldowns = {}; // puuid -> timestamp ultimo refresh
-const REFRESH_COOLDOWN = 60 * 1000; // 1 minuto
+const refreshCooldowns = {};
+const REFRESH_COOLDOWN = 60 * 1000;
 
 const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
@@ -32,19 +32,24 @@ function sortByRank(list) {
   return [...list].sort((a, b) => getRankScore(b) - getRankScore(a));
 }
 
+function updateGlobalRef() {
+  window._accounts_ref = accounts;
+}
+
 async function init() {
   accounts = await loadAccounts();
-  window._accounts_ref = accounts;
+  updateGlobalRef();
   renderAccounts(sortByRank(accounts));
 }
 init();
 
-//setInterval(async () => {
-//  if (accounts.length === 0) return;
-//  for (const acc of accounts) {
-//    await handleRefresh(acc.puuid, true);
-//  }
-//}, AUTO_REFRESH_INTERVAL);
+// Auto-refresh activado
+setInterval(async () => {
+  if (accounts.length === 0) return;
+  for (const acc of accounts) {
+    await handleRefresh(acc.puuid, true);
+  }
+}, AUTO_REFRESH_INTERVAL);
 
 /* ---- Search ---- */
 async function handleSearch() {
@@ -54,7 +59,7 @@ async function handleSearch() {
 
   const parts = raw.split('#');
   if (parts.length !== 2 || !parts[0] || !parts[1]) {
-    showError('Formato invalido. Usa Nombre#TAG  (ej: Pepitoflow#LAN1)');
+    showError('Formato inválido. Usa Nombre#TAG (ej: Pepitoflow#LAN1)');
     return;
   }
 
@@ -64,12 +69,12 @@ async function handleSearch() {
 
   try {
     const entry  = await fetchAccountSnapshot(gameName, tagLine);
-    const result = await saveAccountToServer(entry);
+    const result = await saveAccount(entry);
     if (!result.added) {
-      showError('Esta cuenta ya esta en la lista.');
+      showError('Esta cuenta ya está en la lista.');
     } else {
       accounts.push(entry);
-      window._accounts_ref = accounts;
+      updateGlobalRef();
       renderAccounts(sortByRank(accounts));
       searchInput.value = '';
     }
@@ -93,7 +98,7 @@ function championsFromMatches(matches) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(function([name]) {
-      return { name: name, image: name }; // imagen se resuelve en render con getChampImageName
+      return { name: name, image: name };
     });
 }
 
@@ -102,7 +107,6 @@ async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Cooldown de 1 minuto por cuenta (solo para refresh manual)
   if (!silent) {
     const lastRefresh = refreshCooldowns[puuid] || 0;
     const elapsed = Date.now() - lastRefresh;
@@ -125,7 +129,6 @@ async function handleRefresh(puuid, silent = false) {
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
 
-    // Siempre actualiza el historial si ya estaba cargado antes
     const hadHistory = acc.matches && acc.matches.length > 0;
     if (hadHistory) {
       const history = await fetchMatchHistory(acc.puuid);
@@ -141,10 +144,10 @@ async function handleRefresh(puuid, silent = false) {
       updated.topChampions = acc.topChampions || [];
     }
 
-    await updateAccountOnServer(updated);
+    await updateAccount(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
-    window._accounts_ref = accounts;
-    // Si el historial estaba abierto, lo mantiene abierto tras re-render
+    updateGlobalRef();
+    
     const wasOpen = card && document.getElementById('history-' + puuid) &&
                     document.getElementById('history-' + puuid).style.display !== 'none';
 
@@ -190,7 +193,6 @@ async function handleHistoryToggle(puuid) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Si no tiene historial aun, lo carga
   if (!acc.matches || acc.matches.length === 0) {
     btn.querySelector('.history-btn-text').textContent = 'Cargando...';
     btn.disabled = true;
@@ -203,7 +205,8 @@ async function handleHistoryToggle(puuid) {
       const champs = championsFromMatches(history.matches);
       if (champs) acc.topChampions = champs;
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
-      await updateAccountOnServer(acc);
+      updateGlobalRef();
+      await updateAccount(acc);
       renderAccounts(sortByRank(accounts));
       const newContent = document.getElementById('history-' + puuid);
       const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
@@ -215,6 +218,7 @@ async function handleHistoryToggle(puuid) {
     } catch(e) {
       btn.querySelector('.history-btn-text').textContent = 'Ver historial';
       btn.disabled = false;
+      showError('Error cargando historial: ' + e.message);
     }
     return;
   }
@@ -232,10 +236,16 @@ accountsGrid.addEventListener('click', async (e) => {
 
   if (removeBtn) {
     const puuid = removeBtn.dataset.puuid;
-    await deleteAccountFromServer(puuid);
-    accounts = accounts.filter(a => a.puuid !== puuid);
-    window._accounts_ref = accounts;
-    renderAccounts(sortByRank(accounts));
+    if (confirm('¿Eliminar esta cuenta?')) {
+      await deleteAccount(puuid);
+      accounts = accounts.filter(a => a.puuid !== puuid);
+      updateGlobalRef();
+      // Limpiar comparación si la cuenta eliminada estaba seleccionada
+      if (window.selectedToCompare) {
+        window.selectedToCompare = window.selectedToCompare.filter(p => p !== puuid);
+      }
+      renderAccounts(sortByRank(accounts));
+    }
   }
 
   if (refreshBtn) {

@@ -13,69 +13,109 @@ const MONGO_URI = process.env.MONGO_URI;
 if (!API_KEY)   { console.error('❌ Falta RIOT_API_KEY');  process.exit(1); }
 if (!MONGO_URI) { console.error('❌ Falta MONGO_URI');     process.exit(1); }
 
-// Conexion a MongoDB
+// Conexión a MongoDB con reintentos
 let db;
 async function connectDB() {
-  const client = new MongoClient(MONGO_URI);
-  await client.connect();
-  db = client.db('lan-tracker');
-  console.log('✅ MongoDB conectado');
+  try {
+    const client = new MongoClient(MONGO_URI, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    await client.connect();
+    db = client.db('lan-tracker');
+    console.log('✅ MongoDB conectado');
+    
+    // Crear índices para mejor rendimiento
+    await db.collection('accounts').createIndex({ puuid: 1 }, { unique: true });
+    await db.collection('accounts').createIndex({ addedAt: -1 });
+  } catch(e) {
+    console.error('❌ Error conectando a MongoDB:', e);
+    console.log('Reintentando en 5 segundos...');
+    setTimeout(connectDB, 5000);
+  }
 }
 connectDB();
 
 function getCollection() {
+  if (!db) throw new Error('Database not connected');
   return db.collection('accounts');
 }
 
 // --- CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS ---
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
-// Sirve los archivos de la raíz (index.html, styles.css, app.js, etc.)
+// Sirve los archivos de la raíz
 app.use(express.static(path.join(__dirname)));
 
-// Sirve específicamente para la carpeta de rangos y pic para que Railway la reconozca
+// Sirve carpetas específicas
 app.use('/ranks', express.static(path.join(__dirname, 'ranks')));
 app.use('/pic', express.static(path.join(__dirname, 'pic')));
+
 // -------------------------------------------
+
+// ---- Middleware de verificación de DB ----
+app.use('/accounts', (req, res, next) => {
+  if (!db) {
+    return res.status(503).json({ error: 'Database not ready' });
+  }
+  next();
+});
 
 // ---- Endpoints de cuentas ----
 
 app.get('/accounts', async (req, res) => {
   try {
-    const accounts = await getCollection().find({}).toArray();
+    const accounts = await getCollection()
+      .find({})
+      .sort({ addedAt: -1 })
+      .toArray();
     res.json(accounts);
   } catch(e) {
+    console.error('Error leyendo cuentas:', e);
     res.status(500).json({ error: 'Error leyendo cuentas' });
   }
 });
 
 app.post('/accounts', async (req, res) => {
   const entry = req.body;
-  if (!entry || !entry.puuid) return res.status(400).json({ error: 'Datos invalidos' });
+  if (!entry || !entry.puuid) return res.status(400).json({ error: 'Datos inválidos' });
   try {
     const exists = await getCollection().findOne({ puuid: entry.puuid });
-    if (exists) return res.status(409).json({ error: 'Ya existe' });
+    if (exists) return res.status(409).json({ error: 'Ya existe', added: false });
     await getCollection().insertOne(entry);
-    res.json({ ok: true });
+    res.json({ ok: true, added: true });
   } catch(e) {
+    console.error('Error guardando cuenta:', e);
     res.status(500).json({ error: 'Error guardando cuenta' });
   }
 });
 
 app.delete('/accounts/:puuid', async (req, res) => {
   try {
-    await getCollection().deleteOne({ puuid: req.params.puuid });
+    const result = await getCollection().deleteOne({ puuid: req.params.puuid });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Cuenta no encontrada' });
+    }
     res.json({ ok: true });
   } catch(e) {
+    console.error('Error eliminando cuenta:', e);
     res.status(500).json({ error: 'Error eliminando cuenta' });
   }
 });
 
 app.put('/accounts/:puuid', async (req, res) => {
   try {
-    await getCollection().replaceOne({ puuid: req.params.puuid }, req.body);
+    const result = await getCollection().replaceOne(
+      { puuid: req.params.puuid },
+      req.body
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Cuenta no encontrada' });
+    }
     res.json({ ok: true });
   } catch(e) {
+    console.error('Error actualizando cuenta:', e);
     res.status(500).json({ error: 'Error actualizando cuenta' });
   }
 });
@@ -99,6 +139,12 @@ app.get('/riot', async (req, res) => {
     console.error('[Proxy] Error:', err.message);
     res.status(500).json({ error: 'Error contactando Riot' });
   }
+});
+
+// Manejo de errores global
+app.use((err, req, res, next) => {
+  console.error('Error no manejado:', err);
+  res.status(500).json({ error: 'Error interno del servidor' });
 });
 
 app.listen(PORT, () => {

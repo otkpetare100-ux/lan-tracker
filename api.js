@@ -82,35 +82,40 @@ async function getChampionData() {
   return map;
 }
 
-async function fetchMatchHistory(puuid) {
-  try {
-   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchMatchHistory(puuid) {
   try {
-    const matchIds = await getMatchIds(puuid); // Esto requiere que mantengas tu getMatchIds viejo
+    const matchIds = await getMatchIds(puuid);
     if (!matchIds?.length) return { matches: [], streak: 0, mainPosition: '—' };
+    
     const details = [];
     for (const id of matchIds) {
-      await sleep(1200); // Evita el error 429
+      await sleep(1200);
       try {
-        const match = await getMatchDetail(id); // Requiere que mantengas tu getMatchDetail viejo
+        const match = await getMatchDetail(id);
         const p = match.info.participants.find(x => x.puuid === puuid);
         if (!p) continue;
+        
         details.push({
-          champion: p.championName, win: p.win, kills: p.kills, deaths: p.deaths, assists: p.assists,
+          champion: p.championName,
+          win: p.win,
+          kills: p.kills,
+          deaths: p.deaths,
+          assists: p.assists,
           gameDuration: match.info.gameDuration,
           cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
           damage: p.totalDamageDealtToChampions || 0,
           vision: p.visionScore || 0,
           gold: p.goldEarned || 0,
-          kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0
+          kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0,
+          position: p.teamPosition || ''
         });
-      } catch(e) { continue; }
+      } catch(e) {
+        console.warn('Error fetching match detail:', e);
+        continue;
+      }
     }
-    return { matches: details };
-  } catch(e) { return { matches: [] }; }
-}
 
     let streak = 0;
     if (details.length > 0) {
@@ -131,17 +136,16 @@ async function fetchMatchHistory(puuid) {
 
     return { matches: details, streak, mainPosition };
   } catch(e) {
+    console.error('Error in fetchMatchHistory:', e);
     return { matches: [], streak: 0, mainPosition: '—' };
   }
 }
 
-// Carga rapida — incluye top 3 campeones por maestria
 async function fetchAccountSnapshot(gameName, tagLine) {
   const account  = await getAccountByRiotId(gameName, tagLine);
   const summoner = await getSummonerByPuuid(account.puuid);
   const ranked   = await getRankedEntriesByPuuid(account.puuid);
 
-  // Top 3 campeones por maestria
   let topChampions = [];
   try {
     const mastery   = await getTopMasteryChampions(account.puuid);
@@ -175,16 +179,4 @@ async function fetchAccountSnapshot(gameName, tagLine) {
     addedAt:      Date.now(),
     updatedAt:    Date.now(),
   };
-}
-async function deleteAccountFromServer(puuid) {
-    try {
-        const response = await fetch(`${API_URL}/accounts/${puuid}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Error al eliminar en el servidor');
-        return true;
-    } catch (error) {
-        console.error("Error eliminando cuenta:", error);
-        return false;
-    }
 }

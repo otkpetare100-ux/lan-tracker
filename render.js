@@ -22,12 +22,6 @@ const RANK_ICONS = {
   UNRANKED:    null,
 };
 
-const MEDALS = {
-  0: '/pic/medalla top/top1.png',
-  1: '/pic/medalla top/top2.png',
-  2: '/pic/medalla top/top3.png',
-};
-
 const CHAMP_NAME_FIX = {
   'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'Chogath': 'Chogath',
   'DrMundo': 'DrMundo', 'JarvanIV': 'JarvanIV', 'Kaisa': 'Kaisa',
@@ -133,8 +127,6 @@ function buildCardHTML(acc, position) {
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
-  const medalHTML = '';
-
   const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame" onerror="this.remove()">';
 
   const rankIconHTML = RANK_ICONS[r.tier]
@@ -148,7 +140,6 @@ function buildCardHTML(acc, position) {
   return '<div class="card-top">' +
     '<div class="icon-wrap">' +
       frameHTML +
-      medalHTML +
       '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
@@ -186,9 +177,10 @@ function buildCardHTML(acc, position) {
 }
 
 function renderAccounts(accounts) {
+  window._accounts_ref = accounts;
   const grid = document.getElementById('accounts-grid');
   if (accounts.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aun</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
+    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aún</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
     return;
   }
   grid.innerHTML = accounts.map(function(acc, idx) {
@@ -215,11 +207,11 @@ function showError(msg) {
 
 function getApiErrorMessage(status) {
   switch (status) {
-    case 400: return 'Solicitud invalida. Revisa el formato Nombre#TAG.';
-    case 403: return 'API key invalida o expirada. Renovela en developer.riotgames.com';
+    case 400: return 'Solicitud inválida. Revisa el formato Nombre#TAG.';
+    case 403: return 'API key inválida o expirada. Renuévala en developer.riotgames.com';
     case 404: return 'Cuenta no encontrada en LAN. Verifica el nombre y tag.';
     case 429: return 'Demasiadas solicitudes. Espera un momento e intenta de nuevo.';
-    case 503: return 'El servidor de Riot esta caido. Intenta mas tarde.';
+    case 503: return 'El servidor de Riot está caído. Intenta más tarde.';
     default:  return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
   }
 }

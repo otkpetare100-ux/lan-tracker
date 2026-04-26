@@ -1,3 +1,3 @@
 git add .
-git commit -m "fix comapre.js"
+git commit -m "acc con deepspace"
 git push

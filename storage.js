@@ -4,7 +4,6 @@
 
 async function loadAccounts() {
     try {
-        // Usamos ruta relativa para que Railway sepa que es el mismo servidor
         const response = await fetch('/accounts');
         
         if (!response.ok) {
@@ -27,20 +26,39 @@ async function saveAccount(accountData) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(accountData)
         });
-        return await response.json();
+        const result = await response.json();
+        return { ...result, added: response.ok };
     } catch (err) {
         console.error('[Storage] Error al guardar:', err);
+        return { added: false, error: err.message };
+    }
+}
+
+async function updateAccount(accountData) {
+    try {
+        const response = await fetch(`/accounts/${accountData.puuid}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(accountData)
+        });
+        return response.ok;
+    } catch (err) {
+        console.error('[Storage] Error al actualizar:', err);
+        return false;
     }
 }
 
 async function deleteAccount(puuid) {
     try {
-        await fetch(`/accounts/${puuid}`, { method: 'DELETE' });
+        const response = await fetch(`/accounts/${puuid}`, { method: 'DELETE' });
+        return response.ok;
     } catch (err) {
         console.error('[Storage] Error al eliminar:', err);
+        return false;
     }
 }
 
 window.loadAccounts = loadAccounts;
 window.saveAccount = saveAccount;
+window.updateAccount = updateAccount;
 window.deleteAccount = deleteAccount;
