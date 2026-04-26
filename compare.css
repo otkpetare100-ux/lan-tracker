@@ -266,3 +266,39 @@
   .compare-modal__vs { padding-top: 0; }
   .compare-modal__box { padding: 1.25rem 1rem; }
 }
+/* ---- Fix imágenes gigantes ---- */
+.compare-col__avatar {
+  width: 64px !important;
+  height: 64px !important;
+  object-fit: cover !important;
+  flex-shrink: 0;
+}
+
+.compare-rank-icon {
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: contain !important;
+  flex-shrink: 0;
+}
+
+.compare-champ-icon {
+  width: 36px !important;
+  height: 36px !important;
+  object-fit: cover !important;
+  flex-shrink: 0;
+}
+
+.compare-col {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.compare-modal__box {
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.compare-modal__grid img {
+  max-width: 100%;
+  height: auto;
+}
