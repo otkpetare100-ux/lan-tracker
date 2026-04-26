@@ -84,34 +84,33 @@ async function getChampionData() {
 
 async function fetchMatchHistory(puuid) {
   try {
-    const matchIds = await getMatchIds(puuid);
-    if (!matchIds || matchIds.length === 0) return { matches: [], streak: 0, mainPosition: '—' };
+   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+async function fetchMatchHistory(puuid) {
+  try {
+    const matchIds = await getMatchIds(puuid); // Esto requiere que mantengas tu getMatchIds viejo
+    if (!matchIds?.length) return { matches: [], streak: 0, mainPosition: '—' };
     const details = [];
     for (const id of matchIds) {
+      await sleep(1200); // Evita el error 429
       try {
-        const match = await getMatchDetail(id);
-        const p     = match.info.participants.find(x => x.puuid === puuid);
+        const match = await getMatchDetail(id); // Requiere que mantengas tu getMatchDetail viejo
+        const p = match.info.participants.find(x => x.puuid === puuid);
         if (!p) continue;
-        console.log("Datos de Riot para este jugador:", p);
-details.push({
-          matchId:      id,
-          champion:     p.championName,
-          win:          p.win,
-          kills:        p.kills,
-          deaths:       p.deaths,
-          assists:      p.assists,
-          position:     p.teamPosition || p.individualPosition || '',
+        details.push({
+          champion: p.championName, win: p.win, kills: p.kills, deaths: p.deaths, assists: p.assists,
           gameDuration: match.info.gameDuration,
-          cs:       (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
-  damage:   p.totalDamageDealtToChampions || 0,
-  vision:   p.visionScore || 0,
-  gold:     p.goldEarned || 0,
-  kp:       p.challenges && p.challenges.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0
-});
-      
+          cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+          damage: p.totalDamageDealtToChampions || 0,
+          vision: p.visionScore || 0,
+          gold: p.goldEarned || 0,
+          kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0
+        });
       } catch(e) { continue; }
     }
+    return { matches: details };
+  } catch(e) { return { matches: [] }; }
+}
 
     let streak = 0;
     if (details.length > 0) {
