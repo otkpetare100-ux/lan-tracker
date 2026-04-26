@@ -295,8 +295,10 @@ body::before {
 }
 
 .icon-wrap .profile-main-icon {
-  position: relative;
-  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
   width: 100px;
   height: 100px;
   object-fit: cover;
