@@ -254,9 +254,14 @@
   gap: 3px;
   padding: 7px 8px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  transition: all 0.3s ease;
   background: rgba(255,255,255,0.02);
   text-align: center;
+}
+.compare-stat:hover {
+    background: rgba(215, 122, 168, 0.1) !important; /* Un toque del rosa de Wayrail */
+    border-color: rgba(215, 122, 168, 0.3) !important;
 }
 .compare-stat--better {
   border-color: rgba(115,211,138,0.25);
