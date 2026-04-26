@@ -93,7 +93,8 @@ async function fetchMatchHistory(puuid) {
         const match = await getMatchDetail(id);
         const p     = match.info.participants.find(x => x.puuid === puuid);
         if (!p) continue;
-        details.push({
+        console.log("Datos de Riot para este jugador:", p);
+details.push({
           matchId:      id,
           champion:     p.championName,
           win:          p.win,
