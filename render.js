@@ -215,3 +215,42 @@ function getApiErrorMessage(status) {
     default:  return 'Error inesperado (HTTP ' + status + '). Intenta de nuevo.';
   }
 }
+
+function showDeleteConfirm(accountName, onConfirm) {
+  var overlay = document.createElement('div');
+  overlay.id = 'delete-confirm-overlay';
+  overlay.innerHTML =
+    '<div class="delete-confirm-box">' +
+      '<div class="delete-confirm-icon">✕</div>' +
+      '<div class="delete-confirm-title">¿Eliminar cuenta?</div>' +
+      '<div class="delete-confirm-msg">Vas a quitar a <strong>' + escapeHTML(accountName) + '</strong> de la lista.</div>' +
+      '<div class="delete-confirm-actions">' +
+        '<button class="delete-confirm-btn delete-confirm-btn--cancel" id="delete-cancel-btn">Mantener</button>' +
+        '<button class="delete-confirm-btn delete-confirm-btn--remove" id="delete-ok-btn">Sí, quitar</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(function() { overlay.classList.add('delete-confirm-overlay--open'); });
+
+  function close() {
+    overlay.classList.remove('delete-confirm-overlay--open');
+    setTimeout(function() { overlay.remove(); }, 220);
+  }
+
+  document.getElementById('delete-ok-btn').addEventListener('click', function() {
+    close();
+    onConfirm();
+  });
+
+  document.getElementById('delete-cancel-btn').addEventListener('click', close);
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) close();
+  });
+
+  var escHandler = function(e) {
+    if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escHandler); }
+  };
+  document.addEventListener('keydown', escHandler);
+}

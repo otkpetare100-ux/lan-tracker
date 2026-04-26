@@ -108,7 +108,7 @@
     updateCompareBar();
   };
 
-  function updateCompareButtons() {
+  window.updateCompareButtons = function updateCompareButtons() {
     document.querySelectorAll('.compare-btn').forEach(btn => {
       const selected = selectedToCompare.includes(btn.dataset.puuid);
       btn.classList.toggle('compare-btn--active', selected);

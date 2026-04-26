@@ -977,3 +977,117 @@ body::before {
   height: 32px !important;
   object-fit: cover !important;
 }
+
+/* ---- Modal de confirmación de eliminación ---- */
+#delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 6, 11, 0.72);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+#delete-confirm-overlay.delete-confirm-overlay--open {
+  opacity: 1;
+}
+
+.delete-confirm-box {
+  background: linear-gradient(160deg, rgba(26, 18, 30, 0.96), rgba(14, 10, 20, 0.98));
+  border: 1px solid rgba(224, 100, 116, 0.22);
+  border-radius: 20px;
+  padding: 2rem 2.2rem 1.6rem;
+  width: min(360px, 92vw);
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  transform: translateY(10px) scale(0.97);
+  transition: transform 0.22s ease;
+}
+
+#delete-confirm-overlay.delete-confirm-overlay--open .delete-confirm-box {
+  transform: translateY(0) scale(1);
+}
+
+.delete-confirm-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(224, 100, 116, 0.12);
+  border: 1px solid rgba(224, 100, 116, 0.28);
+  color: var(--bad);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.delete-confirm-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.delete-confirm-msg {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  margin-bottom: 1.4rem;
+}
+
+.delete-confirm-msg strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.delete-confirm-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.delete-confirm-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.delete-confirm-btn:active {
+  transform: translateY(0);
+}
+
+.delete-confirm-btn--cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+  color: var(--muted);
+}
+
+.delete-confirm-btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text);
+}
+
+.delete-confirm-btn--remove {
+  background: linear-gradient(135deg, rgba(180, 55, 70, 0.95), rgba(120, 30, 45, 0.96));
+  border-color: rgba(224, 100, 116, 0.30);
+  color: #ffd6db;
+  box-shadow: 0 4px 18px rgba(224, 100, 116, 0.18);
+}
