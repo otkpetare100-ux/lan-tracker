@@ -177,3 +177,15 @@ async function fetchAccountSnapshot(gameName, tagLine) {
     updatedAt:    Date.now(),
   };
 }
+async function deleteAccountFromServer(puuid) {
+    try {
+        const response = await fetch(`${API_URL}/accounts/${puuid}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Error al eliminar en el servidor');
+        return true;
+    } catch (error) {
+        console.error("Error eliminando cuenta:", error);
+        return false;
+    }
+}

@@ -2,7 +2,7 @@
  * app.js — Main controller for LAN Tracker
  */
 
-const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
+const AUTO_REFRESH_INTERVAL = 30 * 60 * 1000;
 
 let accounts = [];
 const refreshCooldowns = {}; // puuid -> timestamp ultimo refresh
