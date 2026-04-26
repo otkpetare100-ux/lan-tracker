@@ -133,7 +133,7 @@ function buildCardHTML(acc, position) {
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
-  const medalHTML = MEDALS[position]
+  const medalHTML = '';
     ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position+1) + '">'
     : '';
 
