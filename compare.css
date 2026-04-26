@@ -2,6 +2,47 @@
    COMPARE MODAL — compare.css
    ============================================= */
 
+#compare-modal * {
+  box-sizing: border-box;
+}
+
+#compare-modal img {
+  display: block;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+#compare-modal .compare-col__avatar {
+  width: 64px !important;
+  height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+#compare-modal .compare-rank-icon {
+  width: 44px !important;
+  height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  object-fit: contain !important;
+}
+
+#compare-modal .compare-champ-icon {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+#compare-modal .compare-modal__box {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 85vh !important;
+}
 /* ---- Compare button ---- */
 .compare-btn {
   display: inline-flex;
