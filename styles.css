@@ -929,3 +929,8 @@ body::before {
     gap: 5px;
   }
 }
+#compare-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+}
