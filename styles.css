@@ -244,22 +244,22 @@ body::before {
 /* ---- Card top row ---- */
 .card-top {
   display: grid;
-  grid-template-columns: 58px 1fr auto auto auto 36px;
+  grid-template-columns: 100px 1fr auto auto auto 44px 36px;
   align-items: center;
   gap: 16px;
 }
 
 /* ---- Profile icon ---- */
-.icon-wrap { position: relative; flex-shrink: 0; }
-.icon-wrap img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 2px solid rgba(212,120,154,0.5);
-  display: block;
-  object-fit: cover;
-  box-shadow: 0 0 12px rgba(212,120,154,0.2);
+.icon-wrap { 
+  position: relative;
+  width: 100px;
+  justify-self: start; 
 }
+.icon-wrap img {
+  width: 100px;
+  height: 100px;
+}
+
 .icon-level {
   position: absolute;
   bottom: -5px;
@@ -276,18 +276,25 @@ body::before {
 }
 
 /* ---- Medal ---- */
+.medal-column,
+.medal-badge,
 .medal-badge-img {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  z-index: 10;
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+  grid-column: 6;
+  justify-self: center;
+  align-self: center;
 }
-
+.medal-badge-img,
+.medal-badge {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  display: block;
+}
 /* ---- Summoner info ---- */
-.summoner-info { min-width: 0; }
+.summoner-info { 
+  min-width: 0;
+  grid-column: 2; 
+}
 .summoner-name {
   font-family: 'Cinzel', serif;
   font-size: 0.98rem;
@@ -332,13 +339,21 @@ body::before {
 .streak-loss { background: rgba(200,80,100,0.12);  border: 1px solid rgba(200,80,100,0.3);  color: var(--wr-bad); }
 
 /* ---- Rank block ---- */
-.rank-block { text-align: center; min-width: 100px; }
+.rank-block { 
+  grid-column: 4;
+  text-align: center;
+  min-width: 100px; 
+}
 .rank-emblem { font-size: 1.6rem; line-height: 1; margin-bottom: 3px; }
 .rank-name { font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 .rank-lp { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
 
 /* ---- Winrate block ---- */
-.winrate-block { text-align: right; min-width: 76px; }
+.winrate-block { 
+  grid-column: 5;
+  text-align: right;
+  min-width: 76px;
+}
 .wr-number { font-size: 1.15rem; font-weight: 600; }
 .wr-number.good  { color: var(--wr-good); }
 .wr-number.ok    { color: var(--wr-ok); }
@@ -348,17 +363,25 @@ body::before {
 .wr-games { font-size: 0.7rem; color: var(--text-dim); }
 
 /* ---- Card actions ---- */
-.card-actions { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.card-actions { 
+ grid-column: 7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 36px; 
+}
 .refresh-btn {
   background: none; border: none; color: var(--text-muted);
   cursor: pointer; font-size: 1.1rem; padding: 4px; border-radius: 4px;
   transition: color 0.15s; line-height: 1;
 }
-.refresh-btn:hover { color: var(--pink-light); }
+.refresh-btn,
 .remove-btn {
-  background: none; border: none; color: var(--text-dim);
-  cursor: pointer; font-size: 1rem; padding: 4px; border-radius: 4px;
-  transition: color 0.15s; line-height: 1;
+  width: 24px;
+  height: 24px;
+  padding: 0;
 }
 .remove-btn:hover { color: var(--wr-bad); }
 
@@ -367,6 +390,7 @@ body::before {
 
 /* ---- Top champions ---- */
 .top-champs-block {
+  grid-column: 3;
   display: flex;
   align-items: center;
   justify-content: center;
