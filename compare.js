@@ -182,16 +182,20 @@
     modal.id = 'compare-modal';
     modal.innerHTML =
       '<div class="compare-modal__box">' +
-        '<button class="compare-modal__close" onclick="closeCompareModal()">✕</button>' +
-        '<h2 class="compare-modal__title">⚖ Comparación</h2>' +
-        '<div class="compare-modal__grid">' +
-          buildColumn(accs[0], statsA, statsB) +
-          '<div class="compare-modal__vs">' +
-            '<div class="compare-vs-score ' + (scoreA > scoreB ? 'compare-vs-score--win' : scoreA < scoreB ? 'compare-vs-score--lose' : '') + '">' + scoreA + '</div>' +
-            '<div class="compare-vs-label">VS</div>' +
-            '<div class="compare-vs-score ' + (scoreB > scoreA ? 'compare-vs-score--win' : scoreB < scoreA ? 'compare-vs-score--lose' : '') + '">' + scoreB + '</div>' +
+        '<div class="compare-modal__header">' +
+          '<h2 class="compare-modal__title">⚖ Comparación</h2>' +
+          '<button class="compare-modal__close" onclick="closeCompareModal()">✕</button>' +
+        '</div>' +
+        '<div class="compare-modal__body">' +
+          '<div class="compare-modal__grid">' +
+            buildColumn(accs[0], statsA, statsB) +
+            '<div class="compare-modal__vs">' +
+              '<div class="compare-vs-score ' + (scoreA > scoreB ? 'compare-vs-score--win' : scoreA < scoreB ? 'compare-vs-score--lose' : '') + '">' + scoreA + '</div>' +
+              '<div class="compare-vs-label">VS</div>' +
+              '<div class="compare-vs-score ' + (scoreB > scoreA ? 'compare-vs-score--win' : scoreB < scoreA ? 'compare-vs-score--lose' : '') + '">' + scoreB + '</div>' +
+            '</div>' +
+            buildColumn(accs[1], statsB, statsA) +
           '</div>' +
-          buildColumn(accs[1], statsB, statsA) +
         '</div>' +
       '</div>';
     

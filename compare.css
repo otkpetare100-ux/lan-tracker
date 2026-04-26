@@ -39,8 +39,9 @@
 }
 
 #compare-modal .compare-modal__box {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
   max-height: 85vh !important;
 }
 /* ---- Compare button ---- */
@@ -134,15 +135,33 @@
   width: 100%;
   max-width: 680px;
   max-height: 88vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border-radius: 20px;
   border: 1px solid rgba(157,108,255,0.2);
   background: linear-gradient(180deg, rgba(20,22,40,0.98), rgba(12,14,26,0.99));
   box-shadow: 0 30px 80px rgba(0,0,0,0.7);
-  padding: 2rem 1.25rem 1.5rem;
   animation: compareSlideIn 0.28s ease both;
   box-sizing: border-box;
+}
+
+/* Header fijo que no scrollea */
+.compare-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 0.75rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Área scrollable */
+.compare-modal__body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  padding: 1rem 1.25rem 1.5rem;
 }
 
 /* Reset de imágenes dentro del modal */
@@ -158,8 +177,6 @@
 }
 
 .compare-modal__close {
-  position: absolute;
-  top: 1rem; right: 1rem;
   width: 30px; height: 30px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,0.12);
@@ -168,18 +185,18 @@
   font-size: 0.85rem;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
 }
 .compare-modal__close:hover { background: rgba(224,100,116,0.2); color: #ffb7c0; }
 
 .compare-modal__title {
-  text-align: center;
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #e8e0ff;
-  margin-bottom: 1.25rem;
+  margin: 0;
 }
 
 /* ---- Grid ---- */
@@ -315,10 +332,10 @@
   border: 2px solid rgba(215,122,168,0.3);
 }
 
-/* ---- Scrollbar ---- */
-.compare-modal__box::-webkit-scrollbar { width: 4px; }
-.compare-modal__box::-webkit-scrollbar-track { background: transparent; }
-.compare-modal__box::-webkit-scrollbar-thumb { background: rgba(157,108,255,0.3); border-radius: 4px; }
+.compare-modal__box::-webkit-scrollbar { width: 0; }
+.compare-modal__body::-webkit-scrollbar { width: 4px; }
+.compare-modal__body::-webkit-scrollbar-track { background: transparent; }
+.compare-modal__body::-webkit-scrollbar-thumb { background: rgba(157,108,255,0.3); border-radius: 4px; }
 
 /* ---- Responsive ---- */
 @media (max-width: 560px) {
