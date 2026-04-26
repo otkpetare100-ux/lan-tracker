@@ -134,8 +134,6 @@ function buildCardHTML(acc, position) {
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
   const medalHTML = '';
-    ? '<img src="' + MEDALS[position] + '" class="medal-badge-img" alt="top' + (position+1) + '">'
-    : '';
 
   const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame" onerror="this.remove()">';
 
