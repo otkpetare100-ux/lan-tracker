@@ -181,7 +181,7 @@ function buildCardHTML(acc, position) {
           '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
           '<div class="summoner-meta">' +
             '<span class="summoner-region">LAN</span>' +
-            '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
+            '<span class="position-badge" title="Posición principal">' + escapeHTML(posLabel) + '</span>' +
             streakIcon +
             recentDots +
           '</div>' +
