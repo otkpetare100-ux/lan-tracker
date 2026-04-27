@@ -129,23 +129,25 @@ async function handleRefresh(puuid, silent = false) {
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
 
-    const hadHistory = acc.matches && acc.matches.length > 0;
-    if (hadHistory) {
-      if (btn) btn.classList.remove('spinning');
-      const history = await fetchMatchHistory(acc.puuid, (curr, total) => {
-        if (btn) {
-          btn.classList.add('refresh-btn--loading');
-          btn.innerHTML = `<span class="refresh-progress">${curr}/${total}</span>`;
-        }
-      });
+    // Siempre intentamos obtener el historial de partidas para tener las 20 últimas
+    if (btn) btn.classList.remove('spinning');
+    
+    const history = await fetchMatchHistory(acc.puuid, (curr, total) => {
+      if (btn) {
+        btn.classList.add('refresh-btn--loading');
+        btn.innerHTML = `<span class="refresh-progress">${curr}/${total}</span>`;
+      }
+    });
+
+    if (history && history.matches) {
       updated.matches      = history.matches;
       updated.streak       = history.streak;
       updated.mainPosition = history.mainPosition;
       const champs = championsFromMatches(history.matches);
       if (champs) updated.topChampions = champs;
     } else {
-      updated.matches      = [];
-      updated.streak       = 0;
+      updated.matches      = acc.matches || [];
+      updated.streak       = acc.streak  || 0;
       updated.mainPosition = acc.mainPosition || '—';
       updated.topChampions = acc.topChampions || [];
     }
