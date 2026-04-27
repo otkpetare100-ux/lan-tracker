@@ -296,7 +296,7 @@ body::before {
 
 .card-main-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 1.2fr) 1fr minmax(140px, 0.8fr);
+  grid-template-columns: 320px 1fr 420px;
   align-items: center;
   gap: 20px;
 }
@@ -311,14 +311,14 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 80;
+  gap: 20px;
 }
 
 .card-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 35px;
+  gap: 30px;
 }
 
 /* Avatar Glows */
@@ -564,7 +564,8 @@ body::before {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
+  width: 170px;
+  flex-shrink: 0;
 }
 
 .rank-emblem {
