@@ -8,6 +8,44 @@ let accounts = [];
 const refreshCooldowns = {};
 const REFRESH_COOLDOWN = 60 * 1000;
 
+// --- Estado de filtros ---
+let filterText = '';
+let filterTier = 'all';
+
+// --- Sistema de Toasts ---
+function showToast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = 'toast toast--' + type;
+  el.innerHTML = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('toast--visible'));
+  setTimeout(() => {
+    el.classList.remove('toast--visible');
+    setTimeout(() => el.remove(), 400);
+  }, 5000);
+}
+
+function compareRankAndNotify(acc, updated) {
+  if (!acc.soloQ || !updated.soloQ) return;
+  const TIER = { IRON:0,BRONZE:1,SILVER:2,GOLD:3,PLATINUM:4,EMERALD:5,DIAMOND:6,MASTER:7,GRANDMASTER:8,CHALLENGER:9 };
+  const DIV  = { IV:1,III:2,II:3,I:4 };
+  const oldScore = (TIER[acc.soloQ.tier] ?? 0) * 10000 + (DIV[acc.soloQ.rank] ?? 0) * 1000 + (acc.soloQ.leaguePoints || 0);
+  const newScore = (TIER[updated.soloQ.tier] ?? 0) * 10000 + (DIV[updated.soloQ.rank] ?? 0) * 1000 + (updated.soloQ.leaguePoints || 0);
+  const newRankStr = updated.soloQ.tier + (updated.soloQ.rank ? ' ' + updated.soloQ.rank : '');
+  const name = updated.gameName;
+  if (newScore > oldScore && (updated.soloQ.tier !== acc.soloQ.tier || updated.soloQ.rank !== acc.soloQ.rank)) {
+    showToast('🎉 <b>' + name + '</b> subió a <b>' + newRankStr + '</b>', 'up');
+    saveRankHistory({ puuid: updated.puuid, gameName: name, tier: updated.soloQ.tier, rank: updated.soloQ.rank, lp: updated.soloQ.leaguePoints });
+  } else if (newScore < oldScore && (updated.soloQ.tier !== acc.soloQ.tier || updated.soloQ.rank !== acc.soloQ.rank)) {
+    showToast('💀 <b>' + name + '</b> bajó a <b>' + newRankStr + '</b>', 'down');
+    saveRankHistory({ puuid: updated.puuid, gameName: name, tier: updated.soloQ.tier, rank: updated.soloQ.rank, lp: updated.soloQ.leaguePoints });
+  } else if (newScore !== oldScore) {
+    const diff = updated.soloQ.leaguePoints - acc.soloQ.leaguePoints;
+    const sign = diff > 0 ? '+' : '';
+    showToast('📊 <b>' + name + '</b>: ' + sign + diff + ' LP (' + updated.soloQ.leaguePoints + ' LP)', 'lp');
+  }
+}
+
 const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
@@ -164,6 +202,8 @@ async function handleRefresh(puuid, silent = false) {
       updated.topChampions = acc.topChampions || [];
     }
 
+    if (!silent) compareRankAndNotify(acc, updated);
+
     await updateAccount(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     updateGlobalRef();
@@ -283,4 +323,45 @@ accountsGrid.addEventListener('click', async (e) => {
 searchBtn.addEventListener('click', handleSearch);
 searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') handleSearch();
+});
+
+// --- Funcionalidad 3: Filtro y búsqueda de cuentas ---
+const filterNameInput = document.getElementById('filter-name');
+const filterBtns = document.querySelectorAll('.filter-tier-btn');
+
+const TIER_GROUPS = {
+  all: null,
+  'iron-silver':    ['IRON','BRONZE','SILVER'],
+  'gold-plat':      ['GOLD','PLATINUM'],
+  'emerald-diamond':['EMERALD','DIAMOND'],
+  'master-plus':    ['MASTER','GRANDMASTER','CHALLENGER'],
+};
+
+function applyFilters() {
+  const text = filterText.toLowerCase();
+  const tiers = TIER_GROUPS[filterTier];
+  const sorted = sortByRank(accounts);
+  const filtered = sorted.filter(acc => {
+    const matchName = !text || (acc.gameName || '').toLowerCase().includes(text);
+    const accTier = acc.soloQ?.tier || 'UNRANKED';
+    const matchTier = !tiers || tiers.includes(accTier);
+    return matchName && matchTier;
+  });
+  renderAccounts(filtered);
+}
+
+if (filterNameInput) {
+  filterNameInput.addEventListener('input', () => {
+    filterText = filterNameInput.value.trim();
+    applyFilters();
+  });
+}
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('filter-tier-btn--active'));
+    btn.classList.add('filter-tier-btn--active');
+    filterTier = btn.dataset.tier;
+    applyFilters();
+  });
 });

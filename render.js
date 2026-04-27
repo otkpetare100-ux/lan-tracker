@@ -575,6 +575,7 @@ window.openPlayerModal = function(puuid, event) {
   document.body.appendChild(modal);
   document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('player-modal--open'));
+  loadRankTimeline(acc.puuid);
 
   const escHandler = (e) => {
     if (e.key === 'Escape') {
@@ -653,9 +654,48 @@ function buildPlayerModalHTML(acc) {
         <div class="stats-source-hint">Resumen de desempeño en SoloQ (Últimas 20)</div>
         ${statsHTML}
       </div>
+      <div id="rank-history-timeline-${acc.puuid}" class="rank-timeline-section">
+        <div class="rank-timeline-title">📈 Historial de Rango</div>
+        <div class="rank-timeline-list" id="rank-timeline-list-${acc.puuid}">
+          <div class="rank-timeline-loading">Cargando historial...</div>
+        </div>
+      </div>
     </div>
   `;
 }
+
+async function loadRankTimeline(puuid) {
+  const container = document.getElementById('rank-timeline-list-' + puuid);
+  if (!container) return;
+  try {
+    const history = await getRankHistory(puuid);
+    if (!history || history.length === 0) {
+      container.innerHTML = '<div class="rank-timeline-empty">Sin historial de cambios de rango aún.</div>';
+      return;
+    }
+    const TIER_COLORS = {
+      IRON:'#a09a8a', BRONZE:'#cd7f32', SILVER:'#b0b4c4',
+      GOLD:'#d9b85f', PLATINUM:'#3ab4a8', EMERALD:'#00c65e',
+      DIAMOND:'#6ba3f5', MASTER:'#c572f5', GRANDMASTER:'#f45e78', CHALLENGER:'#f4c874',
+    };
+    container.innerHTML = history.map((h, i) => {
+      const color = TIER_COLORS[h.tier] || '#fff';
+      const rankStr = h.tier + (h.rank ? ' ' + h.rank : '');
+      const date = h.timestamp ? new Date(h.timestamp).toLocaleDateString('es-MX', { day:'2-digit', month:'short' }) : '—';
+      return `<div class="rank-timeline-item">
+        <div class="rank-timeline-dot" style="background:${color};box-shadow:0 0 6px ${color}"></div>
+        <div class="rank-timeline-info">
+          <span class="rank-timeline-rank" style="color:${color}">${rankStr}</span>
+          <span class="rank-timeline-lp">${h.lp} LP</span>
+        </div>
+        <div class="rank-timeline-date">${date}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="rank-timeline-empty">No disponible</div>';
+  }
+}
+
 
 function calculateGlobalStats(matches) {
   if (!matches || matches.length === 0) return null;

@@ -29,6 +29,8 @@ async function connectDB() {
     // Crear índices para mejor rendimiento
     await db.collection('accounts').createIndex({ puuid: 1 }, { unique: true });
     await db.collection('accounts').createIndex({ addedAt: -1 });
+    await db.collection('rank_history').createIndex({ puuid: 1 });
+    await db.collection('rank_history').createIndex({ timestamp: -1 });
   } catch(e) {
     console.error('❌ Error conectando a MongoDB:', e);
     console.log('Reintentando en 5 segundos...');
@@ -142,7 +144,34 @@ app.get('/riot', async (req, res) => {
 });
 
 // Manejo de errores global
-app.use((err, req, res, next) => {
+app.post('/rank-history', async (req, res) => {
+  const entry = req.body;
+  if (!entry || !entry.puuid) return res.status(400).json({ error: 'Datos inválidos' });
+  try {
+    await db.collection('rank_history').insertOne({
+      ...entry,
+      timestamp: new Date()
+    });
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('Error guardando historial:', e);
+    res.status(500).json({ error: 'Error guardando historial' });
+  }
+});
+
+app.get('/rank-history/:puuid', async (req, res) => {
+  try {
+    const history = await db.collection('rank_history')
+      .find({ puuid: req.params.puuid })
+      .sort({ timestamp: -1 })
+      .limit(10)
+      .toArray();
+    res.json(history);
+  } catch(e) {
+    console.error('Error leyendo historial:', e);
+    res.status(500).json({ error: 'Error leyendo historial' });
+  }
+});
   console.error('Error no manejado:', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
