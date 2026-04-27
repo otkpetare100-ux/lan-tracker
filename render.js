@@ -669,17 +669,15 @@ window.openLeaderboard = function() {
   modal.innerHTML = `
     <div class="leaderboard-box">
       <div class="leaderboard-header">
-        <h2>Récords de la Perrera</h2>
+        <div class="leaderboard-title-group">
+          <h2>Récords de la Perrera</h2>
+          <button class="leaderboard-refresh" onclick="refreshLeaderboard()" title="Actualizar récords">↻</button>
+        </div>
         <button class="leaderboard-close" onclick="closeLeaderboard()">✕</button>
       </div>
-      <div class="leaderboard-body">
+      <div class="leaderboard-body" id="leaderboard-body-grid">
         <div class="leader-grid">
-          ${renderLeaderCard('El Verdugo', records.topKills, 'Kills Promedio')}
-          ${renderLeaderCard('Ojos de Halcón', records.topVision, 'Visión Promedio')}
-          ${renderLeaderCard('El Rico', records.topGold, 'Oro / Minuto')}
-          ${renderLeaderCard('El Más Suertudo', records.topWinrate, 'Winrate Global')}
-          ${renderLeaderCard('El Cañón Pulso de Fuego', records.topDamage, 'Daño a Campeones')}
-          ${renderLeaderCard('El Inmortal', records.minDeaths, 'Menos Muertes')}
+          ${renderLeaderGridHTML(records)}
         </div>
       </div>
     </div>
@@ -696,6 +694,26 @@ window.closeLeaderboard = function() {
     setTimeout(() => modal.remove(), 300);
   }
 };
+
+window.refreshLeaderboard = function() {
+  const accounts = window._accounts_ref || [];
+  const grid = document.querySelector('#leaderboard-body-grid .leader-grid');
+  if (!grid) return;
+  
+  const records = calculateGlobalRecords(accounts);
+  grid.innerHTML = renderLeaderGridHTML(records);
+};
+
+function renderLeaderGridHTML(records) {
+  return `
+    ${renderLeaderCard('El Verdugo', records.topKills, 'Kills Promedio')}
+    ${renderLeaderCard('Ojos de Halcón', records.topVision, 'Visión Promedio')}
+    ${renderLeaderCard('El Rico', records.topGold, 'Oro / Minuto')}
+    ${renderLeaderCard('El Más Suertudo', records.topWinrate, 'Winrate Global')}
+    ${renderLeaderCard('El Cañón Pulso de Fuego', records.topDamage, 'Daño a Campeones')}
+    ${renderLeaderCard('El Inmortal', records.minDeaths, 'Menos Muertes')}
+  `;
+}
 
 function calculateGlobalRecords(accounts) {
   const stats = accounts.map(acc => {

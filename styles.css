@@ -1729,6 +1729,32 @@ body::before {
   font-size: 1.8rem;
 }
 
+.leaderboard-title-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.leaderboard-refresh {
+  background: rgba(244, 200, 116, 0.1);
+  border: 1px solid rgba(244, 200, 116, 0.2);
+  color: #f4c874;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.leaderboard-refresh:hover {
+  background: rgba(244, 200, 116, 0.2);
+  transform: rotate(180deg);
+}
+
 .leaderboard-close {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
