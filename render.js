@@ -109,19 +109,32 @@ function buildTopChampsHTML(topChampions) {
   }).join('');
 }
 
-function buildCardHTML(acc, position) {
-  const r       = getRankInfo(acc);
-  const wr      = computeWinrate(r.wins, r.losses);
-  const wrCls   = winrateClass(wr);
-  const color   = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const rankStr = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + r.division;
-  const iconUrl = getProfileIconUrl(acc.profileIconId);
+function buildMatchDots(matches) {
+  if (!matches || matches.length === 0) return '';
+  return '<div class="match-dots">' +
+    matches.slice(0, 5).map(function(m) {
+      return '<span class="mdot ' + (m.win ? 'mdot--w' : 'mdot--l') + '" title="' + (m.win ? 'Victoria' : 'Derrota') + ' · ' + escapeHTML(m.champion || '') + '"></span>';
+    }).join('') +
+  '</div>';
+}
 
-  const updatedStr = acc.updatedAt
+function buildCardHTML(acc, position) {
+  const r          = getRankInfo(acc);
+  const wr         = computeWinrate(r.wins, r.losses);
+  const wrCls      = winrateClass(wr);
+  const color      = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+  const rankStr    = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + r.division;
+  const iconUrl    = getProfileIconUrl(acc.profileIconId);
+
+  const updatedStr    = acc.updatedAt
     ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
     : '';
-  const posLabel = acc.mainPosition || '—';
-  const streak   = buildStreakHTML(acc.streak);
+  const posLabel      = acc.mainPosition || '—';
+  const streak        = buildStreakHTML(acc.streak);
+  const recentDots    = buildMatchDots(acc.matches);
+  const watermarkHTML = RANK_ICONS[r.tier]
+    ? '<div class="rank-watermark"><img src="' + RANK_ICONS[r.tier] + '" alt="" /></div>'
+    : '';
 
   const wrHTML = wr !== null
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
@@ -137,7 +150,8 @@ function buildCardHTML(acc, position) {
     '<span class="history-btn-text">Ver historial</span><span class="history-arrow">▾</span>' +
   '</button>';
 
-  return '<div class="card-top">' +
+  return watermarkHTML +
+  '<div class="card-top">' +
     '<div class="icon-wrap">' +
       frameHTML +
       '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
@@ -150,6 +164,7 @@ function buildCardHTML(acc, position) {
         '<span class="summoner-region">LAN</span>' +
         '<span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
         streak +
+        recentDots +
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '</div>' +
     '</div>' +
@@ -187,6 +202,8 @@ function renderAccounts(accounts) {
     var div = document.createElement('div');
     div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
     div.id = 'card-' + acc.puuid;
+    var r = getRankInfo(acc);
+    div.style.borderLeft = '3px solid ' + (RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED);
     div.innerHTML = buildCardHTML(acc, idx);
     return div.outerHTML;
   }).join('');
