@@ -267,7 +267,7 @@
         <div class="compare-col__name">${escapeHTML(acc.gameName)}</div>
         <div class="compare-col__tag">#${escapeHTML(acc.tagLine)}</div>
         ${rankInfo}
-        ${champsHTML}
+        ${buildChampsHTMLForCompare(acc.topChampions, acc.puuid)}
       </div>`;
   }
 
@@ -321,7 +321,7 @@
       '</div>' + wrHTML;
   }
 
-  function buildChampsHTMLForCompare(champions) {
+  function buildChampsHTMLForCompare(champions, puuid) {
     if (!champions || champions.length === 0) return '';
     
     const icons = champions
@@ -332,7 +332,8 @@
         return `<img class="compare-champ-icon" 
                      src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${imgName}"
                      alt="${escapeHTML(c.name)}"
-                     title="${escapeHTML(c.name)}"
+                     title="Ver estadísticas de ${escapeHTML(c.name)}"
+                     onclick="openChampModal('${puuid}', '${escapeHTML(c.name)}')"
                      onerror="this.remove()" />`;
       })
       .join('');

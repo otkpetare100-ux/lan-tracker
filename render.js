@@ -98,12 +98,12 @@ function buildMatchHistoryHTML(matches) {
   }).join('') + '</div>';
 }
 
-function buildTopChampsHTML(topChampions) {
+function buildTopChampsHTML(topChampions, puuid) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
     if (!c.name) return '';
     var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
-    return '<div class="top-champ" title="' + escapeHTML(c.name) + '">' +
+    return '<div class="top-champ" title="Ver estadísticas de ' + escapeHTML(c.name) + '" onclick="openChampModal(\'' + puuid + '\', \'' + escapeHTML(c.name) + '\')">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
   }).join('');
@@ -171,7 +171,7 @@ function buildCardHTML(acc, position) {
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '</div>' +
     '</div>' +
-    '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions) + '</div></div>' +
+    '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div></div>' +
     '<div class="rank-block">' +
       '<div class="rank-emblem">' + rankIconHTML + '</div>' +
       '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
@@ -273,4 +273,134 @@ function showDeleteConfirm(accountName, onConfirm) {
     if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escHandler); }
   };
   document.addEventListener('keydown', escHandler);
+}
+
+// --- Lógica del Modal de Campeones ---
+window.openChampModal = function(puuid, champName) {
+  const acc = window._accounts_ref?.find(a => a.puuid === puuid);
+  if (!acc) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'champ-modal';
+  modal.className = 'champ-modal';
+  modal.innerHTML = buildChampModalHTML(acc, champName);
+  
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('champ-modal--open'));
+
+  // Cerrar con Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeChampModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+};
+
+window.closeChampModal = function() {
+  const modal = document.getElementById('champ-modal');
+  if (modal) {
+    modal.classList.remove('champ-modal--open');
+    setTimeout(() => modal.remove(), 300);
+  }
+};
+
+window.switchChampModal = function(puuid, champName) {
+  const modal = document.getElementById('champ-modal');
+  if (modal) {
+    const acc = window._accounts_ref?.find(a => a.puuid === puuid);
+    if (acc) {
+      modal.innerHTML = buildChampModalHTML(acc, champName);
+    }
+  }
+};
+
+function buildChampModalHTML(acc, champName) {
+  const champMatches = acc.matches.filter(m => m.champion === champName);
+  const stats = calculateChampStats(champMatches);
+  const top3 = acc.topChampions || [];
+
+  const tabsHTML = top3.map(c => {
+    const active = c.name === champName ? 'champ-tab--active' : '';
+    return `<div class="champ-tab ${active}" onclick="switchChampModal('${acc.puuid}', '${escapeHTML(c.name)}')">
+      <img src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${getChampImageName(c.name)}" />
+      <span>${escapeHTML(c.name)}</span>
+    </div>`;
+  }).join('');
+
+  const statsGrid = stats ? `
+    <div class="champ-stats-grid">
+      <div class="cstat-card">
+        <div class="cstat-label">Partidas</div>
+        <div class="cstat-value">${stats.total}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Winrate</div>
+        <div class="cstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">KDA</div>
+        <div class="cstat-value">${stats.kda}</div>
+        <div class="cstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">CS/Min</div>
+        <div class="cstat-value">${stats.csMin}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Daño Recibido</div>
+        <div class="cstat-value">${stats.damageTaken.toLocaleString()}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Solo Kills</div>
+        <div class="cstat-value">${stats.soloKills}</div>
+      </div>
+    </div>
+  ` : '<div class="empty-stats">Sin datos suficientes en el historial reciente</div>';
+
+  return `
+    <div class="champ-modal__box">
+      <div class="champ-modal__header">
+        <div class="champ-modal__title-wrap">
+          <img class="champ-modal__main-img" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${getChampImageName(champName)}" />
+          <h2>${escapeHTML(champName)}</h2>
+        </div>
+        <button class="champ-modal__close" onclick="closeChampModal()">✕</button>
+      </div>
+      <div class="champ-modal__tabs">${tabsHTML}</div>
+      <div class="champ-modal__body">${statsGrid}</div>
+    </div>
+  `;
+}
+
+function calculateChampStats(matches) {
+  if (!matches || matches.length === 0) return null;
+  const t = matches.length;
+  const s = matches.reduce((acc, m) => {
+    acc.k += m.kills;
+    acc.d += m.deaths;
+    acc.a += m.assists;
+    acc.cs += m.cs;
+    acc.dmg += m.damage;
+    acc.dmgT += m.damageTaken;
+    acc.solo += m.soloKills;
+    acc.dur += m.gameDuration;
+    acc.wins += m.win ? 1 : 0;
+    return acc;
+  }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, solo:0, dur:0, wins:0 });
+
+  const deaths = s.d || 1;
+  return {
+    total: t,
+    winrate: Math.round((s.wins / t) * 100),
+    kda: ((s.k + s.a) / deaths).toFixed(2),
+    kills: (s.k / t).toFixed(1),
+    deaths: (s.d / t).toFixed(1),
+    assists: (s.a / t).toFixed(1),
+    csMin: (s.cs / (s.dur / 60)).toFixed(1),
+    damage: Math.round(s.dmg / t),
+    damageTaken: Math.round(s.dmgT / t),
+    soloKills: (s.solo / t).toFixed(1)
+  };
 }

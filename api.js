@@ -106,9 +106,11 @@ async function fetchMatchHistory(puuid) {
           gameDuration: match.info.gameDuration,
           cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
           damage: p.totalDamageDealtToChampions || 0,
+          damageTaken: p.totalDamageTaken || 0,
           vision: p.visionScore || 0,
           gold: p.goldEarned || 0,
           kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0,
+          soloKills: p.challenges?.soloKills || 0,
           position: p.teamPosition || ''
         });
       } catch(e) {

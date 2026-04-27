@@ -1189,3 +1189,198 @@ body::before {
   color: #ffd6db;
   box-shadow: 0 4px 18px rgba(224, 100, 116, 0.18);
 }
+
+/* --- Champion Modal Styles --- */
+.champ-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 5, 12, 0.85);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 1rem;
+}
+
+.champ-modal--open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.champ-modal__box {
+  width: 100%;
+  max-width: 520px;
+  background: linear-gradient(180deg, #181a28 0%, #0c0e1a 100%);
+  border: 1px solid rgba(157, 108, 255, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.17, 0.84, 0.44, 1);
+}
+
+.champ-modal--open .champ-modal__box {
+  transform: scale(1);
+}
+
+.champ-modal__header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.champ-modal__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.champ-modal__main-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid rgba(215, 122, 168, 0.4);
+}
+
+.champ-modal__header h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.champ-modal__close {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #7a84aa;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.champ-modal__close:hover {
+  background: rgba(215, 122, 168, 0.15);
+  color: #fff;
+}
+
+.champ-modal__tabs {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.champ-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  min-width: 0;
+}
+
+.champ-tab img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  filter: grayscale(0.5);
+  transition: filter 0.2s;
+}
+
+.champ-tab span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7a84aa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.champ-tab:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.champ-tab--active {
+  background: rgba(157, 108, 255, 0.12);
+  border-color: rgba(157, 108, 255, 0.3);
+}
+
+.champ-tab--active img {
+  filter: grayscale(0);
+}
+
+.champ-tab--active span {
+  color: #d4caff;
+}
+
+.champ-modal__body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.champ-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.cstat-card {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cstat-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7a84aa;
+}
+
+.cstat-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.cstat-sub {
+  font-size: 0.7rem;
+  color: #5c627d;
+  font-weight: 600;
+}
+
+.text-win { color: #00c65e; }
+.text-loss { color: #f45e78; }
+
+.empty-stats {
+  text-align: center;
+  padding: 40px 0;
+  color: #5c627d;
+  font-size: 0.9rem;
+}
