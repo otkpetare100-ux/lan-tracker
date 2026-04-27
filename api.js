@@ -46,6 +46,11 @@ async function getRankedEntriesBySummonerId(summonerId) {
   return riotFetch(url);
 }
 
+async function getRankedEntriesByPuuid(puuid) {
+  const url = `${ENDPOINTS.LAN}/lol/league/v4/entries/by-puuid/${puuid}`;
+  return riotFetch(url);
+}
+
 async function getTopMasteryChampions(puuid) {
   const url = `${ENDPOINTS.LAN}/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3`;
   return riotFetch(url);
@@ -162,33 +167,42 @@ async function fetchAccountSnapshot(gameName, tagLine) {
   if (!summoner) throw new Error('No se pudieron obtener los datos del invocador');
 
   let ranked = [];
-  let rescueId = summoner.id;
 
-  // RESCATE: Si no tenemos el id del invocador, lo buscamos en su última partida
-  if (!rescueId) {
-    try {
-      const matchIds = await getMatchIds(account.puuid);
-      if (matchIds && matchIds.length > 0) {
-        const lastMatch = await getMatchDetails(matchIds[0]);
-        const p = lastMatch.info.participants.find(x => x.puuid === account.puuid);
-        if (p && p.summonerId) {
-          rescueId = p.summonerId;
-          console.log('✅ Rescate exitoso: ID recuperado del historial:', rescueId);
+  // Intento principal: Por PUUID (el más moderno y directo)
+  try {
+    ranked = await getRankedEntriesByPuuid(account.puuid);
+  } catch (e) {
+    console.warn('Fallo el intento por PUUID, iniciando rescate...');
+    
+    let rescueId = summoner.id;
+    // RESCATE: Si no tenemos el id del invocador, lo buscamos en su última partida
+    if (!rescueId) {
+      try {
+        const matchIds = await getMatchIds(account.puuid);
+        if (matchIds && matchIds.length > 0) {
+          const lastMatch = await getMatchDetails(matchIds[0]);
+          const p = lastMatch.info.participants.find(x => x.puuid === account.puuid);
+          if (p && p.summonerId) {
+            rescueId = p.summonerId;
+            console.log('✅ Rescate exitoso: ID recuperado del historial:', rescueId);
+          }
         }
+      } catch (errRescue) {
+        console.warn('Fallo el rescate de ID por historial:', errRescue);
       }
-    } catch (e) {
-      console.warn('Fallo el rescate de ID por historial:', e);
+    }
+
+    if (rescueId) {
+      try {
+        ranked = await getRankedEntriesBySummonerId(rescueId);
+      } catch (errRank) {
+        console.warn('No se pudo obtener el rango por SummonerId:', errRank);
+      }
     }
   }
 
-  if (rescueId) {
-    try {
-      ranked = await getRankedEntriesBySummonerId(rescueId);
-    } catch (e) {
-      console.warn('No se pudo obtener el rango:', e);
-    }
-  } else {
-    console.warn('El servidor no devolvió el ID del invocador y el rescate falló. El rango aparecerá como Unranked');
+  if (!ranked || ranked.length === 0) {
+    console.warn('No se pudo obtener el rango por ningún método. El rango aparecerá como Unranked');
   }
 
   let topChampions = [];
