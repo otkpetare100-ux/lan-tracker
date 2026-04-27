@@ -188,8 +188,11 @@ function buildCardHTML(acc, position) {
         '</div>' +
       '</div>' +
       
-      '<div class="card-center">' +
+      '<div class="card-center-champs">' +
         '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
+      '</div>' +
+      
+      '<div class="card-center-rank">' +
         '<div class="rank-block">' +
           '<div class="rank-emblem">' + 
             '<img src="' + (RANK_ICONS[r.tier] || RANK_ICONS.UNRANKED) + '" alt="' + r.tier + '" class="rank-icon rank-glow-' + r.tier.toLowerCase() + '" />' +
