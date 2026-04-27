@@ -378,14 +378,14 @@ function calculateChampStats(matches) {
   if (!matches || matches.length === 0) return null;
   const t = matches.length;
   const s = matches.reduce((acc, m) => {
-    acc.k += m.kills;
-    acc.d += m.deaths;
-    acc.a += m.assists;
-    acc.cs += m.cs;
-    acc.dmg += m.damage;
-    acc.dmgT += m.damageTaken;
-    acc.solo += m.soloKills;
-    acc.dur += m.gameDuration;
+    acc.k += m.kills || 0;
+    acc.d += m.deaths || 0;
+    acc.a += m.assists || 0;
+    acc.cs += m.cs || 0;
+    acc.dmg += m.damage || 0;
+    acc.dmgT += m.damageTaken || 0;
+    acc.solo += m.soloKills || 0;
+    acc.dur += m.gameDuration || 0;
     acc.wins += m.win ? 1 : 0;
     return acc;
   }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, solo:0, dur:0, wins:0 });
