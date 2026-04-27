@@ -118,11 +118,11 @@ function championsFromMatches(matches) {
 
 /* ---- Refresh ---- */
 /* ---- Notificaciones de Cambio de Rango ---- */
-const TIER_ORDER = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
-const DIV_ORDER  = ['IV','III','II','I'];
+const DIV_ORDER = ['IV','III','II','I'];
 
 function getRankScore(tier, division) {
-  const t = TIER_ORDER.indexOf(tier);
+  const tierList = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
+  const t = tierList.indexOf(tier);
   const d = DIV_ORDER.indexOf(division || 'I');
   return (t < 0 ? -1 : t * 4 + (d < 0 ? 0 : d));
 }

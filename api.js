@@ -273,6 +273,4 @@ async function fetchAccountSnapshot(gameName, tagLine) {
     addedAt:      Date.now(),
     updatedAt:    Date.now(),
   };
-}  
-async function saveRankHistory(data) { return fetch('/rank-history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r =; }  
-async function getRankHistory(puuid) { return fetch(/rank-history/).then(r =; } 
+}
