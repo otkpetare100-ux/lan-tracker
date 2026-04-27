@@ -123,7 +123,7 @@ function buildCardHTML(acc, position) {
   const wr         = computeWinrate(r.wins, r.losses);
   const wrCls      = winrateClass(wr);
   const color      = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const rankStr    = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + r.division;
+  const rankStr    = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + (r.rank || '');
   const iconUrl    = getProfileIconUrl(acc.profileIconId);
 
   const updatedStr    = acc.updatedAt
@@ -451,6 +451,7 @@ function buildPlayerModalHTML(acc) {
   const stats = calculateGlobalStats(acc.matches);
   const r = acc.rank || { tier: 'UNRANKED', rank: '', lp: 0, wins: 0, losses: 0 };
   const color = RANK_COLORS[r.tier] || '#fff';
+  const rankText = r.tier === 'UNRANKED' ? 'UNRANKED' : `${r.tier} ${r.rank} - ${r.lp} LP`;
 
   const statsHTML = stats ? `
     <div class="player-stats-grid">
@@ -494,7 +495,7 @@ function buildPlayerModalHTML(acc) {
           <img class="player-modal__avatar" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png" />
           <div class="player-modal__names">
             <h2>${escapeHTML(acc.gameName)} <span class="tag">#${escapeHTML(acc.tagLine)}</span></h2>
-            <p style="color:${color}">${r.tier} ${r.rank} - ${r.lp} LP</p>
+            <p style="color:${color}">${rankText}</p>
           </div>
         </div>
         <button class="player-modal__close" onclick="closePlayerModal()">✕</button>
