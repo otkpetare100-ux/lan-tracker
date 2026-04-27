@@ -108,6 +108,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function fetchMatchHistory(puuid, onProgress) {
   try {
+    if (!puuid) return { matches: [], streak: 0, mainPosition: '—' };
     const matchIds = await getMatchIds(puuid);
     if (!matchIds?.length) return { matches: [], streak: 0, mainPosition: '—' };
     
@@ -200,7 +201,7 @@ async function fetchAccountSnapshot(gameName, tagLine) {
       try {
         const matchIds = await getMatchIds(account.puuid);
         if (matchIds && matchIds.length > 0) {
-          const lastMatch = await getMatchDetails(matchIds[0]);
+          const lastMatch = await getMatchDetail(matchIds[0]);
           const p = lastMatch.info.participants.find(x => x.puuid === account.puuid);
           if (p && p.summonerId) {
             rescueId = p.summonerId;
