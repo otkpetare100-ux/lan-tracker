@@ -116,14 +116,13 @@ function championsFromMatches(matches) {
     });
 }
 
-/* ---- Refresh ---- */
 /* ---- Notificaciones de Cambio de Rango ---- */
-const DIV_ORDER = ['IV','III','II','I'];
 
 function getRankScore(tier, division) {
   const tierList = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
+  const divList  = ['IV','III','II','I'];
   const t = tierList.indexOf(tier);
-  const d = DIV_ORDER.indexOf(division || 'I');
+  const d = divList.indexOf(division || 'I');
   return (t < 0 ? -1 : t * 4 + (d < 0 ? 0 : d));
 }
 
