@@ -176,14 +176,15 @@ function buildCardHTML(acc, position) {
         (acc.isLive ? '<div class="live-badge-glow"></div><div class="live-badge">🔴 EN VIVO</div>' : '') +
       '</div>' +
       '<div class="summoner-info" title="Ver perfil detallado">' +
-        '<div class="summoner-name">' + escapeHTML(acc.gameName) + streakIcon + '</div>' +
+        '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
         '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
         '<div class="summoner-meta">' +
           '<span class="summoner-region">LAN</span>' +
-          '<span class="position-badge">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
-        streak +
-        recentDots +
-        (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
+          '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
+          streakIcon +
+          recentDots +
+          (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
+        '</div>' +
       '</div>' +
     '</div>' +
     '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div></div>' +
@@ -733,11 +734,21 @@ window.closeLeaderboard = function() {
 
 window.refreshLeaderboard = function() {
   const accounts = window._accounts_ref || [];
-  const grid = document.querySelector('#leaderboard-body-grid .leader-grid');
-  if (!grid) return;
+  const container = document.querySelector('#leaderboard-body-grid');
+  if (!container) return;
   
   const records = calculateGlobalRecords(accounts);
-  grid.innerHTML = renderLeaderGridHTML(records);
+  container.innerHTML = `
+    <div class="leader-grid">
+      ${renderLeaderGridHTML(records)}
+    </div>
+    <div class="shame-title">🤡 Salón de la Vergüenza</div>
+    <div class="leader-grid">
+      ${renderLeaderCard('El Imán de Balas', records.maxDeaths, 'Más Muertes Promedio')}
+      ${renderLeaderCard('El Topo', records.minVision, 'Menos Visión Promedio')}
+      ${renderLeaderCard('El Autofill', records.maxChamps, 'Más Campeones Usados')}
+    </div>
+  `;
 };
 
 function renderLeaderGridHTML(records) {

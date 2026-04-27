@@ -415,13 +415,14 @@ body::before {
 }
 
 .position-badge {
-  padding: 4px 8px;
+  padding: 4px 10px;
   border: 1px solid rgba(215, 122, 168, 0.22);
   background: rgba(215, 122, 168, 0.10);
   color: #ffd9e8;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  gap: 4px;
 }
 
 .updated-time {
@@ -1770,6 +1771,25 @@ body::before {
 .leaderboard-body {
   padding: 0 30px 30px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(244, 200, 116, 0.3) rgba(255, 255, 255, 0.02);
+}
+
+.leaderboard-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.leaderboard-body::-webkit-scrollbar-thumb {
+  background: rgba(244, 200, 116, 0.3);
+  border-radius: 10px;
+}
+
+.leaderboard-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 200, 116, 0.5);
 }
 
 .leader-grid {
