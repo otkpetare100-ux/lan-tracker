@@ -1013,12 +1013,23 @@ body::before {
   }
 
   .icon-wrap {
-    width: 84px;
-    height: 84px;
+    width: 84px !important;
+    height: 84px !important;
+    flex: 0 0 84px !important;
+    min-width: 84px !important;
   }
   .icon-wrap .profile-main-icon {
-    width: 52px;
-    height: 52px;
+    width: 52px !important;
+    height: 52px !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  .icon-wrap .rank-frame {
+    width: 100% !important;
+    height: auto !important;
+    top: 50% !important;
+    left: 50% !important;
   }
 
   .top-champs-block,
