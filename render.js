@@ -160,7 +160,7 @@ function buildCardHTML(acc, position) {
       '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
-    '<div class="summoner-info" onclick="openPlayerModal(\'' + acc.puuid + '\')" title="Ver perfil detallado">' +
+    '<div class="summoner-info" title="Ver perfil detallado">' +
       '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
       '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
       '<div class="summoner-meta">' +
@@ -202,9 +202,12 @@ function renderAccounts(accounts) {
     return;
   }
   grid.innerHTML = accounts.map(function(acc, idx) {
+    const topRank = idx < 3 ? (idx + 1) : null;
+    const cardCls = 'account-card' + (topRank ? ' top-' + topRank : '');
     var div = document.createElement('div');
-    div.className = 'account-card' + (idx < 3 ? ' top-' + (idx + 1) : '');
+    div.className = cardCls;
     div.id = 'card-' + acc.puuid;
+    div.setAttribute('onclick', "openPlayerModal('" + acc.puuid + "', event)");
     var r = getRankInfo(acc);
     div.style.borderLeft = '3px solid ' + (RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED);
     div.innerHTML = buildCardHTML(acc, idx);
@@ -410,7 +413,12 @@ function calculateChampStats(matches) {
 }
 
 // --- Lógica del Modal de Jugador (Perfil Detallado) ---
-window.openPlayerModal = function(puuid) {
+window.openPlayerModal = function(puuid, event) {
+  // Si el clic fue en un botón o en un icono de campeón, no abrimos este modal
+  if (event && (event.target.closest('button') || event.target.closest('.top-champ') || event.target.closest('.top-champ-icon'))) {
+    return;
+  }
+
   const acc = window._accounts_ref?.find(a => a.puuid === puuid);
   if (!acc) return;
 
