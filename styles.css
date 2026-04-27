@@ -2113,3 +2113,106 @@ body::before {
     font-size: 0.75rem;
   }
 }
+
+/* --- Toast Notificaciones de Rango --- */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.rank-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  min-width: 280px;
+  max-width: 360px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.17,0.84,0.44,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.rank-toast--visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.rank-toast--up {
+  background: rgba(16, 40, 24, 0.92);
+  border-color: rgba(40, 202, 66, 0.35);
+  color: #b8f5c4;
+}
+
+.rank-toast--down {
+  background: rgba(40, 12, 16, 0.92);
+  border-color: rgba(224, 100, 116, 0.35);
+  color: #ffc8ce;
+}
+
+.rank-toast--lp {
+  background: rgba(12, 20, 40, 0.92);
+  border-color: rgba(108, 137, 235, 0.35);
+  color: #c4d0f5;
+}
+
+.rank-toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  border-radius: 0 0 14px 14px;
+  animation: toast-timer 5s linear forwards;
+}
+
+.rank-toast--up::after   { background: #28ca42; }
+.rank-toast--down::after { background: #e06474; }
+.rank-toast--lp::after   { background: #6c89eb; }
+
+@keyframes toast-timer {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+.toast-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.toast-msg {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.toast-close:hover { opacity: 1; }

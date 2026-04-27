@@ -117,6 +117,64 @@ function championsFromMatches(matches) {
 }
 
 /* ---- Refresh ---- */
+/* ---- Notificaciones de Cambio de Rango ---- */
+const TIER_ORDER = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
+const DIV_ORDER  = ['IV','III','II','I'];
+
+function getRankScore(tier, division) {
+  const t = TIER_ORDER.indexOf(tier);
+  const d = DIV_ORDER.indexOf(division || 'I');
+  return (t < 0 ? -1 : t * 4 + (d < 0 ? 0 : d));
+}
+
+function getRankLabel(acc) {
+  const soloQ = acc.soloQ;
+  if (!soloQ || soloQ.tier === 'UNRANKED') return 'Sin Clasificar';
+  const noDivision = ['MASTER','GRANDMASTER','CHALLENGER'];
+  return noDivision.includes(soloQ.tier)
+    ? soloQ.tier.charAt(0) + soloQ.tier.slice(1).toLowerCase()
+    : soloQ.tier.charAt(0) + soloQ.tier.slice(1).toLowerCase() + ' ' + soloQ.rank;
+}
+
+function showRankToast(emoji, message, type) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = 'rank-toast rank-toast--' + type;
+  toast.innerHTML = '<span class="toast-emoji">' + emoji + '</span><span class="toast-msg">' + message + '</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>';
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('rank-toast--visible'));
+  setTimeout(() => {
+    toast.classList.remove('rank-toast--visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 5000);
+}
+
+function checkRankChange(oldAcc, newAcc) {
+  const oldSQ = oldAcc.soloQ;
+  const newSQ = newAcc.soloQ;
+  const name = oldAcc.gameName;
+  if (!newSQ || newSQ.tier === 'UNRANKED') return;
+  const newLabel = getRankLabel(newAcc);
+  if (!oldSQ || oldSQ.tier === 'UNRANKED') return;
+  const oldScore = getRankScore(oldSQ.tier, oldSQ.rank);
+  const newScore = getRankScore(newSQ.tier, newSQ.rank);
+  if (newScore > oldScore) {
+    showRankToast('🎉', '¡' + name + ' subió a ' + newLabel + '!', 'up');
+  } else if (newScore < oldScore) {
+    showRankToast('💀', name + ' bajó a ' + newLabel, 'down');
+  } else if (newSQ.leaguePoints !== oldSQ.leaguePoints) {
+    const diff = newSQ.leaguePoints - oldSQ.leaguePoints;
+    const sign = diff > 0 ? '+' : '';
+    showRankToast('📊', name + ': ' + sign + diff + ' LP (' + newSQ.leaguePoints + ' LP)', 'lp');
+  }
+}
+
+
 async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
@@ -164,9 +222,14 @@ async function handleRefresh(puuid, silent = false) {
       updated.topChampions = acc.topChampions || [];
     }
 
+    const prevAcc = { ...acc, soloQ: acc.soloQ ? { ...acc.soloQ } : null };
+
     await updateAccount(updated);
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     updateGlobalRef();
+
+    if (!silent) checkRankChange(prevAcc, updated);
+
     
     const wasOpen = card && document.getElementById('history-' + puuid) &&
                     document.getElementById('history-' + puuid).style.display !== 'none';
