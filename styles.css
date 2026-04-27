@@ -249,8 +249,10 @@ body::before {
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
   padding: 1.3rem 1.5rem 1.2rem;
-  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.2, 1, 0.3, 1);
   animation: slideIn 0.28s ease both;
+  cursor: pointer;
+  user-select: none;
 }
 
 .account-card::before {
@@ -262,9 +264,21 @@ body::before {
 }
 
 .account-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(215, 122, 168, 0.28);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px) scale(1.005);
+  border-color: rgba(215, 122, 168, 0.45);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 15px rgba(215, 122, 168, 0.1);
+  background: linear-gradient(180deg, rgba(30, 36, 60, 0.92), rgba(16, 20, 35, 0.92));
+}
+
+.account-card:active {
+  transform: translateY(-1px) scale(0.995);
+  filter: brightness(0.9);
+}
+
+/* Evitar que los botones hereden el cursor de puntero si no son clickeables */
+.account-card button, 
+.account-card .top-champ {
+  cursor: pointer;
 }
 
 .top-1 {
