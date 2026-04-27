@@ -159,9 +159,18 @@ async function fetchAccountSnapshot(gameName, tagLine) {
   if (!account || !account.puuid) throw new Error('Cuenta no encontrada en Riot');
 
   const summoner = await getSummonerByPuuid(account.puuid);
-  if (!summoner || !summoner.id) throw new Error('Datos de invocador no encontrados');
+  if (!summoner) throw new Error('No se pudieron obtener los datos del invocador');
 
-  const ranked   = await getRankedEntriesBySummonerId(summoner.id);
+  let ranked = [];
+  if (summoner.id) {
+    try {
+      ranked = await getRankedEntriesBySummonerId(summoner.id);
+    } catch (e) {
+      console.warn('No se pudo obtener el rango:', e);
+    }
+  } else {
+    console.warn('El servidor no devolvió el ID del invocador, el rango aparecerá como Unranked');
+  }
 
   let topChampions = [];
   try {
