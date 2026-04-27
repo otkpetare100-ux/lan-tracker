@@ -1,6 +1,8 @@
-/**
- * render.js — DOM rendering helpers for LAN Tracker
- */
+const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/29.png';
+
+function getProfileIconUrl(id) {
+  return `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${id}.png`;
+}
 
 const RANK_COLORS = {
   IRON: '#6B5A4E', BRONZE: '#CD7F32', SILVER: '#A8A9AD', GOLD: '#C89B3C',
@@ -603,7 +605,7 @@ function buildPlayerModalHTML(acc) {
     <div class="player-modal__box">
       <div class="player-modal__header">
         <div class="player-modal__profile">
-          <img class="player-modal__avatar" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png" />
+          <img class="player-modal__avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
           <div class="player-modal__names">
             <h2>${escapeHTML(acc.gameName)} <span class="tag">#${escapeHTML(acc.tagLine)}</span></h2>
             <p style="color:${color}">${rankText}</p>
@@ -725,7 +727,7 @@ function renderLeaderCard(title, data, sub) {
     <div class="leader-card">
       <div class="leader-title">${title}</div>
       <div class="leader-profile">
-        <img class="leader-avatar" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${data.acc.profileIconId}.png" />
+        <img class="leader-avatar" src="${getProfileIconUrl(data.acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
         <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
         <div class="leader-value">${val}</div>
         <div class="leader-sub">${sub}</div>
