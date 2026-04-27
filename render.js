@@ -19,7 +19,7 @@ const RANK_ICONS = {
   MASTER:      '/pic/ranks/master.png',
   GRANDMASTER: '/pic/ranks/grandmaster.png',
   CHALLENGER:  '/pic/ranks/challenger.png',
-  UNRANKED:    null,
+  UNRANKED:    '/pic/ranks/unranked.png',
 };
 
 const CHAMP_NAME_FIX = {
