@@ -282,15 +282,15 @@ body::before {
 
 .card-top {
   display: grid;
-  grid-template-columns: 120px 1fr auto auto auto 42px;
+  grid-template-columns: 100px 1fr auto auto auto 42px;
   align-items: center;
   gap: 20px;
 }
 
 .icon-wrap {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   justify-self: start;
   overflow: visible;
 }
@@ -299,8 +299,8 @@ body::before {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 74px;
-  height: 74px;
+  width: 62px;
+  height: 62px;
   transform: translate(-50%, -50%);
   z-index: 1;
   border-radius: 50%;
@@ -334,7 +334,7 @@ body::before {
   position: absolute;
   z-index: 3;
   left: 50%;
-  top: calc(50% + 32px);
+  top: calc(50% + 28px);
   transform: translateX(-50%);
   padding: 3px 8px;
   border-radius: 999px;
