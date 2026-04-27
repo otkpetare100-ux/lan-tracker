@@ -13,6 +13,15 @@ const ENDPOINTS = {
 
 const DDRAGON_VERSION = '15.8.1';
 
+const POSITION_LABELS = {
+  TOP: 'TOP',
+  JUNGLE: 'JNG',
+  MIDDLE: 'MID',
+  BOTTOM: 'ADC',
+  UTILITY: 'SUP',
+  '': '—'
+};
+
 async function riotFetch(url) {
   const proxyUrl = BASE_PROXY + '?url=' + url;
   const res = await fetch(proxyUrl);
@@ -38,6 +47,16 @@ async function getAccountByRiotId(gameName, tagLine) {
 async function getSummonerByPuuid(puuid) {
   const url = `${ENDPOINTS.LAN}/lol/summoner/v4/summoners/by-puuid/${puuid}`;
   return riotFetch(url);
+}
+
+async function getActiveGame(puuid) {
+  const url = `${ENDPOINTS.LAN}/lol/spectator/v5/active-games/by-puuid/${puuid}`;
+  try {
+    return await riotFetch(url);
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
 }
 
 async function getRankedEntriesBySummonerId(summonerId) {

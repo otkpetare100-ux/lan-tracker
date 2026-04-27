@@ -162,19 +162,25 @@ function buildCardHTML(acc, position) {
     '<span class="history-btn-text">Ver historial</span><span class="history-arrow">▾</span>' +
   '</button>';
 
-  return watermarkHTML +
-  '<div class="card-top">' +
-    '<div class="icon-wrap">' +
-      frameHTML +
-      '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
-      '<span class="icon-level">' + acc.summonerLevel + '</span>' +
-    '</div>' +
-    '<div class="summoner-info" title="Ver perfil detallado">' +
-      '<div class="summoner-name">' + escapeHTML(acc.gameName) + streakIcon + '</div>' +
-      '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
-      '<div class="summoner-meta">' +
-        '<span class="summoner-region">LAN</span>' +
-        '<span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
+    const POSITION_ICONS = {
+      TOP: '🛡️', JNG: '⚔️', MID: '🔮', ADC: '🏹', SUP: '🏥', '—': '?'
+    };
+    const roleIcon = POSITION_ICONS[posLabel] || '?';
+
+    return watermarkHTML +
+    '<div class="card-top">' +
+      '<div class="icon-wrap">' +
+        frameHTML +
+        '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
+        '<span class="icon-level">' + acc.summonerLevel + '</span>' +
+        (acc.isLive ? '<div class="live-badge-glow"></div><div class="live-badge">🔴 EN VIVO</div>' : '') +
+      '</div>' +
+      '<div class="summoner-info" title="Ver perfil detallado">' +
+        '<div class="summoner-name">' + escapeHTML(acc.gameName) + streakIcon + '</div>' +
+        '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
+        '<div class="summoner-meta">' +
+          '<span class="summoner-region">LAN</span>' +
+          '<span class="position-badge">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
         streak +
         recentDots +
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
@@ -572,11 +578,13 @@ function buildPlayerModalHTML(acc) {
         <div class="pstat-label">Winrate Global</div>
         <div class="pstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
         <div class="pstat-sub">${stats.total} partidas analizadas</div>
+        ${stats.winrateTrend ? `<div class="trend-indicator ${stats.winrateTrend > 0 ? 'trend-up' : 'trend-down'}">${stats.winrateTrend > 0 ? '▲' : '▼'} ${Math.abs(stats.winrateTrend)}%</div>` : ''}
       </div>
       <div class="pstat-card">
         <div class="pstat-label">KDA Promedio</div>
         <div class="pstat-value">${stats.kda}</div>
         <div class="pstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
+        ${stats.kdaTrend ? `<div class="trend-indicator ${stats.kdaTrend > 0 ? 'trend-up' : 'trend-down'}">${stats.kdaTrend > 0 ? '▲' : '▼'} ${Math.abs(stats.kdaTrend)}</div>` : ''}
       </div>
       <div class="pstat-card">
         <div class="pstat-label">Visión</div>
@@ -641,10 +649,32 @@ function calculateGlobalStats(matches) {
   const deaths = s.d || 1;
   const totalMin = s.dur / 60;
 
+  // Cálculo de tendencia (primera mitad vs segunda mitad)
+  let wrTrend = 0;
+  let kdaTrend = 0;
+  if (t >= 6) {
+    const half = Math.floor(t / 2);
+    const m1 = matches.slice(0, half);
+    const m2 = matches.slice(half);
+    
+    const s1 = m1.reduce((a, x) => ({ w: a.w + (x.win?1:0), k: a.k+x.kills, d: a.d+x.deaths, a: a.a+x.assists }), {w:0, k:0, d:0, a:0});
+    const s2 = m2.reduce((a, x) => ({ w: a.w + (x.win?1:0), k: a.k+x.kills, d: a.d+x.deaths, a: a.a+x.assists }), {w:0, k:0, d:0, a:0});
+    
+    const wr1 = (s1.w / m1.length) * 100;
+    const wr2 = (s2.w / m2.length) * 100;
+    wrTrend = Math.round(wr1 - wr2); // Tendencia positiva si los recientes (m1) son mejores
+
+    const k1 = (s1.k + s1.a) / (s1.d || 1);
+    const k2 = (s2.k + s2.a) / (s2.d || 1);
+    kdaTrend = parseFloat((k1 - k2).toFixed(2));
+  }
+
   return {
     total: t,
     winrate: Math.round((s.wins / t) * 100),
+    winrateTrend: wrTrend,
     kda: ((s.k + s.a) / deaths).toFixed(2),
+    kdaTrend: kdaTrend,
     kills: (s.k / t).toFixed(1),
     deaths: (s.d / t).toFixed(1),
     assists: (s.a / t).toFixed(1),
@@ -678,6 +708,12 @@ window.openLeaderboard = function() {
       <div class="leaderboard-body" id="leaderboard-body-grid">
         <div class="leader-grid">
           ${renderLeaderGridHTML(records)}
+        </div>
+        <div class="shame-title">🤡 Salón de la Vergüenza</div>
+        <div class="leader-grid">
+          ${renderLeaderCard('El Imán de Balas', records.maxDeaths, 'Más Muertes Promedio')}
+          ${renderLeaderCard('El Topo', records.minVision, 'Menos Visión Promedio')}
+          ${renderLeaderCard('El Autofill', records.maxChamps, 'Más Campeones Usados')}
         </div>
       </div>
     </div>
@@ -729,7 +765,14 @@ function calculateGlobalRecords(accounts) {
     topGold: stats.sort((a,b) => b.s.goldMin - a.s.goldMin)[0],
     topWinrate: stats.sort((a,b) => b.s.winrate - a.s.winrate)[0],
     topDamage: stats.sort((a,b) => b.s.damage - a.s.damage)[0],
-    minDeaths: stats.sort((a,b) => a.s.deaths - b.s.deaths)[0]
+    minDeaths: stats.sort((a,b) => a.s.deaths - b.s.deaths)[0],
+    // Shame
+    maxDeaths: stats.sort((a,b) => b.s.deaths - a.s.deaths)[0],
+    minVision: stats.sort((a,b) => a.s.vision - b.s.vision)[0],
+    maxChamps: stats.map(x => {
+      const unique = new Set(x.acc.matches.map(m => m.champion)).size;
+      return { ...x, unique };
+    }).sort((a,b) => b.unique - a.unique)[0]
   };
 }
 
@@ -739,17 +782,27 @@ function renderLeaderCard(title, data, sub) {
               title === 'El Más Suertudo' ? data.s.winrate + '%' :
               title === 'El Cañón Pulso de Fuego' ? data.s.damage.toLocaleString() :
               title === 'Ojos de Halcón' ? data.s.vision :
-              title === 'El Inmortal' ? data.s.deaths : data.s.kills;
+              title === 'El Topo' ? data.s.vision :
+              title === 'El Autofill' ? data.unique + ' champs' :
+              title === 'El Inmortal' ? data.s.deaths : data.s.deaths;
+  
+  if (title === 'El Verdugo') return renderCard(data.s.kills);
+  if (title === 'El Imán de Balas') return renderCard(data.s.deaths);
 
-  return `
-    <div class="leader-card">
-      <div class="leader-title">${title}</div>
-      <div class="leader-profile">
-        <img class="leader-avatar" src="${getProfileIconUrl(data.acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
-        <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
-        <div class="leader-value">${val}</div>
-        <div class="leader-sub">${sub}</div>
+  function renderCard(displayVal) {
+    return `
+      <div class="leader-card">
+        <div class="leader-title">${title}</div>
+        <div class="leader-profile">
+          <img class="leader-avatar" src="${getProfileIconUrl(data.acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
+          <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
+          <div class="leader-value">${displayVal}</div>
+          <div class="leader-sub">${sub}</div>
+        </div>
       </div>
-    </div>
-  `;
+    `;
+  }
+
+  // Fallback para los que no tienen función específica arriba
+  return renderCard(val);
 }
