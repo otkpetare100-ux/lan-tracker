@@ -328,6 +328,7 @@ window.openChampModal = function(puuid, champName) {
   modal.innerHTML = buildChampModalHTML(acc, champName);
   
   document.body.appendChild(modal);
+  document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('champ-modal--open'));
 
   // Cerrar con Escape
@@ -344,6 +345,7 @@ window.closeChampModal = function() {
   const modal = document.getElementById('champ-modal');
   if (modal) {
     modal.classList.remove('champ-modal--open');
+    document.body.classList.remove('modal-open');
     setTimeout(() => modal.remove(), 300);
   }
 };
@@ -571,6 +573,7 @@ window.openPlayerModal = function(puuid, event) {
   modal.innerHTML = buildPlayerModalHTML(acc);
   
   document.body.appendChild(modal);
+  document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('player-modal--open'));
 
   const escHandler = (e) => {
@@ -586,6 +589,7 @@ window.closePlayerModal = function() {
   const modal = document.getElementById('player-modal');
   if (modal) {
     modal.classList.remove('player-modal--open');
+    document.body.classList.remove('modal-open');
     setTimeout(() => modal.remove(), 300);
   }
 };
@@ -744,6 +748,7 @@ window.openLeaderboard = function() {
   `;
 
   document.body.appendChild(modal);
+  document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('leaderboard-modal--open'));
 };
 
@@ -751,6 +756,7 @@ window.closeLeaderboard = function() {
   const modal = document.getElementById('leaderboard-modal');
   if (modal) {
     modal.classList.remove('leaderboard-modal--open');
+    document.body.classList.remove('modal-open');
     setTimeout(() => modal.remove(), 300);
   }
 };
