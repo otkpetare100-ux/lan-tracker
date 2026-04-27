@@ -196,8 +196,8 @@
             '</div>' +
             buildPlayerHeader(accs[1]) +
           '</div>' +
-          '<div class="compare-radar-container" style="position: relative; height: 400px; width: 100%; margin-top: 20px;">' +
-            '<canvas id="compareRadarChart"></canvas>' +
+          '<div class="compare-shared-stats-container">' +
+            buildSharedStatRows(statsA, statsB) +
           '</div>' +
         '</div>' +
       '</div>';
@@ -205,11 +205,6 @@
     document.body.appendChild(modal);
     requestAnimationFrame(() => modal.classList.add('compare-modal--open'));
     
-    // Inicializar Chart.js
-    if (statsA && statsB && window.Chart) {
-      renderRadarChart(accs, statsA, statsB);
-    }
-
     // Evento para cerrar con Escape
     const escHandler = (e) => {
       if (e.key === 'Escape') {
@@ -220,80 +215,43 @@
     document.addEventListener('keydown', escHandler);
   };
 
-  function renderRadarChart(accs, statsA, statsB) {
-    const radarMetrics = METRICS.filter(m => m.key !== 'duration');
-    const labels = radarMetrics.map(m => m.label);
-    
-    const realDataA = radarMetrics.map(m => parseFloat(statsA[m.key]) || 0);
-    const realDataB = radarMetrics.map(m => parseFloat(statsB[m.key]) || 0);
-    
-    const normDataA = [];
-    const normDataB = [];
-
-    for (let i = 0; i < radarMetrics.length; i++) {
-      const max = Math.max(realDataA[i], realDataB[i]);
-      normDataA.push(max > 0 ? (realDataA[i] / max) * 100 : 0);
-      normDataB.push(max > 0 ? (realDataB[i] / max) * 100 : 0);
+  function buildSharedStatRows(statsA, statsB) {
+    if (!statsA && !statsB) {
+      return '<div class="compare-stat" style="color: #7a84aa; padding: 20px;">Sin datos de partidas</div>';
     }
+    
+    return METRICS.map(function(m) {
+      const valA = statsA ? statsA[m.key] : null;
+      const valB = statsB ? statsB[m.key] : null;
 
-    const ctx = document.getElementById('compareRadarChart').getContext('2d');
-    window.compareChartInstance = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: accs[0].gameName,
-            data: normDataA,
-            backgroundColor: 'rgba(0, 198, 94, 0.2)', // Emerald tint
-            borderColor: 'rgba(0, 198, 94, 1)',
-            pointBackgroundColor: 'rgba(0, 198, 94, 1)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgba(0, 198, 94, 1)'
-          },
-          {
-            label: accs[1].gameName,
-            data: normDataB,
-            backgroundColor: 'rgba(215, 122, 168, 0.2)', // Pink/Magenta tint
-            borderColor: 'rgba(215, 122, 168, 1)',
-            pointBackgroundColor: 'rgba(215, 122, 168, 1)',
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: 'rgba(215, 122, 168, 1)'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          r: {
-            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-            pointLabels: { color: '#f0e7ff', font: { size: 13, family: 'Barlow' } },
-            ticks: { display: false, max: 100, min: 0, stepSize: 20 }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: { color: '#f0e7ff', font: { family: 'Barlow', size: 14 } }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const dataIndex = context.dataIndex;
-                const isPlayerA = context.datasetIndex === 0;
-                const realValue = isPlayerA ? realDataA[dataIndex] : realDataB[dataIndex];
-                const metric = radarMetrics[dataIndex];
-                return context.dataset.label + ': ' + metric.format(realValue);
-              }
-            }
-          }
+      let betterA = false;
+      let betterB = false;
+
+      if (valA !== null && valB !== null) {
+        const isLowerBetter = m.key === 'duration';
+        const fA = parseFloat(valA);
+        const fB = parseFloat(valB);
+        if (fA !== fB) {
+          if (isLowerBetter ? fA < fB : fA > fB) betterA = true;
+          else betterB = true;
         }
+      } else if (valA !== null) {
+        betterA = true;
+      } else if (valB !== null) {
+        betterB = true;
       }
-    });
+
+      const strA = valA !== null && valA !== undefined ? m.format(valA) : '—';
+      const strB = valB !== null && valB !== undefined ? m.format(valB) : '—';
+
+      return `
+        <div class="compare-shared-row">
+          <div class="compare-shared-val compare-shared-val--left ${betterA ? 'is-better' : ''}">${strA}</div>
+          <div class="compare-shared-label">${m.label}</div>
+          <div class="compare-shared-val compare-shared-val--right ${betterB ? 'is-better' : ''}">${strB}</div>
+        </div>
+      `;
+    }).join('');
   }
 
   function buildPlayerHeader(acc) {
@@ -389,13 +347,7 @@
     const modal = document.getElementById('compare-modal');
     if (modal) {
       modal.classList.remove('compare-modal--open');
-      setTimeout(() => {
-        if (window.compareChartInstance) {
-          window.compareChartInstance.destroy();
-          window.compareChartInstance = null;
-        }
-        modal.remove();
-      }, 300);
+      setTimeout(() => modal.remove(), 300);
     }
     window.selectedToCompare = [];
     document.getElementById('compare-bar')?.remove();

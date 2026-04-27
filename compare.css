@@ -337,6 +337,60 @@
 .compare-modal__body::-webkit-scrollbar-track { background: transparent; }
 .compare-modal__body::-webkit-scrollbar-thumb { background: rgba(157,108,255,0.3); border-radius: 4px; }
 
+/* ---- Shared Stats Rows ---- */
+.compare-shared-stats-container {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compare-shared-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr;
+  align-items: center;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.compare-shared-row:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(215, 122, 168, 0.2);
+}
+
+.compare-shared-label {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a84aa;
+}
+
+.compare-shared-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f2f4ff;
+}
+
+.compare-shared-val--left {
+  text-align: right;
+  padding-right: 16px;
+}
+
+.compare-shared-val--right {
+  text-align: left;
+  padding-left: 16px;
+}
+
+.compare-shared-val.is-better {
+  color: #73d38a;
+  text-shadow: 0 0 10px rgba(115, 211, 138, 0.3);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 560px) {
   .compare-modal__grid { grid-template-columns: 1fr; gap: 8px; }
