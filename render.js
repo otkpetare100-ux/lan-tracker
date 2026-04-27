@@ -338,42 +338,90 @@ function buildChampModalHTML(acc, champName) {
   const statsGrid = stats ? `
     <div class="stats-source-hint">Basado en las últimas ${stats.total} partidas</div>
     <div class="champ-stats-grid">
-      <div class="cstat-card">
-        <div class="cstat-label">Partidas</div>
-        <div class="cstat-value">${stats.total}</div>
-      </div>
+      <!-- Básicas y Rendimiento -->
+      <div class="cstat-group-title">Rendimiento y Básicas</div>
       <div class="cstat-card">
         <div class="cstat-label">Winrate</div>
         <div class="cstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
+        <div class="cstat-sub">${stats.total} partidas</div>
       </div>
       <div class="cstat-card">
-        <div class="cstat-label">KDA</div>
+        <div class="cstat-label">KDA Promedio</div>
         <div class="cstat-value">${stats.kda}</div>
         <div class="cstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
       </div>
       <div class="cstat-card">
-        <div class="cstat-label">CS/Min</div>
+        <div class="cstat-label">CS por Minuto</div>
         <div class="cstat-value">${stats.csMin}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Daño Recibido</div>
-        <div class="cstat-value">${stats.damageTaken.toLocaleString()}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Solo Kills</div>
-        <div class="cstat-value">${stats.soloKills}</div>
       </div>
       <div class="cstat-card">
         <div class="cstat-label">Visión</div>
         <div class="cstat-value">${stats.vision}</div>
       </div>
+
+      <!-- Impacto y Objetivos -->
+      <div class="cstat-group-title">Impacto y Objetivos</div>
       <div class="cstat-card">
-        <div class="cstat-label">Oro/Min</div>
+        <div class="cstat-label">Daño / Partida</div>
+        <div class="cstat-value">${stats.damage.toLocaleString()}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Daño a Torres</div>
+        <div class="cstat-value">${stats.dmgTurret.toLocaleString()}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Objetivos Robados</div>
+        <div class="cstat-value">${stats.objStolen}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Solo Kills</div>
+        <div class="cstat-value">${stats.soloKills}</div>
+      </div>
+
+      <!-- Economía y Early -->
+      <div class="cstat-group-title">Economía y Early Game</div>
+      <div class="cstat-card">
+        <div class="cstat-label">Oro por Minuto</div>
         <div class="cstat-value">${stats.goldMin}</div>
       </div>
       <div class="cstat-card">
-        <div class="cstat-label">KP%</div>
-        <div class="cstat-value">${stats.kp}%</div>
+        <div class="cstat-label">Ventaja Oro @15</div>
+        <div class="cstat-value ${stats.goldDiff15 >= 0 ? 'text-win' : 'text-loss'}">${stats.goldDiff15 > 0 ? '+' : ''}${stats.goldDiff15}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Ventaja CS @10</div>
+        <div class="cstat-value ${stats.csDiff10 >= 0 ? 'text-win' : 'text-loss'}">${stats.csDiff10 > 0 ? '+' : ''}${stats.csDiff10}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Consumibles</div>
+        <div class="cstat-value">${stats.consumables}</div>
+      </div>
+
+      <!-- Divertidas y Logros -->
+      <div class="cstat-group-title">Logros y Datos de Impacto</div>
+      <div class="cstat-card">
+        <div class="cstat-label">Pentakills</div>
+        <div class="cstat-value" style="color:#f4c874">${stats.penta}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Racha Máxima</div>
+        <div class="cstat-value" style="color:#00C65E">${stats.maxWinStreak}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Primeras Sangres</div>
+        <div class="cstat-value">${stats.firstBlood}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Duración Prom.</div>
+        <div class="cstat-value">${stats.avgDuration} min</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Perfect Games</div>
+        <div class="cstat-value" style="color:#f4c874">${stats.perfectGames}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Late Wins (>35m)</div>
+        <div class="cstat-value">${stats.lateWins}</div>
       </div>
     </div>
   ` : '<div class="empty-stats">Sin datos suficientes en el historial reciente</div>';
@@ -396,23 +444,41 @@ function buildChampModalHTML(acc, champName) {
 function calculateChampStats(matches) {
   if (!matches || matches.length === 0) return null;
   const t = matches.length;
-  const s = matches.reduce((acc, m) => {
-    acc.k += m.kills || 0;
-    acc.d += m.deaths || 0;
-    acc.a += m.assists || 0;
-    acc.cs += m.cs || 0;
     acc.dmg += m.damage || 0;
     acc.dmgT += m.damageTaken || 0;
+    acc.dmgObj += m.dmgObj || 0;
+    acc.dmgTurret += m.dmgTurret || 0;
+    acc.objStolen += m.objStolen || 0;
+    acc.firstBlood += m.firstBlood ? 1 : 0;
+    acc.penta += m.penta || 0;
+    acc.quadra += m.quadra || 0;
+    acc.killingSpree = Math.max(acc.killingSpree, m.killingSpree || 0);
+    acc.goldDiff15 += m.goldDiff15 || 0;
+    acc.csDiff10 += m.csDiff10 || 0;
+    acc.consumables += m.consumables || 0;
     acc.solo += m.soloKills || 0;
     acc.vision += m.vision || 0;
     acc.gold += m.gold || 0;
     acc.kp += m.kp || 0;
     acc.dur += m.gameDuration || 0;
     acc.wins += m.win ? 1 : 0;
+    
+    // Racha actual de victorias
+    if (m.win) {
+      acc.currStreak++;
+      acc.maxStreak = Math.max(acc.maxStreak, acc.currStreak);
+    } else {
+      acc.currStreak = 0;
+    }
+
+    if (m.deaths === 0 && m.win) acc.perfect++;
+    if (m.gameDuration > 2100 && m.win) acc.lateWins++; // > 35 min
+
     return acc;
-  }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, solo:0, vision:0, gold:0, kp:0, dur:0, wins:0 });
+  }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, dmgObj:0, dmgTurret:0, objStolen:0, firstBlood:0, penta:0, quadra:0, killingSpree:0, goldDiff15:0, csDiff10:0, consumables:0, solo:0, vision:0, gold:0, kp:0, dur:0, wins:0, maxStreak:0, currStreak:0, perfect:0, lateWins:0 });
 
   const deaths = s.d || 1;
+  const durMin = s.dur / 60;
   return {
     total: t,
     winrate: Math.round((s.wins / t) * 100),
@@ -420,13 +486,28 @@ function calculateChampStats(matches) {
     kills: (s.k / t).toFixed(1),
     deaths: (s.d / t).toFixed(1),
     assists: (s.a / t).toFixed(1),
-    csMin: (s.cs / (s.dur / 60)).toFixed(1),
+    csMin: (s.cs / durMin).toFixed(1),
     damage: Math.round(s.dmg / t),
     damageTaken: Math.round(s.dmgT / t),
     soloKills: (s.solo / t).toFixed(1),
     vision: (s.vision / t).toFixed(1),
-    goldMin: (s.gold / (s.dur / 60)).toFixed(0),
-    kp: Math.round(s.kp / t)
+    goldMin: (s.gold / durMin).toFixed(0),
+    kp: Math.round(s.kp / t),
+    // Nuevas
+    dmgObj: Math.round(s.dmgObj / t),
+    dmgTurret: Math.round(s.dmgTurret / t),
+    objStolen: s.objStolen,
+    firstBlood: s.firstBlood,
+    penta: s.penta,
+    quadra: s.quadra,
+    killingSpree: s.killingSpree,
+    goldDiff15: Math.round(s.goldDiff15 / t),
+    csDiff10: (s.csDiff10 / t).toFixed(1),
+    consumables: (s.consumables / t).toFixed(1),
+    avgDuration: Math.round(durMin),
+    maxWinStreak: s.maxStreak,
+    perfectGames: s.perfect,
+    lateWins: s.lateWins
   };
 }
 

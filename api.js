@@ -126,6 +126,16 @@ async function fetchMatchHistory(puuid, onProgress) {
           gold: p.goldEarned || 0,
           kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0,
           soloKills: p.challenges?.soloKills || 0,
+          dmgObj: p.totalDamageDealtToObjectives || 0,
+          dmgTurret: p.damageDealtToTurrets || 0,
+          objStolen: p.objectivesStolen || 0,
+          firstBlood: p.firstBloodKill || false,
+          penta: p.pentaKills || 0,
+          quadra: p.quadraKills || 0,
+          killingSpree: p.largestKillingSpree || 0,
+          goldDiff15: p.challenges?.goldDiffAt15 || 0,
+          csDiff10: p.challenges?.maxCsAdvantageOnLaneOpponent || 0,
+          consumables: p.consumablesPurchased || 0,
           position: p.teamPosition || ''
         });
       } catch(e) {
