@@ -444,6 +444,11 @@ function buildChampModalHTML(acc, champName) {
 function calculateChampStats(matches) {
   if (!matches || matches.length === 0) return null;
   const t = matches.length;
+  const s = matches.reduce((acc, m) => {
+    acc.k += m.kills || 0;
+    acc.d += m.deaths || 0;
+    acc.a += m.assists || 0;
+    acc.cs += m.cs || 0;
     acc.dmg += m.damage || 0;
     acc.dmgT += m.damageTaken || 0;
     acc.dmgObj += m.dmgObj || 0;
