@@ -163,9 +163,10 @@ function buildCardHTML(acc, position) {
   '</button>';
 
     const POSITION_ICONS = {
-      TOP: '🛡️', JNG: '⚔️', MID: '🔮', ADC: '🏹', SUP: '🏥', '—': '?'
+      TOP: '🛡️', JNG: '⚔️', MID: '🔮', ADC: '🏹', SUP: '🏥',
+      'TOP': '🛡️', 'Jungla': '⚔️', 'JUNGLE': '⚔️', 'MID': '🔮', 'ADC': '🏹', 'SUP': '🏥', '—': '❓'
     };
-    const roleIcon = POSITION_ICONS[posLabel] || '?';
+    const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
     return watermarkHTML +
     '<div class="card-top">' +
