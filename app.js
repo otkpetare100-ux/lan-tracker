@@ -121,10 +121,8 @@ async function handleRefresh(puuid, silent = false) {
   }
 
   const card = document.getElementById('card-' + puuid);
-  if (card) {
-    const btn = card.querySelector('.refresh-btn');
-    if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
-  }
+  const btn = card ? card.querySelector('.refresh-btn') : null;
+  if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
 
   try {
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
