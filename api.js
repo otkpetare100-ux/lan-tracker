@@ -162,14 +162,33 @@ async function fetchAccountSnapshot(gameName, tagLine) {
   if (!summoner) throw new Error('No se pudieron obtener los datos del invocador');
 
   let ranked = [];
-  if (summoner.id) {
+  let rescueId = summoner.id;
+
+  // RESCATE: Si no tenemos el id del invocador, lo buscamos en su última partida
+  if (!rescueId) {
     try {
-      ranked = await getRankedEntriesBySummonerId(summoner.id);
+      const matchIds = await getMatchIds(account.puuid);
+      if (matchIds && matchIds.length > 0) {
+        const lastMatch = await getMatchDetails(matchIds[0]);
+        const p = lastMatch.info.participants.find(x => x.puuid === account.puuid);
+        if (p && p.summonerId) {
+          rescueId = p.summonerId;
+          console.log('✅ Rescate exitoso: ID recuperado del historial:', rescueId);
+        }
+      }
+    } catch (e) {
+      console.warn('Fallo el rescate de ID por historial:', e);
+    }
+  }
+
+  if (rescueId) {
+    try {
+      ranked = await getRankedEntriesBySummonerId(rescueId);
     } catch (e) {
       console.warn('No se pudo obtener el rango:', e);
     }
   } else {
-    console.warn('El servidor no devolvió el ID del invocador, el rango aparecerá como Unranked');
+    console.warn('El servidor no devolvió el ID del invocador y el rescate falló. El rango aparecerá como Unranked');
   }
 
   let topChampions = [];
