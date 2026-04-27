@@ -311,7 +311,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: auto;
+  gap: 80;
 }
 
 .card-right {
