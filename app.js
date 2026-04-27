@@ -40,7 +40,7 @@ async function init() {
   accounts = await loadAccounts();
   updateGlobalRef();
   renderAccounts(sortByRank(accounts));
-  checkAllLiveStatus();
+  // checkAllLiveStatus(); // Deshabilitado temporalmente (403 dev key)
 }
 init();
 
@@ -55,7 +55,7 @@ async function checkAllLiveStatus() {
   renderAccounts(sortByRank(accounts));
 }
 
-setInterval(checkAllLiveStatus, 180000); // 3 minutos
+// setInterval(checkAllLiveStatus, 180000); // 3 minutos (Deshabilitado temporalmente)
 
 // Auto-refresh activado
 setInterval(async () => {
