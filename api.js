@@ -22,7 +22,6 @@ async function riotFetch(url) {
     throw err;
   }
   const data = await res.json();
-  console.log('Riot API Response:', url, data);
   if (data.status && data.status.status_code && data.status.status_code >= 400) {
     const err = new Error(`Riot API Error: ${data.status.status_code} ${data.status.message}`);
     err.status = data.status.status_code;
