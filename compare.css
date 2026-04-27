@@ -13,27 +13,27 @@
 }
 
 #compare-modal .compare-col__avatar {
-  width: 64px !important;
-  height: 64px !important;
-  max-width: 64px !important;
-  max-height: 64px !important;
+  width: 48px !important;
+  height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
   object-fit: cover !important;
   border-radius: 50% !important;
 }
 
 #compare-modal .compare-rank-icon {
-  width: 44px !important;
-  height: 44px !important;
-  max-width: 44px !important;
-  max-height: 44px !important;
-  object-fit: contain !important;
-}
-
-#compare-modal .compare-champ-icon {
   width: 32px !important;
   height: 32px !important;
   max-width: 32px !important;
   max-height: 32px !important;
+  object-fit: contain !important;
+}
+
+#compare-modal .compare-champ-icon {
+  width: 26px !important;
+  height: 26px !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
   object-fit: cover !important;
   border-radius: 50% !important;
 }
@@ -42,7 +42,7 @@
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
-  max-height: 85vh !important;
+  max-height: 90vh !important;
 }
 /* ---- Compare button ---- */
 .compare-btn {
@@ -148,20 +148,20 @@
 
 /* Header fijo que no scrollea */
 .compare-modal__header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.25rem 0.75rem;
-  flex-shrink: 0;
+  padding: 12px 18px;
+  background: rgba(0,0,0,0.2);
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 /* Área scrollable */
 .compare-modal__body {
-  overflow-y: auto;
-  overflow-x: hidden;
   flex: 1;
-  padding: 1rem 1.25rem 1.5rem;
+  overflow-y: auto;
+  padding: 16px 24px;
 }
 
 /* Reset de imágenes dentro del modal */
@@ -212,8 +212,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 2.2rem;
-  gap: 6px;
+  padding-top: 1rem;
+  gap: 2px;
 }
 
 /* ---- Column ---- */
@@ -221,14 +221,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 0.9rem 0.75rem;
+  gap: 4px;
+  padding: 0.5rem;
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.025);
+  background: rgba(255,255,255,0.015);
   overflow: hidden;
   min-width: 0;
   box-sizing: border-box;
+  box-shadow: inset 0 2px 10px rgba(255,255,255,0.01);
 }
 
 /* Avatar — tamaño fijo siempre */
@@ -339,10 +340,10 @@
 
 /* ---- Shared Stats Rows ---- */
 .compare-shared-stats-container {
-  margin-top: 24px;
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .compare-shared-row {
@@ -351,7 +352,7 @@
   align-items: center;
   background: rgba(255,255,255,0.02);
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 4px 16px;
   border: 1px solid rgba(255,255,255,0.05);
   transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -363,7 +364,7 @@
 
 .compare-shared-label {
   text-align: center;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -371,7 +372,7 @@
 }
 
 .compare-shared-val {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: #f2f4ff;
 }
