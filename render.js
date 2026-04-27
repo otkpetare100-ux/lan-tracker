@@ -142,9 +142,9 @@ function buildCardHTML(acc, position) {
 
   let streakIcon = '';
   if (acc.streak >= 3) {
-    streakIcon = '<span class="status-icon fire-streak" title="¡En racha de victorias! 🔥">🔥</span>';
+    streakIcon = '<span class="status-icon fire-streak" title="¡En racha de victorias! 🔥">🔥 ' + acc.streak + '</span>';
   } else if (acc.streak <= -3) {
-    streakIcon = '<span class="status-icon ice-streak" title="En racha de derrotas ❄️">❄️</span>';
+    streakIcon = '<span class="status-icon ice-streak" title="En racha de derrotas ❄️">❄️ ' + Math.abs(acc.streak) + '</span>';
   }
 
   const hasFrame = r.tier && r.tier.toUpperCase() !== 'UNRANKED';
@@ -651,4 +651,85 @@ function calculateGlobalStats(matches) {
     damage: Math.round(s.dmg / t),
     kp: Math.round(s.kp / t)
   };
+}
+
+/* --- Récords Globales (Muro de la Fama) --- */
+window.openLeaderboard = function() {
+  const accounts = window._accounts_ref || [];
+  if (!accounts.length) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'leaderboard-modal';
+  modal.className = 'leaderboard-modal';
+  
+  const records = calculateGlobalRecords(accounts);
+  
+  modal.innerHTML = `
+    <div class="leaderboard-box">
+      <div class="leaderboard-header">
+        <h2>Récords de la Perrera</h2>
+        <button class="leaderboard-close" onclick="closeLeaderboard()">✕</button>
+      </div>
+      <div class="leaderboard-body">
+        <div class="leader-grid">
+          ${renderLeaderCard('El Verdugo', records.topKills, 'Kills Promedio')}
+          ${renderLeaderCard('Ojos de Halcón', records.topVision, 'Visión Promedio')}
+          ${renderLeaderCard('El Rico', records.topGold, 'Oro / Minuto')}
+          ${renderLeaderCard('El Más Suertudo', records.topWinrate, 'Winrate Global')}
+          ${renderLeaderCard('El Cañón Pulso de Fuego', records.topDamage, 'Daño a Campeones')}
+          ${renderLeaderCard('El Inmortal', records.minDeaths, 'Menos Muertes')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('leaderboard-modal--open'));
+};
+
+window.closeLeaderboard = function() {
+  const modal = document.getElementById('leaderboard-modal');
+  if (modal) {
+    modal.classList.remove('leaderboard-modal--open');
+    setTimeout(() => modal.remove(), 300);
+  }
+};
+
+function calculateGlobalRecords(accounts) {
+  const stats = accounts.map(acc => {
+    const s = calculateGlobalStats(acc.matches);
+    return { acc, s };
+  }).filter(x => x.s !== null);
+
+  if (!stats.length) return {};
+
+  return {
+    topKills: stats.sort((a,b) => b.s.kills - a.s.kills)[0],
+    topVision: stats.sort((a,b) => b.s.vision - a.s.vision)[0],
+    topGold: stats.sort((a,b) => b.s.goldMin - a.s.goldMin)[0],
+    topWinrate: stats.sort((a,b) => b.s.winrate - a.s.winrate)[0],
+    topDamage: stats.sort((a,b) => b.s.damage - a.s.damage)[0],
+    minDeaths: stats.sort((a,b) => a.s.deaths - b.s.deaths)[0]
+  };
+}
+
+function renderLeaderCard(title, data, sub) {
+  if (!data) return '';
+  const val = title === 'El Rico' ? data.s.goldMin : 
+              title === 'El Más Suertudo' ? data.s.winrate + '%' :
+              title === 'El Cañón Pulso de Fuego' ? data.s.damage.toLocaleString() :
+              title === 'Ojos de Halcón' ? data.s.vision :
+              title === 'El Inmortal' ? data.s.deaths : data.s.kills;
+
+  return `
+    <div class="leader-card">
+      <div class="leader-title">${title}</div>
+      <div class="leader-profile">
+        <img class="leader-avatar" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${data.acc.profileIconId}.png" />
+        <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
+        <div class="leader-value">${val}</div>
+        <div class="leader-sub">${sub}</div>
+      </div>
+    </div>
+  `;
 }
