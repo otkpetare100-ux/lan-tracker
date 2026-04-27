@@ -1012,10 +1012,13 @@ body::before {
     gap: 10px;
   }
 
-  .icon-wrap,
-  .icon-wrap img {
+  .icon-wrap {
     width: 84px;
     height: 84px;
+  }
+  .icon-wrap .profile-main-icon {
+    width: 52px;
+    height: 52px;
   }
 
   .top-champs-block,
