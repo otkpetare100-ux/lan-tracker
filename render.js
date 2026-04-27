@@ -363,6 +363,18 @@ function buildChampModalHTML(acc, champName) {
         <div class="cstat-label">Solo Kills</div>
         <div class="cstat-value">${stats.soloKills}</div>
       </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Visión</div>
+        <div class="cstat-value">${stats.vision}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">Oro/Min</div>
+        <div class="cstat-value">${stats.goldMin}</div>
+      </div>
+      <div class="cstat-card">
+        <div class="cstat-label">KP%</div>
+        <div class="cstat-value">${stats.kp}%</div>
+      </div>
     </div>
   ` : '<div class="empty-stats">Sin datos suficientes en el historial reciente</div>';
 
@@ -392,10 +404,13 @@ function calculateChampStats(matches) {
     acc.dmg += m.damage || 0;
     acc.dmgT += m.damageTaken || 0;
     acc.solo += m.soloKills || 0;
+    acc.vision += m.vision || 0;
+    acc.gold += m.gold || 0;
+    acc.kp += m.kp || 0;
     acc.dur += m.gameDuration || 0;
     acc.wins += m.win ? 1 : 0;
     return acc;
-  }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, solo:0, dur:0, wins:0 });
+  }, { k:0, d:0, a:0, cs:0, dmg:0, dmgT:0, solo:0, vision:0, gold:0, kp:0, dur:0, wins:0 });
 
   const deaths = s.d || 1;
   return {
@@ -408,7 +423,10 @@ function calculateChampStats(matches) {
     csMin: (s.cs / (s.dur / 60)).toFixed(1),
     damage: Math.round(s.dmg / t),
     damageTaken: Math.round(s.dmgT / t),
-    soloKills: (s.solo / t).toFixed(1)
+    soloKills: (s.solo / t).toFixed(1),
+    vision: (s.vision / t).toFixed(1),
+    goldMin: (s.gold / (s.dur / 60)).toFixed(0),
+    kp: Math.round(s.kp / t)
   };
 }
 
