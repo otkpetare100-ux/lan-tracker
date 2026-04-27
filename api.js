@@ -13,7 +13,7 @@ const ENDPOINTS = {
 
 const DDRAGON_VERSION = '15.8.1';
 
-const POSITION_LABELS = {
+window.POSITION_LABELS = {
   TOP: 'TOP',
   JUNGLE: 'JNG',
   MIDDLE: 'MID',
