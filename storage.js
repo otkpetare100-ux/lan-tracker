@@ -11,7 +11,7 @@ async function loadAccounts() {
         }
 
         const data = await response.json();
-        console.log('Cuentas cargadas desde el servidor:', data);
+
         return data;
     } catch (err) {
         console.error('[Storage] Error cargando cuentas:', err);
