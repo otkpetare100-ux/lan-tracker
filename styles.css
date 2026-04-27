@@ -1906,44 +1906,6 @@ body::before {
 .trend-up { color: #00c65e; }
 .trend-down { color: #f45e78; }
 
-/* --- Live Badge --- */
-.live-badge {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #f45e78;
-  color: #fff;
-  font-size: 0.55rem;
-  font-weight: 900;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  box-shadow: 0 0 10px rgba(244, 94, 120, 0.5);
-  z-index: 10;
-  animation: pulse-red-badge 2s infinite;
-}
-
-.live-badge-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: 0 0 15px #f45e78;
-  opacity: 0.3;
-  animation: pulse-red-glow 2s infinite;
-}
-
-@keyframes pulse-red-badge {
-  0% { transform: translateX(-50%) scale(1); opacity: 0.8; }
-  50% { transform: translateX(-50%) scale(1.05); opacity: 1; }
-  100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
-}
-
-@keyframes pulse-red-glow {
-  0% { transform: scale(1); opacity: 0.2; }
-  50% { transform: scale(1.1); opacity: 0.5; }
-  100% { transform: scale(1); opacity: 0.2; }
-}
 
 @media (max-width: 600px) {
   #records-btn {

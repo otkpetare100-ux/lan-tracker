@@ -54,16 +54,6 @@ async function getSummonerByPuuid(puuid) {
   return riotFetch(url);
 }
 
-async function getActiveGame(puuid) {
-  const url = `${ENDPOINTS.LAN}/lol/spectator/v5/active-games/by-puuid/${puuid}`;
-  try {
-    return await riotFetch(url);
-  } catch (e) {
-    if (e.status === 404) return null;
-    throw e;
-  }
-}
-
 async function getRankedEntriesBySummonerId(summonerId) {
   const url = `${ENDPOINTS.LAN}/lol/league/v4/entries/by-summoner/${summonerId}`;
   return riotFetch(url);

@@ -40,20 +40,8 @@ async function init() {
   accounts = await loadAccounts();
   updateGlobalRef();
   renderAccounts(sortByRank(accounts));
-  checkAllLiveStatus();
 }
 init();
-
-async function checkAllLiveStatus() {
-  if (!accounts || accounts.length === 0) return;
-  for (const acc of accounts) {
-    try {
-      const game = await getActiveGame(acc.puuid);
-      acc.isLive = !!game;
-    } catch(e) { acc.isLive = false; }
-  }
-  renderAccounts(sortByRank(accounts));
-}
 
 // Auto-refresh activado
 setInterval(async () => {
