@@ -563,8 +563,8 @@ body::before {
 .rank-block {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 170px;
+  gap: 15px;
+  width: 210px;
   flex-shrink: 0;
 }
 
@@ -573,8 +573,8 @@ body::before {
 }
 
 .rank-icon {
-  width: 62px;
-  height: 62px;
+  width: 82px;
+  height: 82px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
