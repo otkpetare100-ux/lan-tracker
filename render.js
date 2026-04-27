@@ -182,10 +182,12 @@ function buildCardHTML(acc, position) {
           frameHTML +
           '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
           '<span class="icon-level">' + acc.summonerLevel + '</span>' +
-          '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
         '</div>' +
         '<div class="summoner-info" title="Ver perfil detallado">' +
-          '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
+          '<div class="summoner-name">' + 
+            '<span>' + escapeHTML(acc.gameName) + '</span>' +
+            '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
+          '</div>' +
           '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
           '<div class="summoner-meta">' +
             '<span class="summoner-region">LAN</span>' +
