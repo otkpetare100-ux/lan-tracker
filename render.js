@@ -208,13 +208,12 @@ function buildCardHTML(acc, position) {
         '</div>' +
       '</div>' +
     '</div>' +
-    '<div class="card-footer">' +
-      (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
     '</div>' +
   '</div>' +
   '<div class="history-section">' +
     '<div class="card-bottom-actions">' +
       historyBtn +
+      (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
     '</div>' +
     '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
