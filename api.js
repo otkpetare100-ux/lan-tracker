@@ -34,8 +34,8 @@ async function getSummonerByPuuid(puuid) {
   return riotFetch(url);
 }
 
-async function getRankedEntriesByPuuid(puuid) {
-  const url = `${ENDPOINTS.LAN}/lol/league/v4/entries/by-puuid/${puuid}`;
+async function getRankedEntriesBySummonerId(summonerId) {
+  const url = `${ENDPOINTS.LAN}/lol/league/v4/entries/by-summoner/${summonerId}`;
   return riotFetch(url);
 }
 
@@ -150,7 +150,7 @@ async function fetchMatchHistory(puuid, onProgress) {
 async function fetchAccountSnapshot(gameName, tagLine) {
   const account  = await getAccountByRiotId(gameName, tagLine);
   const summoner = await getSummonerByPuuid(account.puuid);
-  const ranked   = await getRankedEntriesByPuuid(account.puuid);
+  const ranked   = await getRankedEntriesBySummonerId(summoner.id);
 
   let topChampions = [];
   try {
