@@ -168,10 +168,14 @@ function buildCardHTML(acc, position) {
     };
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
+    let streakClass = '';
+    if (acc.streak >= 3) streakClass = 'avatar-glow-fire';
+    else if (acc.streak <= -3) streakClass = 'avatar-glow-ice';
+
     return watermarkHTML +
     '<div class="card-main-grid">' +
       '<div class="card-left">' +
-        '<div class="icon-wrap">' +
+        '<div class="icon-wrap ' + streakClass + '">' +
           frameHTML +
           '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
           '<span class="icon-level">' + acc.summonerLevel + '</span>' +
@@ -188,11 +192,11 @@ function buildCardHTML(acc, position) {
         '</div>' +
       '</div>' +
       
-      '<div class="card-center-champs">' +
+      '<div class="card-center">' +
         '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
       '</div>' +
       
-      '<div class="card-center-rank">' +
+      '<div class="card-right">' +
         '<div class="rank-block">' +
           '<div class="rank-emblem">' + 
             '<img src="' + (RANK_ICONS[r.tier] || RANK_ICONS.UNRANKED) + '" alt="' + r.tier + '" class="rank-icon rank-glow-' + r.tier.toLowerCase() + '" />' +
@@ -202,10 +206,7 @@ function buildCardHTML(acc, position) {
             '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
           '</div>' +
         '</div>' +
-      '</div>' +
-      
-      '<div class="card-right">' +
-        '<div class="winrate-block">' + wrHTML + '</div>' +
+        '<div class="winrate-block ' + (wr >= 55 ? 'wr-glow-good' : (wr < 48 ? 'wr-glow-bad' : '')) + '">' + wrHTML + '</div>' +
         '<div class="card-actions">' +
           '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
           '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +

@@ -296,36 +296,40 @@ body::before {
 
 .card-main-grid {
   display: grid;
-  /* Definimos columnas fijas para que todo se alinee verticalmente perfecto */
-  grid-template-columns: 260px 180px 150px 1fr 40px;
+  grid-template-columns: minmax(280px, 1.2fr) 1fr minmax(140px, 0.8fr);
   align-items: center;
-  gap: 15px;
+  gap: 20px;
 }
 
 .card-left {
   display: flex;
   align-items: center;
-  gap: 12px;
-  overflow: hidden;
+  gap: 15px;
 }
 
-.card-center-champs {
+.card-center {
   display: flex;
-  justify-content: center;
-}
-
-.card-center-rank {
-  display: flex;
-  justify-content: flex-start;
   align-items: center;
+  justify-content: center;
+  gap: 80;
 }
 
 .card-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 20px;
-  text-align: right;
+  gap: 35px;
+}
+
+/* Avatar Glows */
+.avatar-glow-fire .profile-main-icon {
+  box-shadow: 0 0 15px rgba(255, 134, 46, 0.6), inset 0 0 10px rgba(255, 134, 46, 0.4);
+  border-color: #ff862e !important;
+}
+
+.avatar-glow-ice .profile-main-icon {
+  box-shadow: 0 0 15px rgba(46, 173, 255, 0.6), inset 0 0 10px rgba(46, 173, 255, 0.4);
+  border-color: #2eadff !important;
 }
 
 .card-footer {
@@ -586,6 +590,15 @@ body::before {
   font-size: 1.42rem;
   font-weight: 800;
   line-height: 1;
+  transition: text-shadow 0.3s ease;
+}
+
+.wr-glow-good .wr-number {
+  text-shadow: 0 0 12px rgba(115, 211, 138, 0.7);
+}
+
+.wr-glow-bad .wr-number {
+  text-shadow: 0 0 12px rgba(224, 100, 116, 0.7);
 }
 
 .wr-number.good {
