@@ -21,7 +21,13 @@ async function riotFetch(url) {
     err.status = res.status;
     throw err;
   }
-  return res.json();
+  const data = await res.json();
+  if (data.status && data.status.status_code && data.status.status_code >= 400) {
+    const err = new Error(`Riot API Error: ${data.status.status_code} ${data.status.message}`);
+    err.status = data.status.status_code;
+    throw err;
+  }
+  return data;
 }
 
 async function getAccountByRiotId(gameName, tagLine) {
@@ -149,7 +155,11 @@ async function fetchMatchHistory(puuid, onProgress) {
 
 async function fetchAccountSnapshot(gameName, tagLine) {
   const account  = await getAccountByRiotId(gameName, tagLine);
+  if (!account || !account.puuid) throw new Error('Cuenta no encontrada en Riot');
+
   const summoner = await getSummonerByPuuid(account.puuid);
+  if (!summoner || !summoner.id) throw new Error('Datos de invocador no encontrados');
+
   const ranked   = await getRankedEntriesBySummonerId(summoner.id);
 
   let topChampions = [];
