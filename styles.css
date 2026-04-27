@@ -1405,7 +1405,7 @@ body::before {
 
 .champ-modal__box {
   width: 100%;
-  max-width: 520px;
+  max-width: 650px;
   background: linear-gradient(180deg, #181a28 0%, #0c0e1a 100%);
   border: 1px solid rgba(157, 108, 255, 0.25);
   border-radius: 20px;
@@ -1558,15 +1558,13 @@ body::before {
 }
 
 .champ-modal__body {
-  padding: 24px;
-  max-height: 60vh;
-  overflow-y: auto;
+  padding: 20px;
 }
 
 .champ-stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
 .cstat-group-title {
@@ -1582,13 +1580,13 @@ body::before {
 }
 
 .cstat-card {
-  padding: 16px;
+  padding: 10px 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .cstat-label {
@@ -1600,7 +1598,7 @@ body::before {
 }
 
 .cstat-value {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #fff;
 }
