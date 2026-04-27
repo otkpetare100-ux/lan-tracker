@@ -604,6 +604,12 @@ body::before {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.card-bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .history-toggle-btn {
   display: inline-flex;
   align-items: center;

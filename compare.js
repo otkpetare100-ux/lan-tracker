@@ -290,6 +290,9 @@
       modal.classList.remove('compare-modal--open');
       setTimeout(() => modal.remove(), 300);
     }
+    window.selectedToCompare = [];
+    document.getElementById('compare-bar')?.remove();
+    updateCompareButtons();
   };
 
   function escapeHTML(s) {

@@ -179,12 +179,12 @@ function buildCardHTML(acc, position) {
       '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
       '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
     '</div>' +
-    '<div class="compare-btn-wrap">' +
-      '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
-    '</div>' +
   '</div>' +
   '<div class="history-section">' +
-    historyBtn +
+    '<div class="card-bottom-actions">' +
+      historyBtn +
+      '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
+    '</div>' +
     '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
       buildMatchHistoryHTML(acc.matches) +
     '</div>' +
