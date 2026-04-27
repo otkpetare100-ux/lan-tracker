@@ -79,6 +79,7 @@ async function handleSearch() {
       searchInput.value = '';
     }
   } catch (err) {
+    console.error('Error capturado en handleSearch:', err);
     showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
   } finally {
     searchBtn.disabled = false;
