@@ -612,12 +612,21 @@ body::before {
   pointer-events: none;
 }
 
+.refresh-btn--loading {
+  width: auto !important;
+  min-width: 36px;
+  padding: 0 4px !important;
+  border-color: var(--primary) !important;
+  background: rgba(157, 108, 255, 0.1) !important;
+}
+
 .refresh-progress {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 800;
   display: block;
   animation: none !important;
-  color: var(--primary);
+  color: #fff;
+  text-shadow: 0 0 8px var(--primary);
 }
 
 .history-section {

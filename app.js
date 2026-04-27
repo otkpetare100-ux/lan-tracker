@@ -131,8 +131,10 @@ async function handleRefresh(puuid, silent = false) {
 
     const hadHistory = acc.matches && acc.matches.length > 0;
     if (hadHistory) {
+      if (btn) btn.classList.remove('spinning');
       const history = await fetchMatchHistory(acc.puuid, (curr, total) => {
         if (btn) {
+          btn.classList.add('refresh-btn--loading');
           btn.innerHTML = `<span class="refresh-progress">${curr}/${total}</span>`;
         }
       });
