@@ -514,7 +514,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: 40px;
+  margin-left: auto;
 }
 
 .rank-emblem {
