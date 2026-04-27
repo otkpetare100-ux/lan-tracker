@@ -294,11 +294,37 @@ body::before {
   border-color: rgba(196, 136, 86, 0.3);
 }
 
-.card-top {
+.card-main-grid {
   display: grid;
-  grid-template-columns: 100px 1fr auto auto auto 42px;
+  grid-template-columns: minmax(280px, 1.2fr) 1fr minmax(140px, 0.8fr);
   align-items: center;
   gap: 20px;
+}
+
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.card-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 25px;
+}
+
+.card-footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .icon-wrap {
@@ -483,40 +509,37 @@ body::before {
 }
 
 .rank-block {
-  grid-column: 4;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-width: 120px;
-  text-align: center;
+  gap: 12px;
 }
 
 .rank-emblem {
-  font-size: 2rem;
-  line-height: 1;
-  margin-bottom: 4px;
+  line-height: 0;
 }
 
 .rank-icon {
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.12));
+}
+
+.rank-info-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .rank-name {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .rank-lp {
-  margin-top: 3px;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .winrate-block {

@@ -125,7 +125,7 @@ function buildCardHTML(acc, position) {
   const wr         = computeWinrate(r.wins, r.losses);
   const wrCls      = winrateClass(wr);
   const color      = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const rankStr    = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + (r.rank || '');
+  const rankStr    = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + (r.division || '');
   const iconUrl    = getProfileIconUrl(acc.profileIconId);
 
   const updatedStr    = acc.updatedAt
@@ -169,35 +169,47 @@ function buildCardHTML(acc, position) {
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
     return watermarkHTML +
-    '<div class="card-top">' +
-      '<div class="icon-wrap">' +
-        frameHTML +
-        '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
-        '<span class="icon-level">' + acc.summonerLevel + '</span>' +
-        (acc.isLive ? '<div class="live-badge-glow"></div><div class="live-badge">🔴 EN VIVO</div>' : '') +
+    '<div class="card-main-grid">' +
+      '<div class="card-left">' +
+        '<div class="icon-wrap">' +
+          frameHTML +
+          '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
+          '<span class="icon-level">' + acc.summonerLevel + '</span>' +
+          (acc.isLive ? '<div class="live-badge-glow"></div><div class="live-badge">🔴 EN VIVO</div>' : '') +
+        '</div>' +
+        '<div class="summoner-info" title="Ver perfil detallado">' +
+          '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
+          '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
+          '<div class="summoner-meta">' +
+            '<span class="summoner-region">LAN</span>' +
+            '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
+            streakIcon +
+            recentDots +
+          '</div>' +
+        '</div>' +
       '</div>' +
-      '<div class="summoner-info" title="Ver perfil detallado">' +
-        '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
-        '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
-        '<div class="summoner-meta">' +
-          '<span class="summoner-region">LAN</span>' +
-          '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
-          streakIcon +
-          recentDots +
-          (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
+      
+      '<div class="card-center">' +
+        '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
+        '<div class="rank-block">' +
+          '<div class="rank-emblem">' + rankIconHTML + '</div>' +
+          '<div class="rank-info-text">' +
+            '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
+            '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      
+      '<div class="card-right">' +
+        '<div class="winrate-block">' + wrHTML + '</div>' +
+        '<div class="card-actions">' +
+          '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
+          '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
         '</div>' +
       '</div>' +
     '</div>' +
-    '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div></div>' +
-    '<div class="rank-block">' +
-      '<div class="rank-emblem">' + rankIconHTML + '</div>' +
-      '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
-      '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
-    '</div>' +
-    '<div class="winrate-block">' + wrHTML + '</div>' +
-    '<div class="card-actions">' +
-      '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
-      '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
+    '<div class="card-footer">' +
+      (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
     '</div>' +
   '</div>' +
   '<div class="history-section">' +
