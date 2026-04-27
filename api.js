@@ -23,20 +23,25 @@ window.POSITION_LABELS = {
 };
 
 async function riotFetch(url) {
-  const proxyUrl = BASE_PROXY + '?url=' + url;
-  const res = await fetch(proxyUrl);
-  if (!res.ok) {
-    const err = new Error(`HTTP ${res.status}`);
-    err.status = res.status;
+  const proxyUrl = BASE_PROXY + '?url=' + encodeURIComponent(url);
+  try {
+    const res = await fetch(proxyUrl);
+    if (!res.ok) {
+      const err = new Error(`HTTP ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    const data = await res.json();
+    if (data.status && data.status.status_code && data.status.status_code >= 400) {
+      const err = new Error(`Riot API Error: ${data.status.status_code} ${data.status.message}`);
+      err.status = data.status.status_code;
+      throw err;
+    }
+    return data;
+  } catch (err) {
+    console.error("Error en riotFetch:", err.message);
     throw err;
   }
-  const data = await res.json();
-  if (data.status && data.status.status_code && data.status.status_code >= 400) {
-    const err = new Error(`Riot API Error: ${data.status.status_code} ${data.status.message}`);
-    err.status = data.status.status_code;
-    throw err;
-  }
-  return data;
 }
 
 async function getAccountByRiotId(gameName, tagLine) {
