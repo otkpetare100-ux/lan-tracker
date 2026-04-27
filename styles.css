@@ -312,13 +312,23 @@ body::before {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 125%;
-  height: 125%;
-  transform: translate(-50%, -50%);
+  width: 100%;
+  height: auto;
   z-index: 2;
   pointer-events: none;
-  object-fit: contain;
 }
+
+/* Alineaciones dinámicas calculadas por rango (para centrar el hueco del marco) */
+.frame-bronze { transform: translate(-50%, -48.4%) scale(1.28); }
+.frame-challenger { transform: translate(-50%, -67.4%) scale(1.68); }
+.frame-diamond { transform: translate(-50%, -56.8%) scale(1.58); }
+.frame-emerald { transform: translate(-50%, -55.1%) scale(1.55); }
+.frame-gold { transform: translate(-50%, -50.4%) scale(1.35); }
+.frame-grandmaster { transform: translate(-50%, -62.5%) scale(1.63); }
+.frame-iron { transform: translate(-50%, -49.6%) scale(1.09); }
+.frame-master { transform: translate(-50%, -56.3%) scale(1.45); }
+.frame-platinum { transform: translate(-50%, -50.8%) scale(1.37); }
+.frame-silver { transform: translate(-50%, -47.9%) scale(1.37); }
 
 .icon-wrap .icon-level {
   position: absolute;

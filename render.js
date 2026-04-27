@@ -140,7 +140,7 @@ function buildCardHTML(acc, position) {
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
-  const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame" onerror="this.remove()">';
+  const frameHTML = '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame frame-' + r.tier.toLowerCase() + '" onerror="this.remove()">';
 
   const rankIconHTML = RANK_ICONS[r.tier]
     ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />'
