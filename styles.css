@@ -8,6 +8,25 @@
   padding: 0;
 }
 
+/* Scrollbar Temático Global */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070810;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #181a28, #d9b85f);
+  border: 2px solid #070810;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d9b85f, #f4c874);
+}
+
 :root {
   --bg: #070810;
   --bg-2: #0d1020;
