@@ -160,17 +160,17 @@ function buildCardHTML(acc, position) {
       '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
-    '<div class="summoner-info" onclick="openPlayerModal(\'' + acc.puuid + '\')" title="Ver perfil detallado">
-      <div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>
-      <div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>
-      <div class="summoner-meta">
-        <span class="summoner-region">LAN</span>
-        <span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
+    '<div class="summoner-info" onclick="openPlayerModal(\'' + acc.puuid + '\')" title="Ver perfil detallado">' +
+      '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
+      '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
+      '<div class="summoner-meta">' +
+        '<span class="summoner-region">LAN</span>' +
+        '<span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
         streak +
         recentDots +
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
-      '</div>
-    </div>' +
+      '</div>' +
+    '</div>' +
     '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div></div>' +
     '<div class="rank-block">' +
       '<div class="rank-emblem">' + rankIconHTML + '</div>' +
