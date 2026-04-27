@@ -13,6 +13,14 @@ const ENDPOINTS = {
 
 const DDRAGON_VERSION = '15.8.1';
 
+const POSITION_LABELS = {
+  TOP: 'TOP',
+  JUNGLE: 'JNG',
+  MIDDLE: 'MID',
+  BOTTOM: 'ADC',
+  UTILITY: 'SUP',
+  '': '—'
+};
 
 async function riotFetch(url) {
   const proxyUrl = BASE_PROXY + '?url=' + url;
