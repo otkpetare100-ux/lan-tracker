@@ -325,11 +325,15 @@ function buildChampModalHTML(acc, champName) {
     const active = c.name === champName ? 'champ-tab--active' : '';
     return `<div class="champ-tab ${active}" onclick="switchChampModal('${acc.puuid}', '${escapeHTML(c.name)}')">
       <img src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${getChampImageName(c.name)}" />
-      <span>${escapeHTML(c.name)}</span>
+      <div class="champ-tab-info">
+        <span class="champ-tab-name">${escapeHTML(c.name)}</span>
+        <span class="champ-tab-points">${(c.points || 0).toLocaleString()} pts</span>
+      </div>
     </div>`;
   }).join('');
 
   const statsGrid = stats ? `
+    <div class="stats-source-hint">Basado en las últimas ${stats.total} partidas</div>
     <div class="champ-stats-grid">
       <div class="cstat-card">
         <div class="cstat-label">Partidas</div>

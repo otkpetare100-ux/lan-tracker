@@ -131,7 +131,11 @@ async function handleRefresh(puuid, silent = false) {
 
     const hadHistory = acc.matches && acc.matches.length > 0;
     if (hadHistory) {
-      const history = await fetchMatchHistory(acc.puuid);
+      const history = await fetchMatchHistory(acc.puuid, (curr, total) => {
+        if (btn) {
+          btn.innerHTML = `<span class="refresh-progress">${curr}/${total}</span>`;
+        }
+      });
       updated.matches      = history.matches;
       updated.streak       = history.streak;
       updated.mainPosition = history.mainPosition;

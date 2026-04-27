@@ -45,7 +45,7 @@ async function getTopMasteryChampions(puuid) {
 }
 
 async function getMatchIds(puuid) {
-  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=5`;
+  const url = `${ENDPOINTS.AMERICAS}/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=20`;
   return riotFetch(url);
 }
 
@@ -84,13 +84,17 @@ async function getChampionData() {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function fetchMatchHistory(puuid) {
+async function fetchMatchHistory(puuid, onProgress) {
   try {
     const matchIds = await getMatchIds(puuid);
     if (!matchIds?.length) return { matches: [], streak: 0, mainPosition: '—' };
     
     const details = [];
-    for (const id of matchIds) {
+    const total = matchIds.length;
+
+    for (let i = 0; i < total; i++) {
+      if (onProgress) onProgress(i + 1, total);
+      const id = matchIds[i];
       await sleep(1200);
       try {
         const match = await getMatchDetail(id);
@@ -157,6 +161,8 @@ async function fetchAccountSnapshot(gameName, tagLine) {
       return {
         name:   info.name  || 'Unknown',
         image:  info.image || null,
+        points: m.championPoints || 0,
+        level:  m.championLevel  || 0
       };
     });
   } catch(e) {
