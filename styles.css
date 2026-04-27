@@ -484,8 +484,8 @@ body::before {
 }
 
 .rank-icon {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.12));
@@ -616,6 +616,12 @@ body::before {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .history-toggle-btn {
