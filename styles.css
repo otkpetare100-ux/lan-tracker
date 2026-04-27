@@ -479,11 +479,11 @@ body::before {
 }
 
 .top-champs-block {
-  grid-column: 3;
+  width: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 0;
+  min-width: 170px;
 }
 
 .top-champs-inner {
@@ -522,10 +522,30 @@ body::before {
 }
 
 .rank-icon {
-  width: 48px;
-  height: 48px;
+  width: 62px;
+  height: 62px;
   object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+.rank-icon:hover {
+  transform: scale(1.15) rotate(5deg);
+}
+
+/* Glows por Rango */
+.rank-glow-iron { filter: drop-shadow(0 0 12px rgba(161, 157, 148, 0.4)); }
+.rank-glow-bronze { filter: drop-shadow(0 0 12px rgba(189, 133, 90, 0.4)); }
+.rank-glow-silver { filter: drop-shadow(0 0 12px rgba(192, 192, 192, 0.4)); }
+.rank-glow-gold { filter: drop-shadow(0 0 12px rgba(244, 200, 116, 0.4)); }
+.rank-glow-platinum { filter: drop-shadow(0 0 12px rgba(78, 175, 174, 0.4)); }
+.rank-glow-emerald { filter: drop-shadow(0 0 12px rgba(46, 173, 103, 0.4)); }
+.rank-glow-diamond { filter: drop-shadow(0 0 12px rgba(108, 137, 235, 0.4)); }
+.rank-glow-master { filter: drop-shadow(0 0 12px rgba(215, 122, 168, 0.5)); }
+.rank-glow-grandmaster { filter: drop-shadow(0 0 12px rgba(239, 79, 79, 0.5)); }
+.rank-glow-challenger { filter: drop-shadow(0 0 12px rgba(244, 200, 116, 0.6)); }
+.rank-glow-unranked { filter: grayscale(1) opacity(0.3); }
 
 .rank-info-text {
   display: flex;

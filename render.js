@@ -191,7 +191,9 @@ function buildCardHTML(acc, position) {
       '<div class="card-center">' +
         '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
         '<div class="rank-block">' +
-          '<div class="rank-emblem">' + rankIconHTML + '</div>' +
+          '<div class="rank-emblem">' + 
+            '<img src="' + (RANK_ICONS[r.tier] || RANK_ICONS.UNRANKED) + '" alt="' + r.tier + '" class="rank-icon rank-glow-' + r.tier.toLowerCase() + '" />' +
+          '</div>' +
           '<div class="rank-info-text">' +
             '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
             '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
