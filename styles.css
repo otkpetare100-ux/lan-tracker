@@ -304,7 +304,7 @@ body::before {
 .card-left {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 25px;
 }
 
 .card-center {
@@ -371,13 +371,13 @@ body::before {
 
 /* Alineaciones dinámicas calculadas por rango (para centrar el hueco del marco) */
 .frame-bronze { transform-origin: 50% 48.4%; transform: translate(-50%, -48.4%) scale(1.38); }
-.frame-challenger { transform-origin: 50% 67.4%; transform: translate(-50%, -67.4%) scale(1.68); }
+.frame-challenger { transform-origin: 50% 67.4%; transform: translate(-50%, -67.4%) scale(1.45); }
 .frame-diamond { transform-origin: 50% 56.8%; transform: translate(-50%, -56.8%) scale(1.55); }
 .frame-emerald { transform-origin: 50% 55.1%; transform: translate(-50%, -55.1%) scale(1.58); }
 .frame-gold { transform-origin: 50% 50.4%; transform: translate(-50%, -50.4%) scale(1.38); }
-.frame-grandmaster { transform-origin: 50% 62.5%; transform: translate(-50%, -62.5%) scale(1.63); }
+.frame-grandmaster { transform-origin: 50% 62.5%; transform: translate(-50%, -62.5%) scale(1.45); }
 .frame-iron { transform-origin: 50% 49.6%; transform: translate(-50%, -49.6%) scale(1.15); }
-.frame-master { transform-origin: 50% 56.3%; transform: translate(-50%, -56.3%) scale(1.48); }
+.frame-master { transform-origin: 50% 56.3%; transform: translate(-50%, -56.3%) scale(1.35); }
 .frame-platinum { transform-origin: 50% 50.8%; transform: translate(-50%, -50.8%) scale(1.45); }
 .frame-silver { transform-origin: 50% 47.9%; transform: translate(-50%, -47.9%) scale(1.45); }
 
@@ -572,7 +572,7 @@ body::before {
 }
 
 .rank-lp {
-  color: var(--muted);
+  color: #7a84aa;
   font-size: 0.75rem;
 }
 

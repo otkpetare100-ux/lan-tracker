@@ -125,7 +125,10 @@ function buildCardHTML(acc, position) {
   const wr         = computeWinrate(r.wins, r.losses);
   const wrCls      = winrateClass(wr);
   const color      = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-  const rankStr    = r.tier === 'UNRANKED' ? 'Sin clasificar' : titleCase(r.tier) + ' ' + (r.division || '');
+  const noDivisionTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
+  const rankStr    = noDivisionTiers.includes(r.tier) 
+    ? titleCase(r.tier) 
+    : titleCase(r.tier) + ' ' + (r.division || '');
   const iconUrl    = getProfileIconUrl(acc.profileIconId);
 
   const updatedStr    = acc.updatedAt
