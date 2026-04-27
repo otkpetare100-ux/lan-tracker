@@ -2,7 +2,7 @@
  * storage.js — Manejo de persistencia y API local
  */
 
-async function loadAccounts() {
+/**async function loadAccounts() {
     try {
         const response = await fetch('/accounts');
         
@@ -18,6 +18,7 @@ async function loadAccounts() {
         return [];
     }
 }
+    */
 
 async function saveAccount(accountData) {
     try {
