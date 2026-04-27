@@ -455,7 +455,7 @@ body::before {
   color: var(--dim);
   font-size: 0.68rem;
   padding: 4px 6px;
-  margin-left: 12px;
+  margin-left: 10px;
   opacity: 0.7;
 }
 
