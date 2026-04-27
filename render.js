@@ -160,17 +160,17 @@ function buildCardHTML(acc, position) {
       '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
-    '<div class="summoner-info">' +
-      '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
-      '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
-      '<div class="summoner-meta">' +
-        '<span class="summoner-region">LAN</span>' +
-        '<span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
+    '<div class="summoner-info" onclick="openPlayerModal(\'' + acc.puuid + '\')" title="Ver perfil detallado">
+      <div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>
+      <div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>
+      <div class="summoner-meta">
+        <span class="summoner-region">LAN</span>
+        <span class="position-badge">' + escapeHTML(posLabel) + '</span>' +
         streak +
         recentDots +
         (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
-      '</div>' +
-    '</div>' +
+      '</div>
+    </div>' +
     '<div class="top-champs-block"><div class="top-champs-inner">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div></div>' +
     '<div class="rank-block">' +
       '<div class="rank-emblem">' + rankIconHTML + '</div>' +
@@ -406,5 +406,129 @@ function calculateChampStats(matches) {
     damage: Math.round(s.dmg / t),
     damageTaken: Math.round(s.dmgT / t),
     soloKills: (s.solo / t).toFixed(1)
+  };
+}
+
+// --- Lógica del Modal de Jugador (Perfil Detallado) ---
+window.openPlayerModal = function(puuid) {
+  const acc = window._accounts_ref?.find(a => a.puuid === puuid);
+  if (!acc) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'player-modal';
+  modal.className = 'player-modal';
+  modal.innerHTML = buildPlayerModalHTML(acc);
+  
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('player-modal--open'));
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closePlayerModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+};
+
+window.closePlayerModal = function() {
+  const modal = document.getElementById('player-modal');
+  if (modal) {
+    modal.classList.remove('player-modal--open');
+    setTimeout(() => modal.remove(), 300);
+  }
+};
+
+function buildPlayerModalHTML(acc) {
+  const stats = calculateGlobalStats(acc.matches);
+  const r = acc.rank || { tier: 'UNRANKED', rank: '', lp: 0, wins: 0, losses: 0 };
+  const color = RANK_COLORS[r.tier] || '#fff';
+
+  const statsHTML = stats ? `
+    <div class="player-stats-grid">
+      <div class="pstat-card">
+        <div class="pstat-label">Winrate Global</div>
+        <div class="pstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
+        <div class="pstat-sub">${stats.total} partidas analizadas</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-label">KDA Promedio</div>
+        <div class="pstat-value">${stats.kda}</div>
+        <div class="pstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-label">Visión</div>
+        <div class="pstat-value">${stats.vision}</div>
+        <div class="pstat-sub">Puntos por partida</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-label">Oro por Minuto</div>
+        <div class="pstat-value">${stats.goldMin}</div>
+        <div class="pstat-sub">Eficiencia de farmeo</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-label">Daño / Partida</div>
+        <div class="pstat-value">${stats.damage.toLocaleString()}</div>
+        <div class="pstat-sub">Daño infligido total</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-label">Participación Kills</div>
+        <div class="pstat-value">${stats.kp}%</div>
+        <div class="pstat-sub">Presencia en el mapa</div>
+      </div>
+    </div>
+  ` : '<div class="empty-stats">Actualiza la cuenta para ver estadísticas detalladas</div>';
+
+  return `
+    <div class="player-modal__box">
+      <div class="player-modal__header">
+        <div class="player-modal__profile">
+          <img class="player-modal__avatar" src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png" />
+          <div class="player-modal__names">
+            <h2>${escapeHTML(acc.gameName)} <span class="tag">#${escapeHTML(acc.tagLine)}</span></h2>
+            <p style="color:${color}">${r.tier} ${r.rank} - ${r.lp} LP</p>
+          </div>
+        </div>
+        <button class="player-modal__close" onclick="closePlayerModal()">✕</button>
+      </div>
+      <div class="player-modal__body">
+        <div class="stats-source-hint">Resumen de desempeño en SoloQ (Últimas 20)</div>
+        ${statsHTML}
+      </div>
+    </div>
+  `;
+}
+
+function calculateGlobalStats(matches) {
+  if (!matches || matches.length === 0) return null;
+  const t = matches.length;
+  const s = matches.reduce((acc, m) => {
+    acc.k += m.kills || 0;
+    acc.d += m.deaths || 0;
+    acc.a += m.assists || 0;
+    acc.cs += m.cs || 0;
+    acc.dmg += m.damage || 0;
+    acc.vision += m.vision || 0;
+    acc.gold += m.gold || 0;
+    acc.kp += m.kp || 0;
+    acc.dur += m.gameDuration || 0;
+    acc.wins += m.win ? 1 : 0;
+    return acc;
+  }, { k:0, d:0, a:0, cs:0, dmg:0, vision:0, gold:0, kp:0, dur:0, wins:0 });
+
+  const deaths = s.d || 1;
+  const totalMin = s.dur / 60;
+
+  return {
+    total: t,
+    winrate: Math.round((s.wins / t) * 100),
+    kda: ((s.k + s.a) / deaths).toFixed(2),
+    kills: (s.k / t).toFixed(1),
+    deaths: (s.d / t).toFixed(1),
+    assists: (s.a / t).toFixed(1),
+    vision: (s.vision / t).toFixed(1),
+    goldMin: (s.gold / totalMin).toFixed(0),
+    damage: Math.round(s.dmg / t),
+    kp: Math.round(s.kp / t)
   };
 }
