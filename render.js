@@ -449,9 +449,9 @@ window.closePlayerModal = function() {
 
 function buildPlayerModalHTML(acc) {
   const stats = calculateGlobalStats(acc.matches);
-  const r = acc.rank || { tier: 'UNRANKED', rank: '', lp: 0, wins: 0, losses: 0 };
+  const r = getRankInfo(acc);
   const color = RANK_COLORS[r.tier] || '#fff';
-  const rankText = r.tier === 'UNRANKED' ? 'UNRANKED' : `${r.tier} ${r.rank} - ${r.lp} LP`;
+  const rankText = r.tier === 'UNRANKED' ? 'UNRANKED' : `${r.tier} ${r.division} - ${r.lp} LP`;
 
   const statsHTML = stats ? `
     <div class="player-stats-grid">
