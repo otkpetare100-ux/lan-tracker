@@ -140,6 +140,13 @@ function buildCardHTML(acc, position) {
     ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
     : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
 
+  let streakIcon = '';
+  if (acc.streak >= 3) {
+    streakIcon = '<span class="status-icon fire-streak" title="¡En racha de victorias! 🔥">🔥</span>';
+  } else if (acc.streak <= -3) {
+    streakIcon = '<span class="status-icon ice-streak" title="En racha de derrotas ❄️">❄️</span>';
+  }
+
   const hasFrame = r.tier && r.tier.toUpperCase() !== 'UNRANKED';
   const frameHTML = hasFrame 
     ? '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame frame-' + r.tier.toLowerCase() + '" onerror="this.remove()">' 
@@ -161,7 +168,7 @@ function buildCardHTML(acc, position) {
       '<span class="icon-level">' + acc.summonerLevel + '</span>' +
     '</div>' +
     '<div class="summoner-info" title="Ver perfil detallado">' +
-      '<div class="summoner-name">' + escapeHTML(acc.gameName) + '</div>' +
+      '<div class="summoner-name">' + escapeHTML(acc.gameName) + streakIcon + '</div>' +
       '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
       '<div class="summoner-meta">' +
         '<span class="summoner-region">LAN</span>' +
