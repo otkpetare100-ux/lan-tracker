@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -474,7 +476,7 @@ body::before {
   height: 56px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 0 8px rgba(255,255,255,0.12));
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.12));
 }
 
 .rank-name {
@@ -604,12 +606,6 @@ body::before {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.card-bottom-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .history-toggle-btn {
   display: inline-flex;
   align-items: center;
@@ -726,6 +722,7 @@ body::before {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -737,6 +734,7 @@ body::before {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -748,6 +746,7 @@ body::before {
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -755,8 +754,13 @@ body::before {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ---- Rank watermark ---- */
@@ -800,9 +804,19 @@ body::before {
   transition: transform 0.12s ease;
 }
 
-.mdot:hover { transform: scale(1.35); }
-.mdot--w { background: var(--good); box-shadow: 0 0 5px rgba(115,211,138,0.45); }
-.mdot--l { background: var(--bad);  box-shadow: 0 0 5px rgba(224,100,116,0.45); }
+.mdot:hover {
+  transform: scale(1.35);
+}
+
+.mdot--w {
+  background: var(--good);
+  box-shadow: 0 0 5px rgba(115, 211, 138, 0.45);
+}
+
+.mdot--l {
+  background: var(--bad);
+  box-shadow: 0 0 5px rgba(224, 100, 116, 0.45);
+}
 
 @media (max-width: 980px) {
   .card-top {
@@ -837,95 +851,95 @@ body::before {
   }
 
   .card-top {
-  display: grid;
-  grid-template-columns: 100px 1fr auto auto auto 36px;
-  align-items: center;
-  gap: 16px;
-}
+    display: grid;
+    grid-template-columns: 100px 1fr auto auto auto 36px;
+    align-items: center;
+    gap: 16px;
+  }
 
-.icon-wrap {
-  grid-column: 1;
-  position: relative;
-  width: 100px;
-  height: 100px;
-  justify-self: start;
-  overflow: visible;
-}
+  .icon-wrap {
+    grid-column: 1;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    justify-self: start;
+    overflow: visible;
+  }
 
-.icon-wrap .profile-main-icon {
-  position: relative;
-  z-index: 1;
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  display: block;
-  border-radius: 18px;
-}
+  .icon-wrap .profile-main-icon {
+    position: relative;
+    z-index: 1;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+    border-radius: 18px;
+  }
 
-.icon-wrap .rank-frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-}
+  .icon-wrap .rank-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
 
-.medal-badge-img {
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  z-index: 3;
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  display: block;
-  pointer-events: none;
-}
+  .medal-badge-img {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    z-index: 3;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+  }
 
-.summoner-info {
-  grid-column: 2;
-  min-width: 0;
-}
+  .summoner-info {
+    grid-column: 2;
+    min-width: 0;
+  }
 
-.top-champs-block {
-  grid-column: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .top-champs-block {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.rank-block {
-  grid-column: 4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 100px;
-  text-align: center;
-}
+  .rank-block {
+    grid-column: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    text-align: center;
+  }
 
-.winrate-block {
-  grid-column: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  min-width: 76px;
-  text-align: right;
-}
+  .winrate-block {
+    grid-column: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 76px;
+    text-align: right;
+  }
 
-.card-actions {
-  grid-column: 6;
-  width: 36px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
+  .card-actions {
+    grid-column: 6;
+    width: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
 
   .winrate-block {
     align-items: flex-start;
@@ -977,6 +991,7 @@ body::before {
     gap: 5px;
   }
 }
+
 /* Forzar scroll y contenedor */
 #compare-modal {
   position: fixed !important;
@@ -993,7 +1008,8 @@ body::before {
   width: 90% !important;
   max-width: 680px !important;
   max-height: 85vh !important;
-  overflow-y: auto !important; /* Habilita el scroll */
+  overflow-y: auto !important;
+  /* Habilita el scroll */
   background: #1a1523 !important;
   border-radius: 20px !important;
   padding: 2rem !important;
