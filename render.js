@@ -176,7 +176,7 @@ function buildCardHTML(acc, position) {
       SUP: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
       SUPPORT: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
       UTILITY: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
-      '—': '<img src="/pic/roll/all roll.png" class="role-icon-inline">'
+      '—': '<img src="/pic/roll/all_roll.png" class="role-icon-inline">'
     };
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
@@ -681,7 +681,7 @@ function buildPlayerModalHTML(acc) {
               BOTTOM: '/pic/roll/adc_roll.png',
               UTILITY: '/pic/roll/supp_roll.png'
             };
-            const iconUrl = iconMap[pos] || '/pic/roll/all roll.png';
+            const iconUrl = iconMap[pos] || '/pic/roll/all_roll.png';
             const icon = `<img src="${iconUrl}" class="heat-role-icon">`;
             return `
               <div class="heat-col" title="${pos}: ${count} partidas (${Math.round(pct)}%)">
