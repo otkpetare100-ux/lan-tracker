@@ -233,49 +233,6 @@ body::before {
   outline: none;
 }
 
-.rank-filters {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.rank-filter-btn {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.rank-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-}
-
-.rank-filter-btn.active {
-  background: rgba(157, 108, 255, 0.15);
-  border-color: rgba(157, 108, 255, 0.4);
-  color: #d4caff;
-}
-
-.rank-filter-btn[data-filter="iron-silver"].active {
-  background: rgba(144, 160, 163, 0.15); border-color: rgba(144, 160, 163, 0.5); color: #c0cdd1;
-}
-.rank-filter-btn[data-filter="gold-plat"].active {
-  background: rgba(217, 184, 95, 0.15); border-color: rgba(217, 184, 95, 0.5); color: #ffe699;
-}
-.rank-filter-btn[data-filter="emerald-diamond"].active {
-  background: rgba(43, 202, 114, 0.15); border-color: rgba(43, 202, 114, 0.5); color: #84f0b2;
-}
-.rank-filter-btn[data-filter="master-plus"].active {
-  background: rgba(215, 122, 168, 0.15); border-color: rgba(215, 122, 168, 0.5); color: #ffd9e8;
-}
-
 .section-title {
   display: flex;
   align-items: center;

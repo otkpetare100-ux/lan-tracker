@@ -12,9 +12,7 @@ const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
 const filterInput  = document.getElementById('filter-input');
-const rankFilters  = document.querySelectorAll('.rank-filter-btn');
 
-let activeRankFilter = 'all';
 
 const TIER_ORDER = {
   CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7,
@@ -308,39 +306,11 @@ function applyFilters() {
     filtered = filtered.filter(a => a.gameName.toLowerCase().includes(query));
   }
   
-  // Filtro por rango
-  if (activeRankFilter !== 'all') {
-    filtered = filtered.filter(a => {
-      const tier = a.soloQ ? a.soloQ.tier : 'UNRANKED';
-      if (activeRankFilter === 'iron-silver') {
-        return ['IRON', 'BRONZE', 'SILVER'].includes(tier) || tier === 'UNRANKED';
-      } else if (activeRankFilter === 'gold-plat') {
-        return ['GOLD', 'PLATINUM'].includes(tier);
-      } else if (activeRankFilter === 'emerald-diamond') {
-        return ['EMERALD', 'DIAMOND'].includes(tier);
-      } else if (activeRankFilter === 'master-plus') {
-        return ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(tier);
-      }
-      return true;
-    });
-  }
-  
   renderAccounts(sortByRank(filtered));
 }
 
 if (filterInput) {
   filterInput.addEventListener('input', applyFilters);
-}
-
-if (rankFilters) {
-  rankFilters.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      rankFilters.forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      activeRankFilter = e.target.dataset.filter;
-      applyFilters();
-    });
-  });
 }
 
 
