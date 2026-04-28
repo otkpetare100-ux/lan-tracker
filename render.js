@@ -1104,15 +1104,31 @@ window.closeNoteModal = function() {
 
 function renderPredictionHTML(acc, stats) {
   if (!stats) return '';
-  const seasonEnd = new Date('2026-11-30');
+  // Ajustado según el tiempo real del split actual
+  const seasonEnd = new Date('2026-04-29T03:12:00'); 
   const now = new Date();
-  const weeksLeft = Math.max(1, Math.ceil((seasonEnd - now) / (7 * 24 * 60 * 60 * 1000)));
+  const diffMs = seasonEnd - now;
+  const daysLeft = Math.max(0, diffMs / (24 * 60 * 60 * 1000));
+  const hoursLeft = Math.max(0, diffMs / (60 * 60 * 1000));
   
-  // Asumimos 10 partidas por semana promedio si no hay datos
-  const gamesPerWeek = 10; 
-  const totalGames = weeksLeft * gamesPerWeek;
+  // Si queda menos de un día, el cálculo cambia a "Último empujón"
+  let totalGames = 0;
+  let timeDesc = '';
+  
+  if (daysLeft > 7) {
+    const weeks = Math.ceil(daysLeft / 7);
+    totalGames = weeks * 10; // 10 partidas/semana
+    timeDesc = `${weeks} semanas`;
+  } else if (daysLeft >= 1) {
+    totalGames = Math.floor(daysLeft * 3); // 3 partidas/día
+    timeDesc = `${Math.floor(daysLeft)} días`;
+  } else {
+    totalGames = Math.floor(hoursLeft / 0.75); // Partidas de 45min
+    timeDesc = `${Math.floor(hoursLeft)} horas`;
+  }
+  
   const netWins = (stats.winrate / 100 - 0.5) * 2 * totalGames;
-  const lpChange = Math.round(netWins * 22); // 22 LP promedio
+  const lpChange = Math.round(netWins * 22);
   
   const currentLP = acc.soloQ?.leaguePoints || 0;
   const projectedLP = currentLP + lpChange;
@@ -1131,7 +1147,7 @@ function renderPredictionHTML(acc, stats) {
         <img src="/pic/ranks/${finalTier.toLowerCase()}.png" class="prediction-icon" />
         <div class="prediction-info">
           <div class="prediction-title">Rango Final Predicho: ${finalTier}</div>
-          <div class="prediction-desc">Basado en tu winrate de ${stats.winrate}% y ${weeksLeft} semanas restantes.</div>
+          <div class="prediction-desc">Basado en tu winrate de ${stats.winrate}% y ${timeDesc} restantes.</div>
         </div>
       </div>
       <div class="prediction-message">"${stats.winrate >= 52 ? 'Vas por excelente camino, ¡sigue así!' : 'Con un poco más de enfoque llegarás lejos.'}"</div>
