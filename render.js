@@ -1141,6 +1141,33 @@ function renderPredictionHTML(acc, stats) {
   finalTierIdx = Math.max(0, Math.min(tiers.length - 1, finalTierIdx));
   const finalTier = tiers[finalTierIdx];
 
+  const messages = {
+    high: [
+      "¡Estás imparable! El elo inflado es real, ¡aprovéchalo!",
+      "Dominando la grieta como un profesional. ¡Sigue así!",
+      "Tu desempeño es excepcional. La cima está cerca.",
+      "Vas por excelente camino, ¡estás smurfeando!"
+    ],
+    mid: [
+      "Mantén la consistencia y el ascenso será inevitable.",
+      "Buen ritmo. Un par de victorias más y rompes la liga.",
+      "Estás en el punto de equilibrio. ¡Es hora de dar el 110%!",
+      "Jugando sólido. El diamante no se va a subir solo."
+    ],
+    low: [
+      "No te rindas, cada derrota es una lección aprendida.",
+      "Con un poco más de enfoque llegarás lejos. ¡A por ello!",
+      "El camino al éxito está lleno de baches. ¡Tú puedes remontar!",
+      "Ánimo, hasta los mejores tienen rachas malas. ¡A por la siguiente!"
+    ]
+  };
+
+  let msgPool = messages.mid;
+  if (stats.winrate >= 53) msgPool = messages.high;
+  else if (stats.winrate <= 48) msgPool = messages.low;
+  
+  const randomMsg = msgPool[Math.floor(Math.random() * msgPool.length)];
+
   return `
     <div class="prediction-box">
       <div class="prediction-rank">
@@ -1150,7 +1177,7 @@ function renderPredictionHTML(acc, stats) {
           <div class="prediction-desc">Basado en tu winrate de ${stats.winrate}% y ${timeDesc} restantes.</div>
         </div>
       </div>
-      <div class="prediction-message">"${stats.winrate >= 52 ? 'Vas por excelente camino, ¡sigue así!' : 'Con un poco más de enfoque llegarás lejos.'}"</div>
+      <div class="prediction-message">"${randomMsg}"</div>
     </div>
   `;
 }
