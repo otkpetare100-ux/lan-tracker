@@ -692,7 +692,7 @@ function buildPlayerModalHTML(acc) {
             return `
               <div class="heat-col" title="${pos}: ${count} partidas (${Math.round(pct)}%)">
                 <div class="heat-bar-bg">
-                  <div class="heat-bar-fill" style="height: ${heightPct}%; opacity: ${0.4 + (heightPct/100)*0.6}"></div>
+                  <div class="heat-bar-fill" style="height: ${Math.max(heightPct, 8)}%; opacity: ${0.4 + (heightPct/100)*0.6}; background: #d77aa8;"></div>
                 </div>
                 <div class="heat-icon">${icon}</div>
               </div>
@@ -723,7 +723,7 @@ function buildPlayerModalHTML(acc) {
         
         <div class="rank-history-section">
           <div class="cstat-group-title" style="margin-top: 12px;">Historial y Progresión de LP</div>
-          <div class="lp-chart-wrapper" style="height: 180px; position: relative; margin-bottom: 12px;">
+          <div class="lp-chart-wrapper" style="height: 200px; position: relative; margin-bottom: 12px; margin-left: -4px; margin-right: -4px;">
             <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
           </div>
           <div id="rank-history-${acc.puuid}" class="rank-history-container">

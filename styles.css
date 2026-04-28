@@ -2487,9 +2487,11 @@ body::before {
 /* --- Mapa de Calor de Posiciones --- */
 .heatmap-section {
   margin-top: 12px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
-  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 12px;
+  width: 100%;
 }
 
 .heatmap-container {
