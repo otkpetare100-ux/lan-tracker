@@ -576,6 +576,9 @@ window.openPlayerModal = function(puuid, event) {
   document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('player-modal--open'));
 
+  // Cargar historial de rangos asincrónicamente
+  loadRankHistoryUI(puuid);
+
   const escHandler = (e) => {
     if (e.key === 'Escape') {
       closePlayerModal();
@@ -652,10 +655,50 @@ function buildPlayerModalHTML(acc) {
       <div class="player-modal__body">
         <div class="stats-source-hint">Resumen de desempeño en SoloQ (Últimas 20)</div>
         ${statsHTML}
+        
+        <div class="rank-history-section">
+          <div class="cstat-group-title" style="margin-top: 16px;">Historial de Rangos</div>
+          <div id="rank-history-${acc.puuid}" class="rank-history-container">
+            <div class="empty-stats">Cargando historial...</div>
+          </div>
+        </div>
       </div>
     </div>
   `;
 }
+
+async function loadRankHistoryUI(puuid) {
+  const container = document.getElementById(`rank-history-${puuid}`);
+  if (!container) return;
+
+  if (typeof getRankHistory !== 'function') {
+    container.innerHTML = '<div class="empty-stats">Historial no disponible</div>';
+    return;
+  }
+
+  const history = await getRankHistory(puuid);
+  
+  if (!history || history.length === 0) {
+    container.innerHTML = '<div class="empty-stats">No hay cambios de rango registrados</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="rank-timeline">' + history.map(h => {
+    const date = new Date(h.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+    const noDivTiers = ['MASTER','GRANDMASTER','CHALLENGER', 'UNRANKED'];
+    const rankStr = noDivTiers.includes(h.rank.tier) ? h.rank.tier : `${h.rank.tier} ${h.rank.division}`;
+    return `
+      <div class="rank-timeline-item">
+        <div class="rank-timeline-dot"></div>
+        <div class="rank-timeline-content">
+          <span class="rank-timeline-date">${date}</span>
+          <span class="rank-timeline-rank">${rankStr} <span class="rank-timeline-lp">${h.rank.lp} LP</span></span>
+        </div>
+      </div>
+    `;
+  }).join('') + '</div>';
+}
+
 
 function calculateGlobalStats(matches) {
   if (!matches || matches.length === 0) return null;

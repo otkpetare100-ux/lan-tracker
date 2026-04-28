@@ -34,6 +34,17 @@
         <button id="records-btn" onclick="openLeaderboard()" title="Ver récords de la perrera">🏆 Récords</button>
       </div>
       <div id="error-msg" class="error-msg" style="display:none;"></div>
+      
+      <div class="filter-controls">
+        <input type="text" id="filter-input" placeholder="Filtrar por nombre..." autocomplete="off">
+        <div class="rank-filters">
+          <button class="rank-filter-btn active" data-filter="all">Todos</button>
+          <button class="rank-filter-btn" data-filter="iron-silver">Iron-Silver</button>
+          <button class="rank-filter-btn" data-filter="gold-plat">Gold-Plat</button>
+          <button class="rank-filter-btn" data-filter="emerald-diamond">Emerald-Diamond</button>
+          <button class="rank-filter-btn" data-filter="master-plus">Master+</button>
+        </div>
+      </div>
     </section>
 
     <section class="accounts-section">

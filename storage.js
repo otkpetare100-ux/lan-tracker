@@ -63,3 +63,31 @@ window.loadAccounts = loadAccounts;
 window.saveAccount = saveAccount;
 window.updateAccount = updateAccount;
 window.deleteAccount = deleteAccount;
+
+async function postRankHistory(entry) {
+    try {
+        const response = await fetch('/rank-history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry)
+        });
+        return response.ok;
+    } catch (err) {
+        console.error('[Storage] Error guardando historial de rango:', err);
+        return false;
+    }
+}
+
+async function getRankHistory(puuid) {
+    try {
+        const response = await fetch(`/rank-history/${puuid}`);
+        if (!response.ok) return [];
+        return await response.json();
+    } catch (err) {
+        console.error('[Storage] Error cargando historial de rango:', err);
+        return [];
+    }
+}
+
+window.postRankHistory = postRankHistory;
+window.getRankHistory = getRankHistory;

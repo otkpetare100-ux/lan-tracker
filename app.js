@@ -11,6 +11,10 @@ const REFRESH_COOLDOWN = 60 * 1000;
 const searchInput  = document.getElementById('search-input');
 const searchBtn    = document.getElementById('search-btn');
 const accountsGrid = document.getElementById('accounts-grid');
+const filterInput  = document.getElementById('filter-input');
+const rankFilters  = document.querySelectorAll('.rank-filter-btn');
+
+let activeRankFilter = 'all';
 
 const TIER_ORDER = {
   CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7,
@@ -39,7 +43,7 @@ function updateGlobalRef() {
 async function init() {
   accounts = await loadAccounts();
   updateGlobalRef();
-  renderAccounts(sortByRank(accounts));
+  applyFilters();
   // checkAllLiveStatus(); // Deshabilitado temporalmente (403 dev key)
 }
 init();
@@ -52,7 +56,7 @@ async function checkAllLiveStatus() {
       acc.isLive = !!game;
     } catch(e) { acc.isLive = false; }
   }
-  renderAccounts(sortByRank(accounts));
+  applyFilters();
 }
 
 // setInterval(checkAllLiveStatus, 180000); // 3 minutos (Deshabilitado temporalmente)
@@ -89,7 +93,7 @@ async function handleSearch() {
     } else {
       accounts.push(entry);
       updateGlobalRef();
-      renderAccounts(sortByRank(accounts));
+      applyFilters();
       searchInput.value = '';
     }
   } catch (err) {
@@ -116,64 +120,7 @@ function championsFromMatches(matches) {
     });
 }
 
-/* ---- Notificaciones de Cambio de Rango ---- */
-
-function getRankScore(tier, division) {
-  const tierList = ['IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'];
-  const divList  = ['IV','III','II','I'];
-  const t = tierList.indexOf(tier);
-  const d = divList.indexOf(division || 'I');
-  return (t < 0 ? -1 : t * 4 + (d < 0 ? 0 : d));
-}
-
-function getRankLabel(acc) {
-  const soloQ = acc.soloQ;
-  if (!soloQ || soloQ.tier === 'UNRANKED') return 'Sin Clasificar';
-  const noDivision = ['MASTER','GRANDMASTER','CHALLENGER'];
-  return noDivision.includes(soloQ.tier)
-    ? soloQ.tier.charAt(0) + soloQ.tier.slice(1).toLowerCase()
-    : soloQ.tier.charAt(0) + soloQ.tier.slice(1).toLowerCase() + ' ' + soloQ.rank;
-}
-
-function showRankToast(emoji, message, type) {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const toast = document.createElement('div');
-  toast.className = 'rank-toast rank-toast--' + type;
-  toast.innerHTML = '<span class="toast-emoji">' + emoji + '</span><span class="toast-msg">' + message + '</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>';
-  container.appendChild(toast);
-  requestAnimationFrame(() => toast.classList.add('rank-toast--visible'));
-  setTimeout(() => {
-    toast.classList.remove('rank-toast--visible');
-    setTimeout(() => toast.remove(), 400);
-  }, 5000);
-}
-
-function checkRankChange(oldAcc, newAcc) {
-  const oldSQ = oldAcc.soloQ;
-  const newSQ = newAcc.soloQ;
-  const name = oldAcc.gameName;
-  if (!newSQ || newSQ.tier === 'UNRANKED') return;
-  const newLabel = getRankLabel(newAcc);
-  if (!oldSQ || oldSQ.tier === 'UNRANKED') return;
-  const oldScore = getRankScore(oldSQ.tier, oldSQ.rank);
-  const newScore = getRankScore(newSQ.tier, newSQ.rank);
-  if (newScore > oldScore) {
-    showRankToast('🎉', '¡' + name + ' subió a ' + newLabel + '!', 'up');
-  } else if (newScore < oldScore) {
-    showRankToast('💀', name + ' bajó a ' + newLabel, 'down');
-  } else if (newSQ.leaguePoints !== oldSQ.leaguePoints) {
-    const diff = newSQ.leaguePoints - oldSQ.leaguePoints;
-    const sign = diff > 0 ? '+' : '';
-    showRankToast('📊', name + ': ' + sign + diff + ' LP (' + newSQ.leaguePoints + ' LP)', 'lp');
-  }
-}
-
-
+/* ---- Refresh ---- */
 async function handleRefresh(puuid, silent = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
@@ -221,19 +168,22 @@ async function handleRefresh(puuid, silent = false) {
       updated.topChampions = acc.topChampions || [];
     }
 
-    const prevAcc = { ...acc, soloQ: acc.soloQ ? { ...acc.soloQ } : null };
-
     await updateAccount(updated);
+    
+    // Toast y guardado de historial de cambio de rango
+    const prevSoloQ = acc.soloQ;
+    const newSoloQ  = updated.soloQ;
+    showRankChangeToast(updated.gameName, prevSoloQ, newSoloQ);
+    saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ);
+
+
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     updateGlobalRef();
-
-    if (!silent) checkRankChange(prevAcc, updated);
-
     
     const wasOpen = card && document.getElementById('history-' + puuid) &&
                     document.getElementById('history-' + puuid).style.display !== 'none';
 
-    renderAccounts(sortByRank(accounts));
+    applyFilters();
 
     if (wasOpen) {
       const newContent = document.getElementById('history-' + puuid);
@@ -289,7 +239,7 @@ async function handleHistoryToggle(puuid) {
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
       updateGlobalRef();
       await updateAccount(acc);
-      renderAccounts(sortByRank(accounts));
+      applyFilters();
       const newContent = document.getElementById('history-' + puuid);
       const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
       if (newContent) newContent.style.display = 'block';
@@ -327,7 +277,7 @@ accountsGrid.addEventListener('click', async (e) => {
       if (window.selectedToCompare) {
         window.selectedToCompare = window.selectedToCompare.filter(p => p !== puuid);
       }
-      renderAccounts(sortByRank(accounts));
+      applyFilters();
     });
   }
 
@@ -346,3 +296,113 @@ searchBtn.addEventListener('click', handleSearch);
 searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') handleSearch();
 });
+
+/* ---- Búsqueda y Filtro en Cliente ---- */
+function applyFilters() {
+  const query = (filterInput ? filterInput.value : '').toLowerCase().trim();
+  
+  let filtered = accounts;
+  
+  // Filtro por nombre
+  if (query) {
+    filtered = filtered.filter(a => a.gameName.toLowerCase().includes(query));
+  }
+  
+  // Filtro por rango
+  if (activeRankFilter !== 'all') {
+    filtered = filtered.filter(a => {
+      const tier = a.soloQ ? a.soloQ.tier : 'UNRANKED';
+      if (activeRankFilter === 'iron-silver') {
+        return ['IRON', 'BRONZE', 'SILVER'].includes(tier) || tier === 'UNRANKED';
+      } else if (activeRankFilter === 'gold-plat') {
+        return ['GOLD', 'PLATINUM'].includes(tier);
+      } else if (activeRankFilter === 'emerald-diamond') {
+        return ['EMERALD', 'DIAMOND'].includes(tier);
+      } else if (activeRankFilter === 'master-plus') {
+        return ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(tier);
+      }
+      return true;
+    });
+  }
+  
+  renderAccounts(sortByRank(filtered));
+}
+
+if (filterInput) {
+  filterInput.addEventListener('input', applyFilters);
+}
+
+if (rankFilters) {
+  rankFilters.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      rankFilters.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      activeRankFilter = e.target.dataset.filter;
+      applyFilters();
+    });
+  });
+}
+
+
+/* ---- Toasts de Rango ---- */
+function showRankChangeToast(name, prev, next) {
+  if (!prev || !next || prev.tier === 'UNRANKED' || next.tier === 'UNRANKED') return;
+  const prevScore = (TIER_ORDER[prev.tier] ?? -1) * 10000 + (DIV_ORDER[prev.rank] ?? 0) * 1000 + (prev.leaguePoints || 0);
+  const nextScore = (TIER_ORDER[next.tier] ?? -1) * 10000 + (DIV_ORDER[next.rank] ?? 0) * 1000 + (next.leaguePoints || 0);
+  if (prevScore === nextScore) return;
+  
+  const noDivTiers = ['MASTER','GRANDMASTER','CHALLENGER'];
+  const fmt = r => noDivTiers.includes(r.tier) ? r.tier : `${r.tier} ${r.rank}`;
+  
+  const promoted  = nextScore > prevScore;
+  const sameDiv   = prev.tier === next.tier && prev.rank === next.rank;
+  
+  const emoji     = promoted ? '🎉' : '💀';
+  const color     = promoted ? 'toast-up' : 'toast-down';
+  const msg       = sameDiv
+    ? `${name}: ${prev.leaguePoints} → ${next.leaguePoints} LP`
+    : promoted
+      ? `¡${name} subió a ${fmt(next)}!`
+      : `${name} bajó a ${fmt(next)}`;
+      
+  showToast(emoji + ' ' + msg, color);
+}
+
+function showToast(message, cls = '') {
+  const t = document.createElement('div');
+  t.className = 'rank-toast ' + cls;
+  t.textContent = message;
+  document.body.appendChild(t);
+  
+  requestAnimationFrame(() => t.classList.add('rank-toast--show'));
+  
+  setTimeout(() => {
+    t.classList.remove('rank-toast--show');
+    setTimeout(() => t.remove(), 400);
+  }, 5000);
+}
+
+/* ---- Historial de Rangos ---- */
+async function saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ) {
+  if (!newSoloQ || newSoloQ.tier === 'UNRANKED') return;
+  
+  // Guardamos solo si cambió el tier, división o lp
+  const changed = !prevSoloQ || 
+                  prevSoloQ.tier !== newSoloQ.tier || 
+                  prevSoloQ.rank !== newSoloQ.rank || 
+                  prevSoloQ.leaguePoints !== newSoloQ.leaguePoints;
+                  
+  if (changed) {
+    const entry = {
+      puuid: acc.puuid,
+      gameName: acc.gameName,
+      tagLine: acc.tagLine,
+      rank: {
+        tier: newSoloQ.tier,
+        division: newSoloQ.rank,
+        lp: newSoloQ.leaguePoints
+      }
+    };
+    await postRankHistory(entry);
+  }
+}

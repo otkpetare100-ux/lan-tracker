@@ -205,6 +205,77 @@ body::before {
   font-size: 0.86rem;
 }
 
+/* --- Controles de Filtro --- */
+.filter-controls {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+#filter-input {
+  flex: 1;
+  min-width: 200px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(12, 15, 26, 0.4);
+  color: var(--text);
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+#filter-input:focus {
+  border-color: rgba(157, 108, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(157, 108, 255, 0.1);
+  outline: none;
+}
+
+.rank-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rank-filter-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rank-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.rank-filter-btn.active {
+  background: rgba(157, 108, 255, 0.15);
+  border-color: rgba(157, 108, 255, 0.4);
+  color: #d4caff;
+}
+
+.rank-filter-btn[data-filter="iron-silver"].active {
+  background: rgba(144, 160, 163, 0.15); border-color: rgba(144, 160, 163, 0.5); color: #c0cdd1;
+}
+.rank-filter-btn[data-filter="gold-plat"].active {
+  background: rgba(217, 184, 95, 0.15); border-color: rgba(217, 184, 95, 0.5); color: #ffe699;
+}
+.rank-filter-btn[data-filter="emerald-diamond"].active {
+  background: rgba(43, 202, 114, 0.15); border-color: rgba(43, 202, 114, 0.5); color: #84f0b2;
+}
+.rank-filter-btn[data-filter="master-plus"].active {
+  background: rgba(215, 122, 168, 0.15); border-color: rgba(215, 122, 168, 0.5); color: #ffd9e8;
+}
+
 .section-title {
   display: flex;
   align-items: center;
@@ -2114,105 +2185,122 @@ body::before {
   }
 }
 
-/* --- Toast Notificaciones de Rango --- */
-#toast-container {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 99999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: none;
-}
-
+/* --- Toasts de Rango --- */
 .rank-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-soft);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.17, 0.84, 0.44, 1), opacity 0.4s ease;
+  z-index: 100000;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  border: 1px solid transparent;
-  min-width: 280px;
-  max-width: 360px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  pointer-events: auto;
-  opacity: 0;
-  transform: translateX(30px);
-  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.17,0.84,0.44,1);
-  position: relative;
-  overflow: hidden;
 }
 
-.rank-toast--visible {
-  opacity: 1;
+.rank-toast--show {
   transform: translateX(0);
+  opacity: 1;
 }
 
-.rank-toast--up {
-  background: rgba(16, 40, 24, 0.92);
-  border-color: rgba(40, 202, 66, 0.35);
-  color: #b8f5c4;
+.toast-up {
+  border-left: 4px solid var(--good);
 }
 
-.rank-toast--down {
-  background: rgba(40, 12, 16, 0.92);
-  border-color: rgba(224, 100, 116, 0.35);
-  color: #ffc8ce;
+.toast-down {
+  border-left: 4px solid var(--bad);
 }
 
-.rank-toast--lp {
-  background: rgba(12, 20, 40, 0.92);
-  border-color: rgba(108, 137, 235, 0.35);
-  color: #c4d0f5;
+/* --- Historial de Rangos (Timeline) --- */
+.rank-history-section {
+  margin-top: 16px;
 }
 
-.rank-toast::after {
+.rank-history-container {
+  padding: 8px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.rank-history-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rank-history-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.rank-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 10px;
+  position: relative;
+}
+
+.rank-timeline::before {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 100%;
-  border-radius: 0 0 14px 14px;
-  animation: toast-timer 5s linear forwards;
+  top: 6px;
+  bottom: 6px;
+  left: 14.5px;
+  width: 1px;
+  background: var(--border);
+  z-index: 1;
 }
 
-.rank-toast--up::after   { background: #28ca42; }
-.rank-toast--down::after { background: #e06474; }
-.rank-toast--lp::after   { background: #6c89eb; }
-
-@keyframes toast-timer {
-  from { width: 100%; }
-  to   { width: 0%; }
+.rank-timeline-item {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
-.toast-emoji {
-  font-size: 1.4rem;
-  line-height: 1;
+.rank-timeline-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--bg);
+  border: 2px solid var(--purple);
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.toast-msg {
-  flex: 1;
-  line-height: 1.4;
+.rank-timeline-content {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255,255,255,0.02);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  flex-grow: 1;
 }
 
-.toast-close {
-  background: none;
-  border: none;
-  color: inherit;
-  opacity: 0.5;
-  cursor: pointer;
+.rank-timeline-date {
+  font-size: 0.65rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.rank-timeline-rank {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.rank-timeline-lp {
+  color: var(--gold);
   font-size: 0.75rem;
-  padding: 2px 4px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  transition: opacity 0.2s;
+  margin-left: 4px;
 }
-
-.toast-close:hover { opacity: 1; }
