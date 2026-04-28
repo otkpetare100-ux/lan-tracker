@@ -1707,6 +1707,7 @@ body::before {
 .player-modal__box {
   width: 100%;
   max-width: 600px;
+  max-height: 95vh;
   background: #0f111a;
   border: 1px solid rgba(215, 122, 168, 0.3);
   border-radius: 24px;
@@ -1784,6 +1785,21 @@ body::before {
 
 .player-modal__body {
   padding: 16px 20px 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.player-modal__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.player-modal__body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.player-modal__body::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .player-stats-grid {
