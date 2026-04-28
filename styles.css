@@ -1627,7 +1627,7 @@ body::before {
   color: #7a84aa;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 8px 0 2px 0;
+  padding: 4px 0 2px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: 2px;
 }
@@ -1717,7 +1717,7 @@ body::before {
 }
 
 .player-modal__header {
-  padding: 24px 30px;
+  padding: 16px 20px;
   background: rgba(255, 255, 255, 0.02);
   display: flex;
   align-items: center;
@@ -1728,18 +1728,18 @@ body::before {
 .player-modal__profile {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .player-modal__avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .player-modal__names h2 {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   margin: 0;
   color: #fff;
 }
@@ -1750,8 +1750,8 @@ body::before {
 }
 
 .player-modal__names p {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
+  margin: 2px 0 0;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1761,8 +1761,8 @@ body::before {
   background: rgba(255, 255, 255, 0.05);
   border: none;
   color: #7a84aa;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
   transition: 0.2s;
@@ -1777,42 +1777,42 @@ body::before {
 }
 
 .player-modal__body {
-  padding: 30px;
+  padding: 16px 20px 20px;
 }
 
 .player-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
 .pstat-card {
-  padding: 20px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 18px;
+  border-radius: 14px;
   text-align: center;
 }
 
 .pstat-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #7a84aa;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .pstat-value {
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: #fff;
 }
 
 .pstat-sub {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #5c627d;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 @media (max-width: 560px) {
@@ -2237,7 +2237,7 @@ body::before {
   display: flex;
   flex-direction: column;
   background: rgba(255,255,255,0.02);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
   flex-grow: 1;
@@ -2472,31 +2472,31 @@ body::before {
 
 /* --- Mapa de Calor de Posiciones --- */
 .heatmap-section {
-  margin-top: 16px;
+  margin-top: 12px;
   background: rgba(0, 0, 0, 0.15);
   border-radius: 12px;
-  padding: 12px;
+  padding: 8px;
 }
 
 .heatmap-container {
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
-  height: 80px;
-  margin-top: 10px;
+  height: 50px;
+  margin-top: 6px;
 }
 
 .heat-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex: 1;
 }
 
 .heat-bar-bg {
-  width: 24px;
-  height: 50px;
+  width: 20px;
+  height: 35px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   display: flex;
@@ -2512,7 +2512,7 @@ body::before {
 }
 
 .heat-icon {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 /* --- Gráfica LP --- */

@@ -697,8 +697,8 @@ function buildPlayerModalHTML(acc) {
         ${heatMapHTML}
         
         <div class="rank-history-section">
-          <div class="cstat-group-title" style="margin-top: 16px;">Historial y Progresión de LP</div>
-          <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas" width="400" height="150" style="margin-bottom:12px; display:none;"></canvas>
+          <div class="cstat-group-title" style="margin-top: 12px;">Historial y Progresión de LP</div>
+          <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas" width="400" height="90" style="margin-bottom:8px; display:none;"></canvas>
           <div id="rank-history-${acc.puuid}" class="rank-history-container">
             <div class="empty-stats">Cargando historial...</div>
           </div>
