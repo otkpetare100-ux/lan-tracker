@@ -141,7 +141,18 @@ async function handleRefresh(puuid, silent = false) {
   if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
 
   try {
+    // --- Funcionalidad 4: Caché Inteligente ---
+    const matchIds = await getMatchIds(acc.puuid);
+    const lastId = matchIds && matchIds.length > 0 ? matchIds[0] : null;
+    
+    if (lastId && acc.lastGameId === lastId) {
+      if (!silent) showToast('Sin partidas nuevas desde el último refresh', 'toast-neutral');
+      if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+      return;
+    }
+
     const updated = await fetchAccountSnapshot(acc.gameName, acc.tagLine);
+    updated.lastGameId = lastId; // Guardar ID para próxima comparación
 
     // Siempre intentamos obtener el historial de partidas para tener las 20 últimas
     if (btn) btn.classList.remove('spinning');
@@ -173,6 +184,18 @@ async function handleRefresh(puuid, silent = false) {
     const newSoloQ  = updated.soloQ;
     showRankChangeToast(updated.gameName, prevSoloQ, newSoloQ);
     saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ);
+
+    // --- Funcionalidad 3: Rachas Históricas ---
+    if (!updated.records) updated.records = acc.records || { maxWinStreak: 0, maxLossStreak: 0 };
+    const currentStreak = updated.streak || 0;
+    
+    if (currentStreak > 0 && currentStreak > (updated.records.maxWinStreak || 0)) {
+      updated.records.maxWinStreak = currentStreak;
+      showToast(`🔥 ¡NUEVO RÉCORD! ${updated.gameName} racha de ${currentStreak} victorias`, 'toast-up');
+      triggerRankUpCelebration(); // Reutilizar celebración
+    } else if (currentStreak < 0 && Math.abs(currentStreak) > (updated.records.maxLossStreak || 0)) {
+      updated.records.maxLossStreak = Math.abs(currentStreak);
+    }
 
 
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);

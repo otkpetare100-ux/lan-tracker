@@ -33,6 +33,10 @@ async function connectDB() {
     // Índices para historial de rangos
     await db.collection('rank_history').createIndex({ puuid: 1 });
     await db.collection('rank_history').createIndex({ date: -1 });
+
+    // Índices para Torneos
+    await db.collection('tournaments').createIndex({ status: 1 });
+    await db.collection('tournaments').createIndex({ date: -1 });
   } catch(e) {
     console.error('❌ Error conectando a MongoDB:', e);
     console.log('Reintentando en 5 segundos...');
@@ -170,6 +174,52 @@ app.get('/rank-history/:puuid', async (req, res) => {
   } catch(e) {
     console.error('Error obteniendo historial de rango:', e);
     res.status(500).json({ error: 'Error obteniendo historial' });
+  }
+});
+
+// ---- Gestión de Torneos ----
+app.get('/tournaments', async (req, res) => {
+  try {
+    const list = await db.collection('tournaments').find({}).sort({ date: -1 }).toArray();
+    res.json(list);
+  } catch(e) {
+    res.status(500).json({ error: 'Error leyendo torneos' });
+  }
+});
+
+app.post('/tournaments', async (req, res) => {
+  try {
+    const tournament = req.body;
+    tournament.createdAt = new Date().toISOString();
+    const result = await db.collection('tournaments').insertOne(tournament);
+    res.json({ ok: true, id: result.insertedId });
+  } catch(e) {
+    res.status(500).json({ error: 'Error creando torneo' });
+  }
+});
+
+app.put('/tournaments/:id', async (req, res) => {
+  try {
+    const { ObjectId } = require('mongodb');
+    const update = { ...req.body };
+    delete update._id;
+    await db.collection('tournaments').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: update }
+    );
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Error actualizando torneo' });
+  }
+});
+
+app.delete('/tournaments/:id', async (req, res) => {
+  try {
+    const { ObjectId } = require('mongodb');
+    await db.collection('tournaments').deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ ok: true });
+  } catch(e) {
+    res.status(500).json({ error: 'Error eliminando torneo' });
   }
 });
 

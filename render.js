@@ -639,14 +639,15 @@ function buildPlayerModalHTML(acc) {
         ${stats.kdaTrend ? `<div class="trend-indicator ${stats.kdaTrend > 0 ? 'trend-up' : 'trend-down'}">${stats.kdaTrend > 0 ? '▲' : '▼'} ${Math.abs(stats.kdaTrend)}</div>` : ''}
       </div>
       <div class="pstat-card">
-        <div class="pstat-label">Visión</div>
-        <div class="pstat-value">${stats.vision}</div>
-        <div class="pstat-sub">Puntos por partida</div>
-      </div>
-      <div class="pstat-card">
         <div class="pstat-label">Oro por Minuto</div>
         <div class="pstat-value">${stats.goldMin}</div>
         <div class="pstat-sub">Eficiencia de farmeo</div>
+      </div>
+      <div class="pstat-card">
+        <div class="pstat-label">Mejores Rachas</div>
+        <div class="pstat-value text-win">W: ${acc.records?.maxWinStreak || 0}</div>
+        <div class="pstat-value text-loss">L: ${acc.records?.maxLossStreak || 0}</div>
+        <div class="pstat-sub">Récords históricos</div>
       </div>
       <div class="pstat-card">
         <div class="pstat-label">Daño / Partida</div>
@@ -659,6 +660,8 @@ function buildPlayerModalHTML(acc) {
         <div class="pstat-sub">Presencia en el mapa</div>
       </div>
     </div>
+    <div class="cstat-group-title" style="margin-top: 12px;">Predicción de Temporada</div>
+    ${renderPredictionHTML(acc, stats)}
   ` : '<div class="empty-stats">Actualiza la cuenta para ver estadísticas detalladas</div>';
 
   // --- Funcionalidad 4: Mapa de calor de posiciones ---
@@ -977,7 +980,7 @@ function renderLeaderGridHTML(records) {
     ${renderLeaderCard('El Rico', records.topGold, 'Oro / Minuto')}
     ${renderLeaderCard('El Más Suertudo', records.topWinrate, 'Winrate Global')}
     ${renderLeaderCard('El Cañón Pulso de Fuego', records.topDamage, 'Daño a Campeones')}
-    ${renderLeaderCard('El Inmortal', records.minDeaths, 'Menos Muertes')}
+    ${renderLeaderCard('Racha Legendaria', records.topStreak, 'Victorias Consecutivas')}
   `;
 }
 
@@ -999,6 +1002,7 @@ function calculateGlobalRecords(accounts) {
     // Shame
     maxDeaths: stats.sort((a,b) => b.s.deaths - a.s.deaths)[0],
     minVision: stats.sort((a,b) => a.s.vision - b.s.vision)[0],
+    topStreak: stats.sort((a,b) => (b.acc.records?.maxWinStreak || 0) - (a.acc.records?.maxWinStreak || 0))[0],
     maxChamps: stats.map(x => {
       const unique = new Set(x.acc.matches.map(m => m.champion)).size;
       return { ...x, unique };
@@ -1014,7 +1018,7 @@ function renderLeaderCard(title, data, sub) {
               title === 'Ojos de Halcón' ? data.s.vision :
               title === 'El Topo' ? data.s.vision :
               title === 'El Autofill' ? data.unique + ' champs' :
-              title === 'El Inmortal' ? data.s.deaths : data.s.deaths;
+              title === 'Racha Legendaria' ? data.acc.records?.maxWinStreak || 0 : data.s.deaths;
   
   if (title === 'El Verdugo') return renderCard(data.s.kills);
   if (title === 'El Imán de Balas') return renderCard(data.s.deaths);
@@ -1096,4 +1100,123 @@ window.closeNoteModal = function() {
     document.body.classList.remove('modal-open');
     setTimeout(() => modal.remove(), 300);
   }
+};
+
+function renderPredictionHTML(acc, stats) {
+  if (!stats) return '';
+  const seasonEnd = new Date('2026-11-30');
+  const now = new Date();
+  const weeksLeft = Math.max(1, Math.ceil((seasonEnd - now) / (7 * 24 * 60 * 60 * 1000)));
+  
+  // Asumimos 10 partidas por semana promedio si no hay datos
+  const gamesPerWeek = 10; 
+  const totalGames = weeksLeft * gamesPerWeek;
+  const netWins = (stats.winrate / 100 - 0.5) * 2 * totalGames;
+  const lpChange = Math.round(netWins * 22); // 22 LP promedio
+  
+  const currentLP = acc.soloQ?.leaguePoints || 0;
+  const projectedLP = currentLP + lpChange;
+  
+  // Lógica de rango predicho (simplificada)
+  const tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+  let currentTierIdx = tiers.indexOf(acc.soloQ?.tier || 'SILVER');
+  if (currentTierIdx === -1) currentTierIdx = 2; // Default Silver
+  let finalTierIdx = currentTierIdx + Math.floor(projectedLP / 400);
+  finalTierIdx = Math.max(0, Math.min(tiers.length - 1, finalTierIdx));
+  const finalTier = tiers[finalTierIdx];
+
+  return `
+    <div class="prediction-box">
+      <div class="prediction-rank">
+        <img src="/pic/ranks/${finalTier.toLowerCase()}.png" class="prediction-icon" />
+        <div class="prediction-info">
+          <div class="prediction-title">Rango Final Predicho: ${finalTier}</div>
+          <div class="prediction-desc">Basado en tu winrate de ${stats.winrate}% y ${weeksLeft} semanas restantes.</div>
+        </div>
+      </div>
+      <div class="prediction-message">"${stats.winrate >= 52 ? 'Vas por excelente camino, ¡sigue así!' : 'Con un poco más de enfoque llegarás lejos.'}"</div>
+    </div>
+  `;
+}
+
+window.openTournamentModal = async function() {
+  const modal = document.createElement('div');
+  modal.id = 'tournament-modal';
+  modal.className = 'tournament-modal';
+  const tournaments = await fetch('/tournaments').then(r => r.json());
+  
+  modal.innerHTML = `
+    <div class="tournament-box">
+      <div class="tournament-header">
+        <div class="tournament-title-group">
+          <span class="t-emoji">🏆</span>
+          <h2>Gestión de Torneos</h2>
+        </div>
+        <button class="modal-close" onclick="closeTournamentModal()">✕</button>
+      </div>
+      <div class="tournament-body">
+        <div class="t-actions">
+           <button class="btn-primary" onclick="showCreateTournament()">Crear Nuevo Torneo</button>
+        </div>
+        <div class="tournament-list">
+          ${tournaments.length === 0 ? '<div class="empty-stats">No hay torneos creados aún</div>' : tournaments.map(t => `
+            <div class="tournament-item" onclick="viewTournament('${t._id}')">
+              <span class="t-name">${escapeHTML(t.name)}</span>
+              <span class="t-status status-${t.status}">${t.status.toUpperCase()}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.body.classList.add('modal-open');
+};
+
+window.closeTournamentModal = () => {
+  const m = document.getElementById('tournament-modal');
+  if (m) m.remove();
+  document.body.classList.remove('modal-open');
+};
+
+window.showCreateTournament = function() {
+  const body = document.querySelector('.tournament-body');
+  const accounts = window._accounts_ref || [];
+  body.innerHTML = `
+    <div class="create-tournament">
+      <div class="t-input-group">
+        <label>Nombre del Torneo</label>
+        <input type="text" id="t-name" placeholder="Ej: Torneo de Verano" />
+      </div>
+      <div class="participant-selector">
+        <p>Seleccionar participantes (mínimo 2):</p>
+        <div class="p-list">
+          ${accounts.map(a => `
+            <label class="p-item"><input type="checkbox" value="${a.puuid}" class="t-participant"> ${a.gameName}</label>
+          `).join('')}
+        </div>
+      </div>
+      <div class="t-actions">
+        <button class="btn-cancel" onclick="openTournamentModal()">Cancelar</button>
+        <button class="btn-save" onclick="saveTournament()">Generar Bracket</button>
+      </div>
+    </div>
+  `;
+};
+
+window.saveTournament = async function() {
+  const name = document.getElementById('t-name').value;
+  const selected = Array.from(document.querySelectorAll('.t-participant:checked')).map(i => i.value);
+  if (!name || selected.length < 2) return alert('Datos insuficientes (mínimo nombre y 2 participantes)');
+  
+  await fetch('/tournaments', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ name, participants: selected, status: 'pendiente', date: new Date().toISOString() })
+  });
+  openTournamentModal();
+};
+
+window.viewTournament = async function(id) {
+  alert('Visualización de bracket para el ID: ' + id + ' (Funcionalidad de guardado de ganador en desarrollo)');
 };

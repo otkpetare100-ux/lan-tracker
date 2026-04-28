@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="compare.css" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔</text></svg>">
 </head>
 <body>
@@ -32,6 +33,7 @@
         />
         <button id="search-btn">Buscar</button>
         <button id="records-btn" onclick="openLeaderboard()" title="Ver récords de la perrera">🏆 Récords</button>
+        <button id="tournament-btn" onclick="openTournamentModal()" title="Gestión de Torneos">🏆 Torneo</button>
       </div>
       <div id="error-msg" class="error-msg" style="display:none;"></div>
       
@@ -57,5 +59,14 @@
 <script src="api.js"></script>
 <script src="app.js"></script>
 <script src="compare.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('SW registrado'))
+        .catch(err => console.log('SW error', err));
+    });
+  }
+</script>
 </body>
 </html>
