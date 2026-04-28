@@ -664,7 +664,7 @@ function buildPlayerModalHTML(acc) {
   if (acc.matches && acc.matches.length > 0) {
     const posCount = { TOP: 0, JUNGLE: 0, MIDDLE: 0, BOTTOM: 0, UTILITY: 0 };
     acc.matches.forEach(m => {
-      let p = m.teamPosition || '';
+      let p = (m.position || m.teamPosition || '').toUpperCase();
       if (p === 'UTILITY') p = 'SUPPORT'; // Normalizar
       if (posCount[p] !== undefined) posCount[p]++;
       else if (p === 'SUPPORT') posCount.UTILITY++;
@@ -692,7 +692,7 @@ function buildPlayerModalHTML(acc) {
             return `
               <div class="heat-col" title="${pos}: ${count} partidas (${Math.round(pct)}%)">
                 <div class="heat-bar-bg">
-                  <div class="heat-bar-fill" style="height: ${Math.max(heightPct, 8)}%; opacity: ${0.4 + (heightPct/100)*0.6}; background: #d77aa8;"></div>
+                  <div class="heat-bar-fill" style="height: ${heightPct}%; opacity: ${0.4 + (heightPct/100)*0.6}; background: #d77aa8;"></div>
                 </div>
                 <div class="heat-icon">${icon}</div>
               </div>
@@ -717,15 +717,28 @@ function buildPlayerModalHTML(acc) {
         <button class="player-modal__close" onclick="closePlayerModal()">✕</button>
       </div>
       <div class="player-modal__body">
-        <div class="stats-source-hint">Resumen de desempeño en SoloQ (Últimas 20)</div>
-        ${statsHTML}
-        ${heatMapHTML}
-        
-        <div class="rank-history-section">
-          <div class="cstat-group-title" style="margin-top: 12px;">Historial y Progresión de LP</div>
-          <div class="lp-chart-wrapper" style="height: 200px; position: relative; margin-bottom: 12px; margin-left: -4px; margin-right: -4px;">
-            <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
+        <div class="player-modal__layout">
+          <!-- Columna Izquierda: Estadísticas -->
+          <div class="player-modal__col-stats">
+            <div class="stats-source-hint">Desempeño SoloQ (Últimas 20)</div>
+            ${statsHTML}
           </div>
+
+          <!-- Columna Derecha: Visualizaciones -->
+          <div class="player-modal__col-visuals">
+            ${heatMapHTML}
+            
+            <div class="rank-history-section">
+              <div class="cstat-group-title" style="margin-top: 12px;">Progresión de LP</div>
+              <div class="lp-chart-wrapper" style="height: 180px; position: relative; margin-bottom: 12px;">
+                <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rank-history-section" style="margin-top: 0;">
+          <div class="cstat-group-title">Historial de Divisiones</div>
           <div id="rank-history-${acc.puuid}" class="rank-history-container">
             <div class="empty-stats">Cargando historial...</div>
           </div>
