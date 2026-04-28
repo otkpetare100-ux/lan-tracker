@@ -394,91 +394,93 @@ function buildChampModalHTML(acc, champName) {
 
   const statsGrid = stats ? `
     <div class="stats-source-hint">Basado en las últimas ${stats.total} partidas</div>
-    <div class="champ-stats-grid">
-      <!-- Básicas y Rendimiento -->
-      <div class="cstat-group-title">Rendimiento y Básicas</div>
-      <div class="cstat-card">
-        <div class="cstat-label">Winrate</div>
-        <div class="cstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
-        <div class="cstat-sub">${stats.total} partidas</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">KDA Promedio</div>
-        <div class="cstat-value">${stats.kda}</div>
-        <div class="cstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">CS por Minuto</div>
-        <div class="cstat-value">${stats.csMin}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Visión</div>
-        <div class="cstat-value">${stats.vision}</div>
+    <div class="champ-modal__layout">
+      <!-- Columna Izquierda: Estadísticas Básicas e Impacto -->
+      <div class="champ-modal__col">
+        <div class="cstat-group-title">Rendimiento y Básicas</div>
+        <div class="player-stats-grid">
+          <div class="cstat-card">
+            <div class="cstat-label">Winrate</div>
+            <div class="cstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
+            <div class="cstat-sub">${stats.total} partidas</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">KDA Promedio</div>
+            <div class="cstat-value">${stats.kda}</div>
+            <div class="cstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">CS por Minuto</div>
+            <div class="cstat-value">${stats.csMin}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Visión</div>
+            <div class="cstat-value">${stats.vision}</div>
+          </div>
+        </div>
+
+        <div class="cstat-group-title" style="margin-top:16px;">Impacto y Objetivos</div>
+        <div class="player-stats-grid">
+          <div class="cstat-card">
+            <div class="cstat-label">Daño / Partida</div>
+            <div class="cstat-value">${stats.damage.toLocaleString()}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Daño a Torres</div>
+            <div class="cstat-value">${stats.dmgTurret.toLocaleString()}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Objetivos Robados</div>
+            <div class="cstat-value">${stats.objStolen}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Solo Kills</div>
+            <div class="cstat-value">${stats.soloKills}</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Impacto y Objetivos -->
-      <div class="cstat-group-title">Impacto y Objetivos</div>
-      <div class="cstat-card">
-        <div class="cstat-label">Daño / Partida</div>
-        <div class="cstat-value">${stats.damage.toLocaleString()}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Daño a Torres</div>
-        <div class="cstat-value">${stats.dmgTurret.toLocaleString()}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Objetivos Robados</div>
-        <div class="cstat-value">${stats.objStolen}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Solo Kills</div>
-        <div class="cstat-value">${stats.soloKills}</div>
-      </div>
+      <!-- Columna Derecha: Economía y Logros -->
+      <div class="champ-modal__col">
+        <div class="cstat-group-title">Economía y Early Game</div>
+        <div class="player-stats-grid">
+          <div class="cstat-card">
+            <div class="cstat-label">Oro por Minuto</div>
+            <div class="cstat-value">${stats.goldMin}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Ventaja Oro @15</div>
+            <div class="cstat-value ${stats.goldDiff15 >= 0 ? 'text-win' : 'text-loss'}">${stats.goldDiff15 > 0 ? '+' : ''}${stats.goldDiff15}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Ventaja CS @10</div>
+            <div class="cstat-value ${stats.csDiff10 >= 0 ? 'text-win' : 'text-loss'}">${stats.csDiff10 > 0 ? '+' : ''}${stats.csDiff10}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Consumibles</div>
+            <div class="cstat-value">${stats.consumables}</div>
+          </div>
+        </div>
 
-      <!-- Economía y Early -->
-      <div class="cstat-group-title">Economía y Early Game</div>
-      <div class="cstat-card">
-        <div class="cstat-label">Oro por Minuto</div>
-        <div class="cstat-value">${stats.goldMin}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Ventaja Oro @15</div>
-        <div class="cstat-value ${stats.goldDiff15 >= 0 ? 'text-win' : 'text-loss'}">${stats.goldDiff15 > 0 ? '+' : ''}${stats.goldDiff15}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Ventaja CS @10</div>
-        <div class="cstat-value ${stats.csDiff10 >= 0 ? 'text-win' : 'text-loss'}">${stats.csDiff10 > 0 ? '+' : ''}${stats.csDiff10}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Consumibles</div>
-        <div class="cstat-value">${stats.consumables}</div>
-      </div>
-
-      <!-- Divertidas y Logros -->
-      <div class="cstat-group-title">Logros y Datos de Impacto</div>
-      <div class="cstat-card">
-        <div class="cstat-label">Pentakills</div>
-        <div class="cstat-value" style="color:#f4c874">${stats.penta}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Racha Máxima</div>
-        <div class="cstat-value" style="color:#00C65E">${stats.maxWinStreak}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Primeras Sangres</div>
-        <div class="cstat-value">${stats.firstBlood}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Duración Prom.</div>
-        <div class="cstat-value">${stats.avgDuration} min</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Perfect Games</div>
-        <div class="cstat-value" style="color:#f4c874">${stats.perfectGames}</div>
-      </div>
-      <div class="cstat-card">
-        <div class="cstat-label">Late Wins (>35m)</div>
-        <div class="cstat-value">${stats.lateWins}</div>
+        <div class="cstat-group-title" style="margin-top:16px;">Logros y Datos de Impacto</div>
+        <div class="player-stats-grid">
+          <div class="cstat-card">
+            <div class="cstat-label">Pentakills</div>
+            <div class="cstat-value" style="color:#f4c874">${stats.penta}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Perfect Games</div>
+            <div class="cstat-value" style="color:#f4c874">${stats.perfectGames}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Racha Máxima</div>
+            <div class="cstat-value" style="color:#00C65E">${stats.maxWinStreak}</div>
+          </div>
+          <div class="cstat-card">
+            <div class="cstat-label">Duración Prom.</div>
+            <div class="cstat-value">${stats.avgDuration} min</div>
+          </div>
+        </div>
       </div>
     </div>
   ` : '<div class="empty-stats">Sin datos suficientes en el historial reciente</div>';
