@@ -2537,10 +2537,16 @@ body::before {
 }
 
 /* --- Gráfica LP --- */
-.lp-chart-canvas {
+.lp-chart-wrapper {
   background: rgba(0,0,0,0.2);
   border-radius: 12px;
-  padding: 10px;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.lp-chart-canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* --- Animación de Subida de Rango --- */

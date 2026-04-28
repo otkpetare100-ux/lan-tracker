@@ -583,6 +583,9 @@ window.openPlayerModal = function(puuid, event) {
   const acc = window._accounts_ref?.find(a => a.puuid === puuid);
   if (!acc) return;
 
+  // Evitar duplicados
+  if (document.getElementById('player-modal')) return;
+
   const modal = document.createElement('div');
   modal.id = 'player-modal';
   modal.className = 'player-modal';
@@ -720,7 +723,9 @@ function buildPlayerModalHTML(acc) {
         
         <div class="rank-history-section">
           <div class="cstat-group-title" style="margin-top: 12px;">Historial y Progresión de LP</div>
-          <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas" width="400" height="90" style="margin-bottom:8px; display:none;"></canvas>
+          <div class="lp-chart-wrapper" style="height: 180px; position: relative; margin-bottom: 12px;">
+            <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
+          </div>
           <div id="rank-history-${acc.puuid}" class="rank-history-container">
             <div class="empty-stats">Cargando historial...</div>
           </div>
@@ -764,7 +769,7 @@ async function loadRankHistoryUI(puuid) {
   // --- Funcionalidad 3: Gráfica de LP ---
   const canvas = document.getElementById(`lpChart-${puuid}`);
   if (canvas && history.length > 1 && window.Chart) {
-    canvas.style.display = 'block';
+    // No necesitamos style.display = 'block' porque el wrapper tiene altura fija
     const chartData = [...history].reverse(); // De más antiguo a más nuevo
     
     // Calcular LP continuos (sumando 100 por cada tier/división para ver subidas reales)
