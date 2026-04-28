@@ -169,13 +169,16 @@ function buildCardHTML(acc, position) {
       TOP: '<img src="/pic/roll/top_roll.png" class="role-icon-inline">',
       JNG: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
       JUNGLE: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
+      JUNGLA: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
       MID: '<img src="/pic/roll/middle_roll.png" class="role-icon-inline">',
       MIDDLE: '<img src="/pic/roll/middle_roll.png" class="role-icon-inline">',
       ADC: '<img src="/pic/roll/adc_roll.png" class="role-icon-inline">',
       BOTTOM: '<img src="/pic/roll/adc_roll.png" class="role-icon-inline">',
       SUP: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
       SUPPORT: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
+      SOPORTE: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
       UTILITY: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
+      SUPERIOR: '<img src="/pic/roll/top_roll.png" class="role-icon-inline">',
       '—': '<img src="/pic/roll/all_roll.png" class="role-icon-inline">'
     };
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
