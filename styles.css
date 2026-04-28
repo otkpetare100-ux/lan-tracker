@@ -2261,3 +2261,47 @@ body::before {
   font-size: 0.75rem;
   margin-left: 4px;
 }
+
+/* --- Animación de Carga Historial --- */
+.loading-history {
+  position: relative;
+  overflow: hidden;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.loading-history .history-btn-text,
+.loading-history .history-arrow {
+  opacity: 0;
+}
+
+.loading-history::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  animation: loading-shimmer 1.2s infinite linear;
+}
+
+.loading-history::before {
+  content: 'Cargando...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+@keyframes loading-shimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+

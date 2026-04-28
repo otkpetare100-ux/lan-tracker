@@ -224,6 +224,7 @@ async function handleHistoryToggle(puuid) {
   if (!acc) return;
 
   if (!acc.matches || acc.matches.length === 0) {
+    btn.classList.add('loading-history');
     btn.querySelector('.history-btn-text').textContent = 'Cargando...';
     btn.disabled = true;
 
@@ -246,6 +247,7 @@ async function handleHistoryToggle(puuid) {
         newBtn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
       }
     } catch(e) {
+      btn.classList.remove('loading-history');
       btn.querySelector('.history-btn-text').textContent = 'Ver historial';
       btn.disabled = false;
       showError('Error cargando historial: ' + e.message);
