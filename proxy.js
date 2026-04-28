@@ -189,12 +189,7 @@ app.get('/player/:slug', async (req, res) => {
     const tier = acc.soloQ ? acc.soloQ.tier : 'UNRANKED';
     const rankStr = tier === 'UNRANKED' ? 'Unranked' : `${tier} ${acc.soloQ.rank || ''} - ${acc.soloQ.leaguePoints || 0} LP`;
     const wr = acc.soloQ && acc.soloQ.wins ? Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100) : null;
-    const wrStr = wr !== null ? `${wr}%` : 'N/A';
-    
-    const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-    const rankIcon = tier !== 'UNRANKED' ? `/ranks/Season_2023_-_${titleCase(tier)}.png` : `/ranks/Season_2023_-_Unranked.png`;
-    const profileIcon = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId || 1}.png`;
-    const frameIcon = tier !== 'UNRANKED' ? `/pic/frame/${tier.toLowerCase()}-frame.png` : '';
+    const wrStr = wr !== null ? `${wr}% Winrate` : 'Sin partidas';
 
     const html = `
     <!DOCTYPE html>
@@ -203,123 +198,32 @@ app.get('/player/:slug', async (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${acc.gameName}#${acc.tagLine} - LAN Tracker</title>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
       <style>
-        :root {
-          --bg: #070810;
-          --card: rgba(23, 28, 48, 0.7);
-          --pink: #d77aa8;
-          --purple: #9d6cff;
-          --text: #f2f4ff;
-          --muted: #7a84aa;
-        }
-        * { box-sizing: border-box; }
-        body { 
-          font-family: 'Inter', sans-serif; 
-          background: radial-gradient(circle at top right, #1a0f2e, var(--bg) 60%);
-          color: var(--text); 
-          display: flex; 
-          justify-content: center; 
-          align-items: center; 
-          height: 100vh; 
-          margin: 0; 
-          overflow: hidden;
-        }
-        .card { 
-          background: var(--card); 
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,0.08); 
-          padding: 40px; 
-          border-radius: 24px; 
-          text-align: center; 
-          box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); 
-          width: 90%;
-          max-width: 420px;
-          animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .avatar-wrap {
-          position: relative;
-          width: 120px;
-          height: 120px;
-          margin: 0 auto 20px;
-        }
-        .avatar {
-          width: 100%;
-          height: 100%;
-          border-radius: 24px;
-          object-fit: cover;
-          box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-        .frame {
-          position: absolute;
-          top: -15%;
-          left: -15%;
-          width: 130%;
-          height: 130%;
-          pointer-events: none;
-        }
-        .level-badge {
-          position: absolute;
-          bottom: -10px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #0f111a;
-          border: 1px solid var(--purple);
-          color: var(--text);
-          padding: 2px 10px;
-          border-radius: 12px;
-          font-size: 0.8rem;
-          font-weight: 800;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        h1 { margin: 0; color: var(--pink); font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
-        .tag { color: var(--muted); font-size: 1.2rem; font-weight: 400; margin-left: 4px; }
-        .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 24px 0; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .stat-box { 
-          background: rgba(0,0,0,0.2); 
-          padding: 16px; 
-          border-radius: 16px; 
-          border: 1px solid rgba(255,255,255,0.03);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        .stat-icon { width: 48px; height: 48px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 4px; }
-        .stat-value { font-size: 1.1rem; font-weight: 800; color: var(--text); text-align: center; line-height: 1.2; }
-        .stat-value.wr { font-size: 1.5rem; color: ${wr >= 50 ? '#73d38a' : '#e06474'}; }
-        .watermark { position: fixed; bottom: 24px; color: rgba(255,255,255,0.2); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase; }
+        body { font-family: system-ui, sans-serif; background: #070810; color: #f2f4ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: rgba(23, 28, 48, 0.92); border: 1px solid rgba(255,255,255,0.08); padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { margin: 0 0 10px 0; color: #d77aa8; font-size: 2rem; }
+        .tag { color: #657099; font-size: 1.2rem; font-weight: normal; }
+        .level { color: #9d6cff; font-weight: bold; margin-bottom: 20px; display: block; }
+        .stats { display: flex; justify-content: space-around; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .stat-box { display: flex; flex-direction: column; padding: 0 15px;}
+        .stat-label { font-size: 0.8rem; color: #9aa3c7; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: #f2f4ff; }
+        .watermark { position: fixed; bottom: 20px; opacity: 0.5; font-size: 0.9rem; letter-spacing: 2px; }
       </style>
     </head>
     <body>
       <div class="card">
-        <div class="avatar-wrap">
-          <img src="${profileIcon}" alt="Avatar" class="avatar" onerror="this.src='/pic/icon.jpg'">
-          ${frameIcon ? \`<img src="\${frameIcon}" class="frame" onerror="this.remove()">\` : ''}
-          <div class="level-badge">${acc.summonerLevel}</div>
-        </div>
+        <h1>${acc.gameName}<span class="tag">#${acc.tagLine}</span></h1>
+        <span class="level">Nivel ${acc.summonerLevel}</span>
         
-        <h1>${escape(acc.gameName)}<span class="tag">#${escape(acc.tagLine)}</span></h1>
-        
-        <div class="divider"></div>
-        
-        <div class="stats-grid">
+        <div class="stats">
           <div class="stat-box">
-            <img src="${rankIcon}" alt="Rank" class="stat-icon" onerror="this.src='/ranks/Season_2023_-_Unranked.png'">
-            <span class="stat-label">Clasificatoria</span>
+            <span class="stat-label">Rango</span>
             <span class="stat-value">${rankStr}</span>
           </div>
-          <div class="stat-box">
-            <span class="stat-label">Winrate</span>
-            <span class="stat-value wr">${wrStr}</span>
-            <span class="stat-label" style="margin-top: 8px; margin-bottom: 0;">${acc.soloQ ? acc.soloQ.wins + 'V ' + acc.soloQ.losses + 'D' : '—'}</span>
+          <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.1);">
+            <span class="stat-label">Rendimiento</span>
+            <span class="stat-value">${wrStr}</span>
           </div>
         </div>
       </div>
