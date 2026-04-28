@@ -173,6 +173,71 @@ app.get('/rank-history/:puuid', async (req, res) => {
   }
 });
 
+// ---- Perfil Público (Compartir) ----
+app.get('/player/:slug', async (req, res) => {
+  try {
+    const [gameName, tagLine] = req.params.slug.split('-');
+    if (!gameName || !tagLine) return res.status(400).send('URL inválida');
+
+    const acc = await db.collection('accounts').findOne({ 
+      gameName: { $regex: new RegExp(`^${gameName}$`, 'i') },
+      tagLine: { $regex: new RegExp(`^${tagLine}$`, 'i') }
+    });
+
+    if (!acc) return res.status(404).send('Jugador no encontrado en LAN Tracker');
+
+    const tier = acc.soloQ ? acc.soloQ.tier : 'UNRANKED';
+    const rankStr = tier === 'UNRANKED' ? 'Unranked' : `${tier} ${acc.soloQ.rank || ''} - ${acc.soloQ.leaguePoints || 0} LP`;
+    const wr = acc.soloQ && acc.soloQ.wins ? Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100) : null;
+    const wrStr = wr !== null ? `${wr}% Winrate` : 'Sin partidas';
+
+    const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${acc.gameName}#${acc.tagLine} - LAN Tracker</title>
+      <style>
+        body { font-family: system-ui, sans-serif; background: #070810; color: #f2f4ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: rgba(23, 28, 48, 0.92); border: 1px solid rgba(255,255,255,0.08); padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { margin: 0 0 10px 0; color: #d77aa8; font-size: 2rem; }
+        .tag { color: #657099; font-size: 1.2rem; font-weight: normal; }
+        .level { color: #9d6cff; font-weight: bold; margin-bottom: 20px; display: block; }
+        .stats { display: flex; justify-content: space-around; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .stat-box { display: flex; flex-direction: column; padding: 0 15px;}
+        .stat-label { font-size: 0.8rem; color: #9aa3c7; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: #f2f4ff; }
+        .watermark { position: fixed; bottom: 20px; opacity: 0.5; font-size: 0.9rem; letter-spacing: 2px; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>${acc.gameName}<span class="tag">#${acc.tagLine}</span></h1>
+        <span class="level">Nivel ${acc.summonerLevel}</span>
+        
+        <div class="stats">
+          <div class="stat-box">
+            <span class="stat-label">Rango</span>
+            <span class="stat-value">${rankStr}</span>
+          </div>
+          <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.1);">
+            <span class="stat-label">Rendimiento</span>
+            <span class="stat-value">${wrStr}</span>
+          </div>
+        </div>
+      </div>
+      <div class="watermark">LAN TRACKER</div>
+    </body>
+    </html>
+    `;
+    res.send(html);
+  } catch(e) {
+    console.error('Error sirviendo perfil:', e);
+    res.status(500).send('Error interno');
+  }
+});
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error('Error no manejado:', err);

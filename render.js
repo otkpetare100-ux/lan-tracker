@@ -214,6 +214,7 @@ function buildCardHTML(acc, position) {
         '</div>' +
         '<div class="winrate-block ' + (wr >= 55 ? 'wr-glow-good' : (wr < 48 ? 'wr-glow-bad' : '')) + '">' + wrHTML + '</div>' +
         '<div class="card-actions">' +
+          '<button class="note-btn ' + (acc.notes ? 'has-note' : '') + '" data-puuid="' + acc.puuid + '" title="Notas de cuenta">📝</button>' +
           '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
           '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
         '</div>' +
@@ -224,6 +225,7 @@ function buildCardHTML(acc, position) {
   '<div class="history-section">' +
     '<div class="card-bottom-actions">' +
       historyBtn +
+      '<button class="share-btn" data-puuid="' + acc.puuid + '" title="Compartir">🔗 Compartir</button>' +
       (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
     '</div>' +
@@ -640,6 +642,43 @@ function buildPlayerModalHTML(acc) {
     </div>
   ` : '<div class="empty-stats">Actualiza la cuenta para ver estadísticas detalladas</div>';
 
+  // --- Funcionalidad 4: Mapa de calor de posiciones ---
+  let heatMapHTML = '';
+  if (acc.matches && acc.matches.length > 0) {
+    const posCount = { TOP: 0, JUNGLE: 0, MIDDLE: 0, BOTTOM: 0, UTILITY: 0 };
+    acc.matches.forEach(m => {
+      let p = m.teamPosition || '';
+      if (p === 'UTILITY') p = 'SUPPORT'; // Normalizar
+      if (posCount[p] !== undefined) posCount[p]++;
+      else if (p === 'SUPPORT') posCount.UTILITY++;
+    });
+    
+    const totalPos = Object.values(posCount).reduce((a, b) => a + b, 0) || 1;
+    const maxPos = Math.max(...Object.values(posCount), 1);
+    
+    heatMapHTML = `
+      <div class="heatmap-section">
+        <div class="cstat-group-title">Roles Jugados</div>
+        <div class="heatmap-container">
+          ${Object.entries(posCount).map(([pos, count]) => {
+            const pct = (count / totalPos) * 100;
+            const heightPct = (count / maxPos) * 100; // Altura relativa al rol más jugado
+            const icon = pos === 'TOP' ? '🛡️' : pos === 'JUNGLE' ? '⚔️' : pos === 'MIDDLE' ? '🔮' : pos === 'BOTTOM' ? '🏹' : '🏥';
+            return `
+              <div class="heat-col" title="${pos}: ${count} partidas (${Math.round(pct)}%)">
+                <div class="heat-bar-bg">
+                  <div class="heat-bar-fill" style="height: ${heightPct}%; opacity: ${0.4 + (heightPct/100)*0.6}"></div>
+                </div>
+                <div class="heat-icon">${icon}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+  // ----------------------------------------------------
+
   return `
     <div class="player-modal__box">
       <div class="player-modal__header">
@@ -655,9 +694,11 @@ function buildPlayerModalHTML(acc) {
       <div class="player-modal__body">
         <div class="stats-source-hint">Resumen de desempeño en SoloQ (Últimas 20)</div>
         ${statsHTML}
+        ${heatMapHTML}
         
         <div class="rank-history-section">
-          <div class="cstat-group-title" style="margin-top: 16px;">Historial de Rangos</div>
+          <div class="cstat-group-title" style="margin-top: 16px;">Historial y Progresión de LP</div>
+          <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas" width="400" height="150" style="margin-bottom:12px; display:none;"></canvas>
           <div id="rank-history-${acc.puuid}" class="rank-history-container">
             <div class="empty-stats">Cargando historial...</div>
           </div>
@@ -697,7 +738,71 @@ async function loadRankHistoryUI(puuid) {
       </div>
     `;
   }).join('') + '</div>';
+
+  // --- Funcionalidad 3: Gráfica de LP ---
+  const canvas = document.getElementById(`lpChart-${puuid}`);
+  if (canvas && history.length > 1 && window.Chart) {
+    canvas.style.display = 'block';
+    const chartData = [...history].reverse(); // De más antiguo a más nuevo
+    
+    // Calcular LP continuos (sumando 100 por cada tier/división para ver subidas reales)
+    // Para simplificar, solo mostramos los LP como valor, o un puntaje. Mostrar LP es más limpio.
+    const labels = chartData.map(h => {
+      const d = new Date(h.date);
+      return d.getDate() + '/' + (d.getMonth()+1);
+    });
+    
+    const lpData = chartData.map(h => h.rank.lp);
+    
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'League Points',
+          data: lpData,
+          borderColor: '#d77aa8',
+          backgroundColor: 'rgba(215, 122, 168, 0.15)',
+          borderWidth: 2,
+          pointBackgroundColor: '#9d6cff',
+          pointBorderColor: '#070810',
+          pointRadius: 4,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(23, 28, 48, 0.95)',
+            titleColor: '#f2f4ff',
+            bodyColor: '#d9b85f',
+            borderColor: 'rgba(214, 125, 170, 0.3)',
+            borderWidth: 1,
+            callbacks: {
+              label: function(context) {
+                const h = chartData[context.dataIndex];
+                const noDivTiers = ['MASTER','GRANDMASTER','CHALLENGER', 'UNRANKED'];
+                const rankStr = noDivTiers.includes(h.rank.tier) ? h.rank.tier : `${h.rank.tier} ${h.rank.division}`;
+                return `${rankStr} - ${h.rank.lp} LP`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099', font: { size: 10 } } }
+        }
+      }
+    });
+  } else if (canvas && history.length <= 1) {
+    canvas.insertAdjacentHTML('afterend', '<div class="empty-stats" style="margin-bottom:12px;">Actualiza la cuenta varias veces para ver tu progresión en gráfica</div>');
+  }
 }
+
 
 
 function calculateGlobalStats(matches) {
@@ -886,6 +991,67 @@ function renderLeaderCard(title, data, sub) {
     `;
   }
 
-  // Fallback para los que no tienen función específica arriba
   return renderCard(val);
 }
+
+/* --- Funcionalidad 1: Notas por cuenta --- */
+window.openNoteModal = function(puuid) {
+  const acc = window._accounts_ref?.find(a => a.puuid === puuid);
+  if (!acc) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'note-modal';
+  modal.className = 'note-modal';
+  
+  const currentNote = escapeHTML(acc.notes || '');
+  
+  modal.innerHTML = `
+    <div class="note-box">
+      <div class="note-header">
+        <h3>Notas: ${escapeHTML(acc.gameName)}</h3>
+        <button class="note-close" onclick="closeNoteModal()">✕</button>
+      </div>
+      <div class="note-body">
+        <textarea id="note-textarea-${puuid}" class="note-textarea" maxlength="200" placeholder="Añade una nota sobre este jugador (máx 200 caracteres)...">${currentNote}</textarea>
+        <div class="note-footer">
+          <span class="note-counter" id="note-counter-${puuid}">${currentNote.length}/200</span>
+          <div class="note-actions">
+            <button class="note-cancel" onclick="closeNoteModal()">Cancelar</button>
+            <button class="note-save" onclick="saveNote('${puuid}')">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.classList.add('modal-open');
+  requestAnimationFrame(() => modal.classList.add('note-modal--open'));
+
+  const textarea = document.getElementById(`note-textarea-${puuid}`);
+  const counter = document.getElementById(`note-counter-${puuid}`);
+  
+  if (textarea && counter) {
+    textarea.focus();
+    textarea.addEventListener('input', () => {
+      counter.textContent = `${textarea.value.length}/200`;
+    });
+  }
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeNoteModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+};
+
+window.closeNoteModal = function() {
+  const modal = document.getElementById('note-modal');
+  if (modal) {
+    modal.classList.remove('note-modal--open');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => modal.remove(), 300);
+  }
+};

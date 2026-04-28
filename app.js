@@ -265,6 +265,26 @@ accountsGrid.addEventListener('click', async (e) => {
   const removeBtn  = e.target.closest('.remove-btn');
   const refreshBtn = e.target.closest('.refresh-btn');
   const historyBtn = e.target.closest('.history-toggle-btn');
+  const noteBtn    = e.target.closest('.note-btn');
+  const shareBtn   = e.target.closest('.share-btn');
+
+  if (noteBtn) {
+    const puuid = noteBtn.dataset.puuid;
+    if (typeof openNoteModal === 'function') openNoteModal(puuid);
+  }
+
+  if (shareBtn) {
+    const puuid = shareBtn.dataset.puuid;
+    const acc = accounts.find(a => a.puuid === puuid);
+    if (acc) {
+      const url = `https://lan-tracker-production.up.railway.app/player/${encodeURIComponent(acc.gameName)}-${encodeURIComponent(acc.tagLine)}`;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('🔗 ¡Link copiado al portapapeles!', 'toast-up');
+      }).catch(err => {
+        showError('No se pudo copiar el link');
+      });
+    }
+  }
 
   if (removeBtn) {
     const puuid = removeBtn.dataset.puuid;
@@ -338,6 +358,29 @@ function showRankChangeToast(name, prev, next) {
       : `${name} bajó a ${fmt(next)}`;
       
   showToast(emoji + ' ' + msg, color);
+  
+  if (promoted && !sameDiv) {
+    triggerRankUpCelebration();
+  }
+}
+
+function triggerRankUpCelebration() {
+  const container = document.createElement('div');
+  container.className = 'rank-celebration-container';
+  document.body.appendChild(container);
+
+  for (let i = 0; i < 50; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle-gold';
+    particle.style.left = Math.random() * 100 + 'vw';
+    particle.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+    particle.style.animationDelay = (Math.random() * 0.5) + 's';
+    container.appendChild(particle);
+  }
+
+  setTimeout(() => {
+    container.remove();
+  }, 3500);
 }
 
 function showToast(message, cls = '') {
@@ -376,5 +419,33 @@ async function saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ) {
       }
     };
     await postRankHistory(entry);
+  }
+}
+
+/* ---- Notas por Cuenta ---- */
+async function saveNote(puuid) {
+  const textarea = document.getElementById(`note-textarea-${puuid}`);
+  if (!textarea) return;
+  
+  const text = textarea.value.trim().substring(0, 200);
+  const acc = accounts.find(a => a.puuid === puuid);
+  if (!acc) return;
+  
+  acc.notes = text;
+  
+  const btn = document.querySelector(`.note-save`);
+  if (btn) { btn.textContent = 'Guardando...'; btn.disabled = true; }
+  
+  const ok = await updateAccount(acc);
+  
+  if (ok) {
+    accounts = accounts.map(a => a.puuid === puuid ? acc : a);
+    updateGlobalRef();
+    if (typeof closeNoteModal === 'function') closeNoteModal();
+    applyFilters();
+    showToast('📝 Nota guardada', 'toast-up');
+  } else {
+    showError('Error al guardar la nota');
+    if (btn) { btn.textContent = 'Guardar'; btn.disabled = false; }
   }
 }
