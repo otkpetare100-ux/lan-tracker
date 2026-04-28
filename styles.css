@@ -854,7 +854,7 @@ body::before {
   align-items: center;
 }
 
-.history-toggle-btn {
+.history-toggle-btn, .share-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -870,7 +870,7 @@ body::before {
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
-.history-toggle-btn:hover {
+.history-toggle-btn:hover, .share-btn:hover {
   color: var(--text);
   border-color: rgba(215, 122, 168, 0.24);
   background: rgba(215, 122, 168, 0.08);
@@ -2312,7 +2312,7 @@ body::before {
 }
 
 /* --- Botones Adicionales en Tarjetas --- */
-.note-btn, .share-btn {
+.note-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--muted);
@@ -2343,15 +2343,7 @@ body::before {
   border: 2px solid var(--card-2);
 }
 
-.share-btn {
-  padding: 0 10px;
-  height: 28px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.note-btn:hover, .share-btn:hover {
+.note-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
