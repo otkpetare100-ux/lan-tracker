@@ -848,6 +848,12 @@ body::before {
   align-items: center;
 }
 
+.card-bottom-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .history-toggle-btn {
   display: inline-flex;
   align-items: center;
