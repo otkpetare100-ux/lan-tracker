@@ -2511,6 +2511,29 @@ body::before {
 
 .heat-icon {
   font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heat-role-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+}
+
+.role-icon-inline {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  margin-right: 4px;
+  object-fit: contain;
+}
+
+.position-badge {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* --- Gráfica LP --- */

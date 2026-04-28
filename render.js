@@ -166,8 +166,17 @@ function buildCardHTML(acc, position) {
   '</button>';
 
     const POSITION_ICONS = {
-      TOP: '🛡️', JNG: '⚔️', MID: '🔮', ADC: '🏹', SUP: '🏥',
-      'TOP': '🛡️', 'Jungla': '⚔️', 'JUNGLE': '⚔️', 'MID': '🔮', 'ADC': '🏹', 'SUP': '🏥', '—': '❓'
+      TOP: '<img src="/pic/roll/top_roll.png" class="role-icon-inline">',
+      JNG: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
+      JUNGLE: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
+      MID: '<img src="/pic/roll/middle_roll.png" class="role-icon-inline">',
+      MIDDLE: '<img src="/pic/roll/middle_roll.png" class="role-icon-inline">',
+      ADC: '<img src="/pic/roll/adc_roll.png" class="role-icon-inline">',
+      BOTTOM: '<img src="/pic/roll/adc_roll.png" class="role-icon-inline">',
+      SUP: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
+      SUPPORT: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
+      UTILITY: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
+      '—': '<img src="/pic/roll/all roll.png" class="role-icon-inline">'
     };
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
@@ -191,7 +200,7 @@ function buildCardHTML(acc, position) {
           '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
           '<div class="summoner-meta">' +
             '<span class="summoner-region">LAN</span>' +
-            '<span class="position-badge" title="Posición principal">' + escapeHTML(posLabel) + '</span>' +
+            '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
             streakIcon +
             recentDots +
           '</div>' +
@@ -665,7 +674,15 @@ function buildPlayerModalHTML(acc) {
           ${Object.entries(posCount).map(([pos, count]) => {
             const pct = (count / totalPos) * 100;
             const heightPct = (count / maxPos) * 100; // Altura relativa al rol más jugado
-            const icon = pos === 'TOP' ? '🛡️' : pos === 'JUNGLE' ? '⚔️' : pos === 'MIDDLE' ? '🔮' : pos === 'BOTTOM' ? '🏹' : '🏥';
+            const iconMap = {
+              TOP: '/pic/roll/top_roll.png',
+              JUNGLE: '/pic/roll/jungle_roll.png',
+              MIDDLE: '/pic/roll/middle_roll.png',
+              BOTTOM: '/pic/roll/adc_roll.png',
+              UTILITY: '/pic/roll/supp_roll.png'
+            };
+            const iconUrl = iconMap[pos] || '/pic/roll/all roll.png';
+            const icon = `<img src="${iconUrl}" class="heat-role-icon">`;
             return `
               <div class="heat-col" title="${pos}: ${count} partidas (${Math.round(pct)}%)">
                 <div class="heat-bar-bg">
