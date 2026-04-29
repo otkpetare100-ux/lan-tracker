@@ -1393,7 +1393,19 @@ function toggleActivityPin(e) {
   isActivityPinned = !isActivityPinned;
   
   if (btn) btn.classList.toggle('activity-pin--active', isActivityPinned);
-  if (isActivityPinned && activityCloseTimer) clearTimeout(activityCloseTimer);
+  
+  if (isActivityPinned) {
+    if (activityCloseTimer) clearTimeout(activityCloseTimer);
+  } else {
+    // Si deseleccionamos el pin y está abierto, programar cierre en 5s
+    const sidebar = document.getElementById('activity-sidebar');
+    if (sidebar && !sidebar.classList.contains('collapsed')) {
+      if (activityCloseTimer) clearTimeout(activityCloseTimer);
+      activityCloseTimer = setTimeout(() => {
+        if (!isActivityPinned) closeActivitySidebar();
+      }, 5000);
+    }
+  }
 }
 
 function formatRelativeTime(timestamp) {

@@ -2727,23 +2727,26 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: 20px;
-  overflow-y: auto;
+  overflow: hidden;
   z-index: 50;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 
 .activity-sidebar.collapsed {
-  width: 50px;
-  padding: 20px 0;
-  overflow: hidden;
-  background: rgba(15, 17, 26, 0.4);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+  background: rgba(215, 122, 168, 0.2);
+  border-color: rgba(215, 122, 168, 0.3);
 }
 
 .activity-toggle {
   position: absolute;
-  left: 10px;
-  top: 15px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   background: none;
   border: none;
   color: #d77aa8;
@@ -2751,6 +2754,13 @@ body::before {
   cursor: pointer;
   z-index: 10;
   pointer-events: none;
+  transition: all 0.3s;
+}
+
+.activity-sidebar:not(.collapsed) .activity-toggle {
+  left: 10px;
+  top: 15px;
+  transform: none;
 }
 
 .activity-pin {
@@ -2768,11 +2778,6 @@ body::before {
 .activity-sidebar.collapsed .activity-pin { opacity: 0; pointer-events: none; }
 .activity-pin--active { opacity: 1; filter: drop-shadow(0 0 5px #f4c874); }
 
-.activity-sidebar.collapsed .activity-toggle {
-  left: 50%;
-  transform: translateX(-50%) rotate(180deg);
-}
-
 .activity-sidebar.collapsed .activity-content-wrapper {
   opacity: 0;
   pointer-events: none;
@@ -2780,10 +2785,9 @@ body::before {
 
 .activity-content-wrapper {
   transition: opacity 0.2s;
-  pointer-events: none;
+  padding-top: 10px;
 }
 
-.activity-sidebar:not(.collapsed) .activity-content-wrapper { pointer-events: auto; }
 
 
 .activity-feed {
