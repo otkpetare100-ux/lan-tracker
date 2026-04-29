@@ -9,6 +9,22 @@ const RANK_COLORS = {
   GRANDMASTER: 0xd93f3f, CHALLENGER: 0xf4c874
 };
 
+const TIER_ORDER = {
+  CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7,
+  DIAMOND: 6, EMERALD: 5, PLATINUM: 4,
+  GOLD: 3, SILVER: 2, BRONZE: 1, IRON: 0, UNRANKED: -1,
+};
+const DIV_ORDER = { I: 4, II: 3, III: 2, IV: 1 };
+
+function getRankScore(acc) {
+  const soloQ = acc.soloQ;
+  if (!soloQ) return -1;
+  const tier = TIER_ORDER[soloQ.tier] ?? -1;
+  const div  = DIV_ORDER[soloQ.rank]  ?? 0;
+  const lp   = soloQ.leaguePoints     || 0;
+  return tier * 10000 + div * 1000 + lp;
+}
+
 function initBot(db) {
   if (!process.env.DISCORD_TOKEN) {
     console.warn('⚠️ No se detectó DISCORD_TOKEN. El bot no iniciará.');
@@ -57,7 +73,7 @@ function initBot(db) {
 
     if (command === 'ladder') {
       const accounts = await db.collection('accounts').find({}).toArray();
-      const sorted = accounts.sort((a,b) => (b.soloQ?.leaguePoints || 0) - (a.soloQ?.leaguePoints || 0)).slice(0, 10);
+      const sorted = accounts.sort((a,b) => getRankScore(b) - getRankScore(a)).slice(0, 10);
       
       const list = sorted.map((a, i) => `${i+1}. **${a.gameName}** - ${a.soloQ?.tier || 'Unranked'} ${a.soloQ?.rank || ''}`).join('\n');
       
