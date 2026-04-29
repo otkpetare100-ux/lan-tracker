@@ -1,7 +1,7 @@
-const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/29.png';
+const FALLBACK_ICON_URL = 'https://ddragon.leagueoflegends.com/cdn/16.9.1/img/profileicon/29.png';
 
 function getProfileIconUrl(id) {
-  return `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${id}.png`;
+  return `https://ddragon.leagueoflegends.com/cdn/16.9.1/img/profileicon/${id}.png`;
 }
 
 const RANK_COLORS = {
@@ -34,6 +34,7 @@ const CHAMP_NAME_FIX = {
   'TahmKench': 'TahmKench', 'TwistedFate': 'TwistedFate', 'Velkoz': 'Velkoz',
   'XinZhao': 'XinZhao', 'Fiddlesticks': 'Fiddlesticks', 'FiddleSticks': 'Fiddlesticks',
   'fiddlesticks': 'Fiddlesticks', 'Renata': 'Renata', 'RenataGlasc': 'Renata', 'Mel': 'Mel',
+  'NunuyWillump': 'Nunu', 'NunuWillump': 'Nunu', 'Nunu': 'Nunu',
 };
 
 function getRankInfo(acc) {
@@ -89,7 +90,7 @@ function buildMatchHistoryHTML(matches) {
     const cls = m.win ? 'match-win' : 'match-loss';
     const kda = m.kills + '/' + m.deaths + '/' + m.assists;
     const dur = formatDuration(m.gameDuration);
-    const img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(m.champion);
+    const img = 'https://ddragon.leagueoflegends.com/cdn/16.9.1/img/champion/' + getChampImageName(m.champion);
     return '<div class="match-item ' + cls + '">' +
       '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
       '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
@@ -104,7 +105,7 @@ function buildTopChampsHTML(topChampions, puuid) {
   if (!topChampions || topChampions.length === 0) return '';
   return topChampions.map(function(c) {
     if (!c.name) return '';
-    var img = 'https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/' + getChampImageName(c.name);
+    var img = 'https://ddragon.leagueoflegends.com/cdn/16.9.1/img/champion/' + getChampImageName(c.name);
     return '<div class="top-champ" title="Ver estadísticas de ' + escapeHTML(c.name) + '" onclick="openChampModal(\'' + puuid + '\', \'' + escapeHTML(c.name) + '\')">' +
       '<img src="' + img + '" alt="' + escapeHTML(c.name) + '" onerror="this.style.display=\'none\'" />' +
     '</div>';
