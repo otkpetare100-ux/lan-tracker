@@ -234,6 +234,85 @@ function initBot(db) {
       msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! 🤐`);
     }
 
+    // --- SISTEMA DE GACHAPON ---
+    const GACHA_ITEMS = [
+      { id: 'Naafiri', name: 'Naafiri (Base)', rarity: 'Común', weight: 70, img: 'Naafiri_0' },
+      { id: 'Aatrox', name: 'Aatrox', rarity: 'Común', weight: 70, img: 'Aatrox_0' },
+      { id: 'Yasuo', name: 'Yasuo', rarity: 'Común', weight: 70, img: 'Yasuo_0' },
+      { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
+      { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
+      { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
+      { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
+      { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
+      { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
+      { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' }
+    ];
+
+    if (command === 'gacha' || command === 'tiro') {
+      const COST = 300;
+      const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
+
+      if (!userEco || userEco.coins < COST) {
+        return msg.reply(`❌ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
+      }
+
+      // Sistema de Pesos para Probabilidades
+      const totalWeight = GACHA_ITEMS.reduce((sum, item) => sum + item.weight, 0);
+      let random = Math.random() * totalWeight;
+      let selected = GACHA_ITEMS[0];
+
+      for (const item of GACHA_ITEMS) {
+        if (random < item.weight) {
+          selected = item;
+          break;
+        }
+        random -= item.weight;
+      }
+
+      // Guardar en Inventario
+      await db.collection('economy').updateOne(
+        { discordId: msg.author.id },
+        { 
+          $inc: { coins: -COST },
+          $addToSet: { inventory: { id: selected.id, name: selected.name, rarity: selected.rarity, date: new Date() } }
+        }
+      );
+
+      const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Épico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
+
+      const embed = new EmbedBuilder()
+        .setTitle(`🎰 ¡GACHAPON DE LA PERRERA!`)
+        .setDescription(`¡Has obtenido una carta **${selected.rarity}**!\n\n✨ **${selected.name}**`)
+        .setImage(`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`)
+        .setColor(color)
+        .setFooter({ text: `Gastaste ${COST} coins · Naafiri Bot` });
+
+      msg.reply({ embeds: [embed] });
+
+      if (selected.rarity === 'Legendario') {
+        msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
+      }
+    }
+
+    if (command === 'mochila' || command === 'inv') {
+      const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
+      if (!userEco || !userEco.inventory || userEco.inventory.length === 0) {
+        return msg.reply('🎒 Tu mochila está vacía. ¡Usa `!gacha` para empezar tu colección!');
+      }
+
+      const items = userEco.inventory.map(item => {
+        const icon = item.rarity === 'Legendario' ? '⭐' : item.rarity === 'Épico' ? '💜' : item.rarity === 'Raro' ? '🔷' : '⚪';
+        return `${icon} **${item.name}** (${item.rarity})`;
+      }).join('\n');
+
+      const embed = new EmbedBuilder()
+        .setTitle(`🎒 Mochila de ${msg.author.username}`)
+        .setDescription(items)
+        .setColor(0x2ecc71);
+
+      msg.reply({ embeds: [embed] });
+    }
+
   });
 
   client.login(process.env.DISCORD_TOKEN);
