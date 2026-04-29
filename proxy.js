@@ -45,6 +45,14 @@ async function connectDB() {
     // Resumen Diario cada 24h
     setInterval(() => sendDailySummary(db), 24 * 60 * 60 * 1000);
 
+    // Recordatorio de Primera Victoria (9 AM)
+    setInterval(async () => {
+      const now = new Date();
+      if (now.getHours() === 9 && now.getMinutes() === 0) {
+        sendDailyMotivation(db);
+      }
+    }, 60 * 1000);
+
     // Escaneo de Partidas en Vivo cada 5 min
     const liveCache = new Set();
     setInterval(async () => {

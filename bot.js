@@ -68,6 +68,99 @@ function initBot(db) {
 
       msg.reply({ embeds: [embed] });
     }
+
+    // --- Fase 1: Vínculo y Economía ---
+    
+    if (command === 'vincular') {
+      const slug = args[0];
+      if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
+      const [name, tag] = slug.split('#');
+      
+      const res = await db.collection('accounts').updateOne(
+        { gameName: { $regex: new RegExp(`^${name}$`, 'i') }, tagLine: { $regex: new RegExp(`^${tag}$`, 'i') } },
+        { $set: { discordId: msg.author.id } }
+      );
+
+      if (res.modifiedCount > 0) {
+        msg.reply(`✅ ¡Cuenta vinculada! Ahora eres oficialmente **${name}#${tag}**.`);
+      } else {
+        msg.reply('❌ No encontré esa cuenta en el dashboard.');
+      }
+    }
+
+    if (command === 'monedas' || command === 'bal') {
+      const user = await db.collection('economy').findOne({ discordId: msg.author.id });
+      const bal = user ? user.coins : 0;
+      msg.reply(`💰 Tienes **${bal} Naafiri Coins**. Use \`!diario\` para reclamar más.`);
+    }
+
+    if (command === 'diario') {
+      const now = new Date();
+      const user = await db.collection('economy').findOne({ discordId: msg.author.id });
+      
+      if (user && user.lastDaily && (now - user.lastDaily < 24 * 60 * 60 * 1000)) {
+        return msg.reply('⏳ Ya reclamaste tus monedas hoy. Vuelve mañana.');
+      }
+
+      await db.collection('economy').updateOne(
+        { discordId: msg.author.id },
+        { $inc: { coins: 100 }, $set: { lastDaily: now, discordTag: msg.author.tag } },
+        { upsert: true }
+      );
+      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.');
+    }
+
+    if (command === 'shame' || command === 'muro') {
+      const accounts = await db.collection('accounts').find({}).toArray();
+      const losers = accounts.sort((a,b) => (a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) - (b.soloQ?.wins / (b.soloQ?.wins + b.soloQ?.losses || 1))).slice(0, 5);
+      
+      const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) * 100)}% 🤡`).join('\n');
+      
+      const embed = new EmbedBuilder()
+        .setTitle('🤡 El Muro de la Vergüenza')
+        .setDescription(list || 'Todos son pro players por ahora.')
+        .setColor(0xd93f3f);
+
+      msg.reply({ embeds: [embed] });
+    }
+
+    if (command === 'top_ricos' || command === 'top_coins') {
+      const top = await db.collection('economy').find({}).sort({ coins: -1 }).limit(10).toArray();
+      const list = top.map((u, i) => `${i+1}. **${u.discordTag || 'Usuario'}** - ${u.coins} 💰`).join('\n');
+      
+      const embed = new EmbedBuilder()
+        .setTitle('💰 Los Más Ricos de la Perrera')
+        .setDescription(list || 'Nadie tiene monedas aún.')
+        .setColor(0xf1c40f);
+
+      msg.reply({ embeds: [embed] });
+    }
+
+    if (command === 'apostar') {
+      const amount = parseInt(args[0]);
+      const choice = args[1]?.toLowerCase(); // gana / pierde
+      const targetSlug = args[2]; // opcional
+
+      if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice)) {
+        return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG`');
+      }
+
+      const user = await db.collection('economy').findOne({ discordId: msg.author.id });
+      if (!user || user.coins < amount) return msg.reply('❌ No tienes suficientes Naafiri Coins.');
+
+      // Guardar apuesta (esto se procesaría al terminar la partida en proxy.js)
+      await db.collection('bets').insertOne({
+        discordId: msg.author.id,
+        amount,
+        choice,
+        target: targetSlug,
+        status: 'open',
+        date: new Date()
+      });
+
+      await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
+      msg.reply(`✅ Apuesta registrada: **${amount} coins** a que **${choice.toUpperCase()}**. ¡Suerte!`);
+    }
   });
 
   client.login(process.env.DISCORD_TOKEN);
@@ -91,6 +184,40 @@ async function notifyRankChange(data) {
     .setTimestamp();
 
   channel.send({ embeds: [embed] });
+
+  // Actualizar Rol si está vinculado
+  const acc = await db.collection('accounts').findOne({ gameName: name });
+  if (acc && acc.discordId) {
+    updateUserRoles(acc.discordId, newRank.split(' ')[0]);
+  }
+}
+
+async function updateUserRoles(discordId, tier) {
+  if (!client) return;
+  try {
+    const guild = client.guilds.cache.first(); // Asumimos un solo servidor
+    if (!guild) return;
+    const member = await guild.members.fetch(discordId);
+    if (!member) return;
+
+    const roleEnvMap = {
+      IRON: 'ROLE_IRON', BRONZE: 'ROLE_BRONZE', SILVER: 'ROLE_SILVER', GOLD: 'ROLE_GOLD',
+      PLATINUM: 'ROLE_PLATINUM', EMERALD: 'ROLE_EMERALD', DIAMOND: 'ROLE_DIAMOND',
+      MASTER: 'ROLE_MASTER', GRANDMASTER: 'ROLE_GRANDMASTER', CHALLENGER: 'ROLE_CHALLENGER'
+    };
+
+    const targetRoleId = process.env[roleEnvMap[tier.toUpperCase()]];
+    if (!targetRoleId) return;
+
+    // Quitar otros roles de rango (opcional)
+    const allRankRoles = Object.values(roleEnvMap).map(v => process.env[v]).filter(id => id);
+    await member.roles.remove(allRankRoles);
+    
+    // Añadir nuevo rol
+    await member.roles.add(targetRoleId);
+  } catch (e) {
+    console.error('Error actualizando roles:', e);
+  }
 }
 
 // Alerta de Partida en Vivo
@@ -104,6 +231,20 @@ async function notifyLiveGame(acc, gameData) {
     .setDescription(`**${acc.gameName}** acaba de entrar en una partida.\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
     .setColor(0x576bce)
     .setTimestamp();
+
+  channel.send({ embeds: [embed] });
+}
+
+// Recordatorio Primera Victoria
+async function sendDailyMotivation(db) {
+  if (!client || !targetChannelId) return;
+  const channel = client.channels.cache.get(targetChannelId);
+  if (!channel) return;
+
+  const embed = new EmbedBuilder()
+    .setTitle('☀️ ¡Buenos días, Perrera!')
+    .setDescription('¿Quién se va a sacar la primera victoria hoy? ⚔️\nUsen `!diario` para sus monedas.')
+    .setColor(0xf4c874);
 
   channel.send({ embeds: [embed] });
 }
