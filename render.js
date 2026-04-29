@@ -289,6 +289,7 @@ function buildCardHTML(acc, position) {
           '</div>' +
         '</div>' +
         '<div class="winrate-block ' + (wr >= 55 ? 'wr-glow-good' : (wr < 48 ? 'wr-glow-bad' : '')) + '">' + wrHTML + '</div>' +
+        buildReactionsHTML(acc.reactions, acc.puuid) +
         '<div class="card-actions">' +
           '<button class="note-btn ' + (acc.notes ? 'has-note' : '') + '" data-puuid="' + acc.puuid + '" title="Notas de cuenta">📝</button>' +
           '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
@@ -310,7 +311,6 @@ function buildCardHTML(acc, position) {
     '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
       buildMatchHistoryHTML(acc.matches) +
     '</div>' +
-    buildReactionsHTML(acc.reactions, acc.puuid) +
   '</div>';
 }
 
