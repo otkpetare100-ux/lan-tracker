@@ -1489,3 +1489,97 @@ document.addEventListener('DOMContentLoaded', function() {
     pinBtn.addEventListener('click', toggleActivityPin);
   }
 });
+
+/* --- Hall of Fame Rendering --- */
+window.openHof = async function() {
+  const modal = document.getElementById('hof-modal');
+  const body  = document.getElementById('hof-body');
+  if (!modal || !body) return;
+
+  modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+  body.innerHTML = '<div class="empty-state-mini">Invocando historia...</div>';
+
+  try {
+    const res = await fetch('/splits');
+    const splits = await res.json();
+    renderHallOfFame(splits);
+  } catch(e) {
+    body.innerHTML = '<div class="error-msg">Error al cargar la historia</div>';
+  }
+};
+
+window.closeHof = function() {
+  const modal = document.getElementById('hof-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+  }
+};
+
+function renderHallOfFame(splits) {
+  const body = document.getElementById('hof-body');
+  if (!body) return;
+
+  if (!splits || splits.length === 0) {
+    body.innerHTML = '<div class="empty-state-mini">Aún no hay splits archivados. ¡Haz historia hoy!</div>';
+    return;
+  }
+
+  body.innerHTML = splits.map(split => {
+    // Tomar top 3 para el podio, resto para la tabla
+    const top3 = split.rankings.slice(0, 3);
+    const others = split.rankings.slice(3);
+
+    const podiumHTML = top3.map((player, idx) => {
+      const place = idx + 1;
+      const rankIcon = RANK_ICONS[player.tier] || RANK_ICONS.UNRANKED;
+      return `
+        <div class="podium-place place-${place}">
+          <img class="podium-rank-img" src="${rankIcon}" alt="${player.tier}" />
+          <div class="podium-name">${escapeHTML(player.gameName)}</div>
+          <div class="podium-tier">${player.tier} ${player.rank}</div>
+        </div>
+      `;
+    }).join('');
+
+    const tableHTML = others.length > 0 ? `
+      <table class="hof-table">
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Jugador</th>
+            <th>Rango Final</th>
+            <th>LP</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${others.map((p, i) => `
+            <tr>
+              <td>${i + 4}</td>
+              <td>
+                <img class="hof-mini-icon" src="${getProfileIconUrl(p.profileIconId)}" />
+                ${escapeHTML(p.gameName)}#${escapeHTML(p.tagLine)}
+              </td>
+              <td>${p.tier} ${p.rank}</td>
+              <td>${p.lp} LP</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    ` : '';
+
+    return `
+      <div class="split-record">
+        <div class="split-header">
+          <h3>${escapeHTML(split.name)}</h3>
+          <small>${new Date(split.date).toLocaleDateString()}</small>
+        </div>
+        <div class="podium-container">
+          ${podiumHTML}
+        </div>
+        ${tableHTML}
+      </div>
+    `;
+  }).join('');
+}

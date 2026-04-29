@@ -446,6 +446,56 @@ app.delete('/tournaments/:id', async (req, res) => {
   }
 });
 
+// ---- Gestión de Historial de Splits (Hall of Fame) ----
+app.get('/splits', async (req, res) => {
+  try {
+    if (!db) return res.status(503).json({ error: 'DB no lista' });
+    const list = await db.collection('splits').find({}).sort({ date: -1 }).toArray();
+    res.json(list);
+  } catch(e) {
+    res.status(500).json({ error: 'Error leyendo historial de splits' });
+  }
+});
+
+app.post('/splits/archive', async (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'Falta el nombre del Split' });
+
+  try {
+    const accounts = await db.collection('accounts').find({}).toArray();
+    
+    // Función de puntuación interna para el archivado
+    const getScore = (acc) => {
+      const TIER_VALS = { CHALLENGER: 9, GRANDMASTER: 8, MASTER: 7, DIAMOND: 6, EMERALD: 5, PLATINUM: 4, GOLD: 3, SILVER: 2, BRONZE: 1, IRON: 0 };
+      const DIV_VALS  = { I: 4, II: 3, III: 2, IV: 1 };
+      const soloQ = acc.soloQ;
+      if (!soloQ) return -1;
+      return (TIER_VALS[soloQ.tier] ?? -1) * 10000 + (DIV_VALS[soloQ.rank] ?? 0) * 1000 + (soloQ.leaguePoints || 0);
+    };
+
+    const sorted = accounts.sort((a,b) => getScore(b) - getScore(a));
+
+    const archiveEntry = {
+      name: name,
+      date: new Date(),
+      rankings: sorted.map(a => ({
+        gameName: a.gameName,
+        tagLine: a.tagLine,
+        tier: a.soloQ?.tier || 'UNRANKED',
+        rank: a.soloQ?.rank || '',
+        lp: a.soloQ?.leaguePoints || 0,
+        profileIconId: a.profileIconId
+      }))
+    };
+
+    await db.collection('splits').insertOne(archiveEntry);
+    res.json({ ok: true, message: `Split '${name}' archivado correctamente` });
+  } catch(e) {
+    console.error('Error archivando split:', e);
+    res.status(500).json({ error: 'Error al archivar el split' });
+  }
+});
+
 // ---- Perfil Público (Compartir) ----
 app.get('/player/:slug', async (req, res) => {
   try {
