@@ -4,7 +4,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, sendDailySummary, notifyBetResults } = require('./bot.js');
+const { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake } = require('./bot.js');
 
 const app      = express();
 const PORT     = process.env.PORT || 3000;
@@ -108,6 +108,28 @@ async function settleBets(acc) {
     const p = match.info.participants.find(x => x.puuid === acc.puuid);
     if (!p) return;
 
+    // --- Funcionalidad: Seguro contra Remake (< 3.5 min) ---
+    const isRemake = match.info.gameDuration < 210;
+    
+    if (isRemake) {
+      console.log(`[Bets] Remake detectado para ${acc.gameName}. Devolviendo apuestas...`);
+      const allBets = await db.collection('bets').find({ 
+        targetPuuid: acc.puuid, 
+        status: 'open' 
+      }).toArray();
+
+      for (const bet of allBets) {
+        await db.collection('economy').updateOne(
+          { discordId: bet.discordId },
+          { $inc: { coins: bet.amount } }
+        );
+        await db.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'refunded' } });
+      }
+      
+      notifyRemake(`${acc.gameName}#${acc.tagLine}`);
+      return;
+    }
+
     const gameResult = p.win ? 'gana' : 'pierde';
     
     // 3. Buscar apuestas abiertas
@@ -121,10 +143,13 @@ async function settleBets(acc) {
     const winners = [];
     for (const bet of openBets) {
       if (bet.choice === gameResult) {
-        // Pagar 2x la apuesta
+        // Pagar usando el multiplicador guardado (o 2x por defecto)
+        const multiplier = bet.multiplier || 2.0;
+        const prize = Math.floor(bet.amount * multiplier);
+
         await db.collection('economy').updateOne(
           { discordId: bet.discordId },
-          { $inc: { coins: bet.amount * 2 } }
+          { $inc: { coins: prize } }
         );
         winners.push(bet);
         await db.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'won' } });

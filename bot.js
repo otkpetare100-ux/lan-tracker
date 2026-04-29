@@ -176,6 +176,15 @@ function initBot(db) {
       const targetAcc = await findAccountBySlug(targetSlug);
       if (!targetAcc) return msg.reply('❌ Ese jugador no está registrado en el dashboard.');
 
+      // Calcular multiplicador dinámico basado en Winrate
+      let multiplier = 2.0;
+      if (targetAcc.soloQ && (targetAcc.soloQ.wins + targetAcc.soloQ.losses) > 0) {
+        const totalGames = targetAcc.soloQ.wins + targetAcc.soloQ.losses;
+        const wr = (targetAcc.soloQ.wins / totalGames) * 100;
+        if (wr > 60) multiplier = 1.5; // Favorito
+        else if (wr < 45) multiplier = 3.0; // Underdog
+      }
+
       // Validación de tiempo de partida (Límite 5 min)
       try {
         const liveUrl = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${targetAcc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
@@ -203,11 +212,12 @@ function initBot(db) {
         targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
         status: 'open',
         anonymous: isAnonymous,
+        multiplier: multiplier,
         date: new Date()
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** por el desempeño de **${targetAcc.gameName}**. ¡La elección se revelará al finalizar la partida! 🤐`);
+      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! 🤐`);
     }
 
   });
@@ -332,11 +342,11 @@ async function notifyBetResults(targetName, result, winners) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
-  const emoji = result === 'gana' ? '💰' : '📉';
   const description = winners.length > 0 
     ? `**Ganadores:**\n${winners.map(w => {
         const userStr = w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`;
-        return `${userStr} (Apostó a: **${w.choice.toUpperCase()}**)`;
+        const prize = Math.floor(w.amount * (w.multiplier || 2));
+        return `${userStr} (Elección: **${w.choice.toUpperCase()}**) - Ganó **${prize} 💰**`;
       }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
@@ -349,4 +359,19 @@ async function notifyBetResults(targetName, result, winners) {
   channel.send({ embeds: [embed] });
 }
 
-module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults };
+// Notificación de Remake
+async function notifyRemake(targetName) {
+  if (!client || !targetChannelId) return;
+  const channel = client.channels.cache.get(targetChannelId);
+  if (!channel) return;
+
+  const embed = new EmbedBuilder()
+    .setTitle('⚔️ PARTIDA CANCELADA (REMAKE)')
+    .setDescription(`La partida de **${targetName}** ha sido detectada como Remake.\n\n**Todas las apuestas han sido devueltas íntegramente.** 🔙`)
+    .setColor(0x3498db)
+    .setTimestamp();
+
+  channel.send({ embeds: [embed] });
+}
+
+module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake };
