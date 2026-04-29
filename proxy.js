@@ -4,7 +4,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake } = require('./bot.js');
+const { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete } = require('./bot.js');
 
 const app      = express();
 const PORT     = process.env.PORT || 3000;
@@ -161,8 +161,67 @@ async function settleBets(acc) {
     // 4. Notificar en Discord
     notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners);
 
+    // --- NUEVO: Motor de Retos Automáticos ---
+    await checkChallenges(acc, match);
+
+  }
+}
+
+// --- Motor de Retos Automáticos ---
+async function checkChallenges(acc, match) {
+  try {
+    const participant = match.info.participants.find(p => p.puuid === acc.puuid);
+    if (!participant) return;
+
+    const challengesFound = [];
+    let totalCoins = 0;
+
+    // 1. Reto: Pentakill (El Santo Grial)
+    if (participant.pentakills > 0) {
+      challengesFound.push('🏆 PENTAKILL (Legendario)');
+      totalCoins += 1000;
+    }
+
+    // 2. Reto: El Carnicero (15+ Kills)
+    if (participant.kills >= 15) {
+      challengesFound.push('🔪 El Carnicero (Épico)');
+      totalCoins += 200;
+    }
+
+    // 3. Reto: Inmortal (0 muertes y victoria)
+    if (participant.deaths === 0 && participant.win) {
+      challengesFound.push('😇 Inmortal (Raro)');
+      totalCoins += 150;
+    }
+
+    // 4. Reto: Farm Machine (8+ CS/min)
+    const csPerMin = (participant.totalMinionsKilled + participant.neutralMinionsKilled) / (match.info.gameDuration / 60);
+    if (csPerMin >= 8.5 && match.info.gameDuration > 1200) {
+      challengesFound.push('🚜 Farm Machine (Raro)');
+      totalCoins += 100;
+    }
+
+    if (challengesFound.length > 0) {
+      // Pagar monedas en la colección de economía
+      await db.collection('economy').updateOne(
+        { discordId: acc.discordId },
+        { $inc: { coins: totalCoins } },
+        { upsert: true }
+      );
+
+      // Guardar el registro de actividad para la web
+      await db.collection('activities').insertOne({
+        accountId: acc.puuid,
+        type: 'challenge_win',
+        message: `🏆 ¡${acc.gameName} ha superado ${challengesFound.length} retos! (+${totalCoins} coins)`,
+        timestamp: new Date()
+      });
+
+      // Notificar por Bot
+      notifyChallengeComplete(acc.gameName, challengesFound, totalCoins);
+    }
   } catch (e) {
-    console.error('[Bets Error]', e);
+    console.error('Error procesando retos:', e);
   }
 }
 

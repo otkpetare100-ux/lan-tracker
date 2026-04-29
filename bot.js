@@ -379,13 +379,23 @@ async function notifyRemake(targetName) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
+  channel.send({ embeds: [embed] });
+}
+
+// Notificación de Reto Completado
+async function notifyChallengeComplete(targetName, challenges, coins) {
+  if (!client || !targetChannelId) return;
+  const channel = client.channels.cache.get(targetChannelId);
+  if (!channel) return;
+
   const embed = new EmbedBuilder()
-    .setTitle('⚔️ PARTIDA CANCELADA (REMAKE)')
-    .setDescription(`La partida de **${targetName}** ha sido detectada como Remake.\n\n**Todas las apuestas han sido devueltas íntegramente.** 🔙`)
-    .setColor(0x3498db)
+    .setTitle('✨ ¡RETO COMPLETADO! ✨')
+    .setDescription(`¡Increíble! **${targetName}** ha superado los siguientes retos en su última partida:\n\n${challenges.map(c => `🔹 ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** 💰`)
+    .setColor(0xf4c874)
+    .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png') // Icono de Master para darle prestigio
     .setTimestamp();
 
   channel.send({ embeds: [embed] });
 }
 
-module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake };
+module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete };
