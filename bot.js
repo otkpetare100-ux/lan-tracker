@@ -191,7 +191,7 @@ function initBot(db) {
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** a que **${targetAcc.gameName} ${choice.toUpperCase()}**. ¡Suerte!`);
+      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** por el desempeño de **${targetAcc.gameName}**. ¡La elección se revelará al finalizar la partida! 🤐`);
     }
 
   });
@@ -318,7 +318,10 @@ async function notifyBetResults(targetName, result, winners) {
 
   const emoji = result === 'gana' ? '💰' : '📉';
   const description = winners.length > 0 
-    ? `**Ganadores:**\n${winners.map(w => w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`).join(', ')}`
+    ? `**Ganadores:**\n${winners.map(w => {
+        const userStr = w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`;
+        return `${userStr} (Apostó a: **${w.choice.toUpperCase()}**)`;
+      }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
   const embed = new EmbedBuilder()
