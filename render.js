@@ -55,6 +55,25 @@ function winrateClass(wr) {
   return 'bad';
 }
 
+function getStreakInfo(streak) {
+  if (streak >= 3) return { class: 'card-streak-win', glow: 'avatar-glow-fire' };
+  if (streak <= -3) return { class: 'card-streak-loss', glow: 'avatar-glow-ice' };
+  return { class: '', glow: '' };
+}
+
+function getSpecialistInfo(matches) {
+  if (!matches || matches.length < 10) return { name: null, class: '' };
+  const counts = {};
+  for (let i = 0; i < matches.length; i++) {
+    const name = matches[i].champion;
+    counts[name] = (counts[name] || 0) + 1;
+  }
+  for (const name in counts) {
+    if (counts[name] >= 10) return { name: name, class: 'specialist-card' };
+  }
+  return { name: null, class: '' };
+}
+
 function titleCase(str) {
   return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
 }
@@ -247,34 +266,16 @@ function buildCardHTML(acc, position) {
     };
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
-    let streakClass = '';
-    let glowClass = '';
-    if (acc.streak >= 3) {
-      streakClass = 'card-streak-win';
-      glowClass = 'avatar-glow-fire';
-    } else if (acc.streak <= -3) {
-      streakClass = 'card-streak-loss';
-      glowClass = 'avatar-glow-ice';
-    }
+    const streakInfo = getStreakInfo(acc.streak);
+    const glowClass = streakInfo.glow;
 
     // --- Funcionalidad: Badge de Especialista (Idea 7) ---
-    let specialistChamp = null;
-    if (acc.matches && acc.matches.length >= 10) {
-      const counts = {};
-      acc.matches.forEach(m => {
-        counts[m.champion] = (counts[m.champion] || 0) + 1;
-      });
-      for (const champ in counts) {
-        if (counts[champ] >= 10) {
-          specialistChamp = champ;
-          break;
-        }
-      }
-    }
+    const specInfo = getSpecialistInfo(acc.matches);
+    const specialistChamp = specInfo.name;
+
     const specialistHTML = specialistChamp 
       ? '<div class="specialist-badge" title="Especialista en ' + escapeHTML(specialistChamp) + '"><span>OTP</span> ' + escapeHTML(specialistChamp) + '</div>' 
       : '';
-    const specialistClass = specialistChamp ? 'specialist-card' : '';
 
 
     return watermarkHTML +
@@ -350,6 +351,8 @@ function renderAccounts(accounts) {
   }
   grid.innerHTML = accounts.map(function(acc, idx) {
     const topRank = idx < 3 ? (idx + 1) : null;
+    const streakClass = getStreakInfo(acc.streak).class;
+    const specialistClass = getSpecialistInfo(acc.matches).class;
     const cardCls = 'account-card ' + (topRank ? ' top-' + topRank : '') + ' ' + streakClass + ' ' + specialistClass;
     var div = document.createElement('div');
     div.className = cardCls;
