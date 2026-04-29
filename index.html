@@ -46,7 +46,7 @@
         />
         <button id="search-btn">Buscar</button>
         <button id="records-btn" onclick="openLeaderboard()" title="Ver récords de la perrera">🏆 Récords</button>
-        <button id="hof-btn" onclick="openHof()" title="Salón de la Fama">👑 Hall of Fame</button>
+        <button id="hof-btn" onclick="window.open('hall-of-fame.html', '_blank')" title="Salón de la Fama">👑 Hall of Fame</button>
         <!-- <button id="tournament-btn" onclick="openTournamentModal()" title="Gestión de Torneos">🏆 Torneo</button> -->
       </div>
       <div id="error-msg" class="error-msg" style="display:none;"></div>
@@ -68,17 +68,6 @@
     </section>
     </aside>
   </div>
-
-  <!-- Modal Salón de la Fama -->
-  <div id="hof-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content hof-content">
-      <div class="modal-header">
-        <h2>🏆 Salón de la Fama</h2>
-        <button class="close-modal" onclick="closeHof()">×</button>
-      </div>
-      <div id="hof-body" class="hof-body">
-        <div class="empty-state-mini">Cargando historia...</div>
-      </div>
     </div>
   </div>
   <script src="chart.min.js?v=1.0.3"></script>
