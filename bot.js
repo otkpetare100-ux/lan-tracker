@@ -48,13 +48,20 @@ function initBot(db) {
     const command = args.shift().toLowerCase();
 
     if (command === 'perfil') {
-      const slug = args[0]; // Nombre#Tag
-      if (!slug) return msg.reply('Uso: `!perfil Nombre#TAG`');
-      const [name, tag] = slug.split('#');
-      const acc = await db.collection('accounts').findOne({ 
-        gameName: { $regex: new RegExp(`^${name}$`, 'i') },
-        tagLine: { $regex: new RegExp(`^${tag}$`, 'i') }
-      });
+      let slug = args[0]; // Nombre#Tag
+      let acc = null;
+
+      if (!slug) {
+        // Intentar buscar vinculación automática
+        acc = await db.collection('accounts').findOne({ discordId: msg.author.id });
+        if (!acc) return msg.reply('❌ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.');
+      } else {
+        const [name, tag] = slug.split('#');
+        acc = await db.collection('accounts').findOne({ 
+          gameName: { $regex: new RegExp(`^${name}$`, 'i') },
+          tagLine: { $regex: new RegExp(`^${tag}$`, 'i') }
+        });
+      }
 
       if (!acc) return msg.reply('Jugador no encontrado en el dashboard.');
 
@@ -125,8 +132,15 @@ function initBot(db) {
       const now = new Date();
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
       
-      if (user && user.lastDaily && (now - user.lastDaily < 24 * 60 * 60 * 1000)) {
-        return msg.reply('⏳ Ya reclamaste tus monedas hoy. Vuelve mañana.');
+      if (user && user.lastDaily) {
+        const diff = now - new Date(user.lastDaily);
+        const waitTime = 24 * 60 * 60 * 1000;
+        if (diff < waitTime) {
+          const remaining = waitTime - diff;
+          const hours = Math.floor(remaining / (1000 * 60 * 60));
+          const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+          return msg.reply(`⏳ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
+        }
       }
 
       await db.collection('economy').updateOne(
