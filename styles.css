@@ -2729,7 +2729,36 @@ body::before {
   padding: 20px;
   overflow-y: auto;
   z-index: 50;
-  pointer-events: auto;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activity-sidebar.collapsed {
+  width: 50px;
+  padding: 20px 0;
+  overflow: hidden;
+  background: rgba(15, 17, 26, 0.3);
+}
+
+.activity-toggle {
+  position: absolute;
+  left: 10px;
+  top: 15px;
+  background: none;
+  border: none;
+  color: #d77aa8;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.activity-sidebar.collapsed .activity-toggle {
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+}
+
+.activity-sidebar.collapsed .activity-content-wrapper {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .activity-feed {

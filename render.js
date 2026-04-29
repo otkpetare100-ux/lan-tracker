@@ -1366,4 +1366,13 @@ function formatRelativeTime(timestamp) {
 document.addEventListener('DOMContentLoaded', function() {
   renderActivityFeed();
   setInterval(renderActivityFeed, 30000); // Cada 30s
+  
+  const sidebar = document.getElementById('activity-sidebar');
+  const toggle = document.getElementById('activity-toggle');
+  if (sidebar && toggle) {
+    toggle.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      toggle.textContent = sidebar.classList.contains('collapsed') ? '»' : '«';
+    });
+  }
 });
