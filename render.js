@@ -155,12 +155,13 @@ async function toggleReaction(puuid, emoji) {
         if (idx > -1) acc.reactions[emoji].splice(idx, 1);
         else acc.reactions[emoji].push('local-user');
         
-        // Usar applyFilters si existe para mantener el estado actual, 
-        // de lo contrario renderAccounts con la referencia global
-        if (typeof applyFilters === 'function') {
-          applyFilters();
-        } else {
-          renderAccounts(globalAccs);
+        // Actualizar solo el contenedor de reacciones de esta tarjeta para evitar parpadeo
+        const card = document.getElementById('card-' + puuid);
+        if (card) {
+          const reactionsContainer = card.querySelector('.card-reactions');
+          if (reactionsContainer) {
+            reactionsContainer.outerHTML = buildReactionsHTML(acc.reactions, puuid);
+          }
         }
       }
     }
