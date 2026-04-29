@@ -2715,3 +2715,82 @@ body::before {
 
 .toast-neutral { background: rgba(122, 132, 170, 0.9); border: 1px solid #7a84aa; }
 
+/* --- Feed de Actividad (Sidebar) --- */
+.activity-sidebar {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  width: 280px;
+  max-height: calc(100vh - 140px);
+  background: rgba(15, 17, 26, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-item {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid #d77aa8;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.activity-item--level_up { border-left-color: #00C65E; }
+.activity-item--lose_streak { border-left-color: #d93f3f; }
+.activity-item--challenge_win { border-left-color: #f4c874; box-shadow: 0 0 10px rgba(244, 200, 116, 0.2); }
+
+.activity-msg { color: #fff; margin-bottom: 4px; line-height: 1.3; }
+.activity-time { font-size: 0.7rem; color: #7a84aa; }
+
+/* Reacciones */
+.card-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.reaction-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #7a84aa;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reaction-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.reaction-btn--active {
+  background: rgba(215, 122, 168, 0.15);
+  border-color: rgba(215, 122, 168, 0.3);
+  color: #fff;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 1400px) {
+  .activity-sidebar { display: none; } /* Ocultar en pantallas medianas/pequeñas */
+}
+
+

@@ -451,7 +451,8 @@ async function saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ) {
       },
       discordNotify: tierOrDivChanged,
       oldRank: fmt(prevSoloQ),
-      promoted: nextScore > prevScore
+      promoted: nextScore > prevScore,
+      streak: updated.streak || 0
     };
     await postRankHistory(entry);
   }

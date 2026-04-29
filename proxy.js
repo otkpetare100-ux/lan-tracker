@@ -39,6 +39,11 @@ async function connectDB() {
     await db.collection('tournaments').createIndex({ status: 1 });
     await db.collection('tournaments').createIndex({ date: -1 });
 
+    // Índices para Actividad y Retos
+    await db.collection('activities').createIndex({ accountId: 1 });
+    await db.collection('activities').createIndex({ timestamp: -1 });
+    await db.collection('challenges').createIndex({ status: 1 });
+
     // Inicializar Bot de Discord
     initBot(db);
 
@@ -165,6 +170,32 @@ app.put('/accounts/:puuid', async (req, res) => {
   }
 });
 
+// ---- Funcionalidad 2: Reacciones (Social) ----
+app.post('/accounts/:puuid/react', async (req, res) => {
+  const { emoji, userId } = req.body;
+  const { puuid } = req.params;
+
+  if (!emoji || !userId) return res.status(400).json({ error: 'Faltan datos' });
+
+  try {
+    const acc = await getCollection().findOne({ puuid });
+    if (!acc) return res.status(404).json({ error: 'Cuenta no encontrada' });
+
+    const currentReactions = (acc.reactions && acc.reactions[emoji]) || [];
+    const hasReacted = currentReactions.includes(userId);
+
+    const update = hasReacted 
+      ? { $pull: { [`reactions.${emoji}`]: userId } }
+      : { $addToSet: { [`reactions.${emoji}`]: userId } };
+
+    await getCollection().updateOne({ puuid }, update);
+    res.json({ ok: true, reacted: !hasReacted });
+  } catch(e) {
+    console.error('Error en reacción:', e);
+    res.status(500).json({ error: 'Error procesando reacción' });
+  }
+});
+
 // ---- Proxy de Riot API ----
 app.get('/riot', async (req, res) => {
   const targetUrl = req.query.url;
@@ -204,10 +235,73 @@ app.post('/rank-history', async (req, res) => {
       });
     }
 
+    // ---- Funcionalidad 1: Feed de Actividad ----
+    const activityLogs = [];
+    if (entry.oldRank && entry.oldRank !== `${entry.rank.tier} ${entry.rank.division}`) {
+      activityLogs.push({
+        accountId: entry.puuid,
+        type: 'level_up',
+        message: `¡${entry.gameName} ha cambiado de rango a ${entry.rank.tier} ${entry.rank.division}!`,
+        timestamp: new Date()
+      });
+    }
+    
+    // Racha negativa (detectada si viene en el body)
+    if (entry.streak <= -3) {
+      activityLogs.push({
+        accountId: entry.puuid,
+        type: 'lose_streak',
+        message: `${entry.gameName} está en una racha de ${Math.abs(entry.streak)} derrotas. ¡Ánimo!`,
+        timestamp: new Date()
+      });
+    }
+
+    if (activityLogs.length > 0) {
+      await db.collection('activities').insertMany(activityLogs);
+    }
+
+    // ---- Funcionalidad 3: Sistema de Retos ----
+    const activeChallenges = await db.collection('challenges').find({ 
+      participants: entry.puuid,
+      status: 'active' 
+    }).toArray();
+
+    for (const challenge of activeChallenges) {
+      // Ejemplo: Reto de 'Carrera a Platinum'
+      if (challenge.goalTier === entry.rank.tier || 
+         (challenge.type === 'race' && entry.rank.tier === 'PLATINUM')) {
+        await db.collection('challenges').updateOne(
+          { _id: challenge._id },
+          { $set: { status: 'completed', winner: entry.puuid, completedAt: new Date() } }
+        );
+        
+        await db.collection('activities').insertOne({
+          accountId: entry.puuid,
+          type: 'challenge_win',
+          message: `🏆 ¡${entry.gameName} ha completado el reto: ${challenge.name}!`,
+          timestamp: new Date()
+        });
+      }
+    }
+
     res.json({ ok: true });
   } catch(e) {
     console.error('Error guardando historial de rango:', e);
     res.status(500).json({ error: 'Error guardando historial' });
+  }
+});
+
+// ---- Feed de Actividad ----
+app.get('/activities', async (req, res) => {
+  try {
+    const logs = await db.collection('activities')
+      .find({})
+      .sort({ timestamp: -1 })
+      .limit(20)
+      .toArray();
+    res.json(logs);
+  } catch(e) {
+    res.status(500).json({ error: 'Error cargando actividad' });
   }
 });
 

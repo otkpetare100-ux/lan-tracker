@@ -120,6 +120,44 @@ function buildMatchDots(matches) {
   '</div>';
 }
 
+/* ---- Funcionalidad: Reacciones Visuales ---- */
+function buildReactionsHTML(reactions, puuid) {
+  const emojis = ['🔥', '💀', '👑', '🤡'];
+  const userId = 'local-user'; // Simplificado
+  if (!reactions) reactions = {};
+  
+  return '<div class="card-reactions">' +
+    emojis.map(function(e) {
+      const users = reactions[e] || [];
+      const active = users.includes(userId);
+      return '<button class="reaction-btn ' + (active ? 'reaction-btn--active' : '') + '" onclick="toggleReaction(\'' + puuid + '\', \'' + e + '\')">' +
+        e + ' <span>' + users.length + '</span>' +
+      '</button>';
+    }).join('') +
+  '</div>';
+}
+
+async function toggleReaction(puuid, emoji) {
+  try {
+    const res = await fetch('/accounts/' + puuid + '/react', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emoji: emoji, userId: 'local-user' })
+    });
+    if (res.ok) {
+      const acc = accounts.find(function(a) { return a.puuid === puuid; });
+      if (acc) {
+        if (!acc.reactions) acc.reactions = {};
+        if (!acc.reactions[emoji]) acc.reactions[emoji] = [];
+        const idx = acc.reactions[emoji].indexOf('local-user');
+        if (idx > -1) acc.reactions[emoji].splice(idx, 1);
+        else acc.reactions[emoji].push('local-user');
+        renderAccounts(); // Re-renderizar dashboard
+      }
+    }
+  } catch(e) {}
+}
+
 function buildCardHTML(acc, position) {
   const r          = getRankInfo(acc);
   const wr         = computeWinrate(r.wins, r.losses);
@@ -246,6 +284,7 @@ function buildCardHTML(acc, position) {
     '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
       buildMatchHistoryHTML(acc.matches) +
     '</div>' +
+    buildReactionsHTML(acc.reactions, acc.puuid) +
   '</div>';
 }
 
@@ -1263,3 +1302,42 @@ window.saveTournament = async function() {
 window.viewTournament = async function(id) {
   alert('Visualización de bracket para el ID: ' + id + ' (Funcionalidad de guardado de ganador en desarrollo)');
 };
+
+/* ---- Funcionalidad: Feed de Actividad ---- */
+async function renderActivityFeed() {
+  const container = document.getElementById('activity-feed');
+  if (!container) return;
+  
+  try {
+    const res = await fetch('/activities');
+    const logs = await res.json();
+    
+    if (!logs || logs.length === 0) {
+      container.innerHTML = '<div class="empty-state-mini">Sin actividad reciente.</div>';
+      return;
+    }
+
+    container.innerHTML = logs.map(function(log) {
+      return '<div class="activity-item activity-item--' + log.type + '">' +
+        '<div class="activity-msg">' + log.message + '</div>' +
+        '<div class="activity-time">' + formatRelativeTime(log.timestamp) + '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {}
+}
+
+function formatRelativeTime(timestamp) {
+  const diff = new Date() - new Date(timestamp);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Ahora mismo';
+  if (mins < 60) return 'Hace ' + mins + 'm';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return 'Hace ' + hrs + 'h';
+  return new Date(timestamp).toLocaleDateString();
+}
+
+// Inicializar al cargar
+document.addEventListener('DOMContentLoaded', function() {
+  renderActivityFeed();
+  setInterval(renderActivityFeed, 30000); // Cada 30s
+});
