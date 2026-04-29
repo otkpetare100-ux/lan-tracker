@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="compare.css" />
+  <link rel="stylesheet" href="styles.css?v=1.0.1" />
+  <link rel="stylesheet" href="compare.css?v=1.0.1" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔</text></svg>">
 </head>
@@ -53,17 +53,29 @@
       </div>
     </section>
   </div>
-  <script src="chart.min.js"></script>
-  <script src="render.js"></script>
-<script src="storage.js"></script>
-<script src="api.js"></script>
-<script src="app.js"></script>
-<script src="compare.js"></script>
+  <script src="chart.min.js?v=1.0.1"></script>
+  <script src="render.js?v=1.0.1"></script>
+  <script src="storage.js?v=1.0.1"></script>
+  <script src="api.js?v=1.0.1"></script>
+  <script src="app.js?v=1.0.1"></script>
+  <script src="compare.js?v=1.0.1"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('SW registrado'))
+      navigator.serviceWorker.register('/service-worker.js?v=1.0.1')
+        .then(reg => {
+          console.log('SW registrado');
+          // Si hay una actualización esperando, forzamos el reload
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Nueva versión detectada, recargando...');
+                window.location.reload();
+              }
+            };
+          };
+        })
         .catch(err => console.log('SW error', err));
     });
   }
