@@ -4,6 +4,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
+const { initBot, notifyRankChange, sendDailySummary } = require('./bot.js');
 
 const app      = express();
 const PORT     = process.env.PORT || 3000;
@@ -37,6 +38,34 @@ async function connectDB() {
     // Índices para Torneos
     await db.collection('tournaments').createIndex({ status: 1 });
     await db.collection('tournaments').createIndex({ date: -1 });
+
+    // Inicializar Bot de Discord
+    initBot(db);
+
+    // Resumen Diario cada 24h
+    setInterval(() => sendDailySummary(db), 24 * 60 * 60 * 1000);
+
+    // Escaneo de Partidas en Vivo cada 5 min
+    const liveCache = new Set();
+    setInterval(async () => {
+      try {
+        const accounts = await db.collection('accounts').find({}).toArray();
+        for (const acc of accounts) {
+          const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
+          const res = await fetch(url);
+          if (res.ok) {
+            if (!liveCache.has(acc.puuid)) {
+              const game = await res.json();
+              const p = game.participants.find(x => x.puuid === acc.puuid);
+              notifyLiveGame(acc, { championName: '?' }); // Champion name mapping would need more logic or DDragon
+              liveCache.add(acc.puuid);
+            }
+          } else {
+            liveCache.delete(acc.puuid);
+          }
+        }
+      } catch(e) {}
+    }, 5 * 60 * 1000);
   } catch(e) {
     console.error('❌ Error conectando a MongoDB:', e);
     console.log('Reintentando en 5 segundos...');
@@ -156,6 +185,17 @@ app.post('/rank-history', async (req, res) => {
   try {
     entry.date = new Date().toISOString();
     await db.collection('rank_history').insertOne(entry);
+
+    // Notificar a Discord si hay cambio relevante
+    if (entry.discordNotify) {
+      notifyRankChange({
+        name: entry.gameName,
+        oldRank: entry.oldRank,
+        newRank: `${entry.rank.tier} ${entry.rank.division}`,
+        promoted: entry.promoted
+      });
+    }
+
     res.json({ ok: true });
   } catch(e) {
     console.error('Error guardando historial de rango:', e);

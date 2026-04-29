@@ -431,6 +431,15 @@ async function saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ) {
                   prevSoloQ.leaguePoints !== newSoloQ.leaguePoints;
                   
   if (changed) {
+    const noDivTiers = ['MASTER','GRANDMASTER','CHALLENGER'];
+    const fmt = r => !r || r.tier === 'UNRANKED' ? 'Unranked' : (noDivTiers.includes(r.tier) ? r.tier : `${r.tier} ${r.rank}`);
+    
+    const prevScore = prevSoloQ ? ((TIER_ORDER[prevSoloQ.tier] ?? -1) * 10000 + (DIV_ORDER[prevSoloQ.rank] ?? 0) * 1000 + (prevSoloQ.leaguePoints || 0)) : -1;
+    const nextScore = (TIER_ORDER[newSoloQ.tier] ?? -1) * 10000 + (DIV_ORDER[newSoloQ.rank] ?? 0) * 1000 + (newSoloQ.leaguePoints || 0);
+    
+    // Solo notificar a Discord si cambió de división/liga (no solo LP)
+    const tierOrDivChanged = !prevSoloQ || prevSoloQ.tier !== newSoloQ.tier || prevSoloQ.rank !== newSoloQ.rank;
+
     const entry = {
       puuid: acc.puuid,
       gameName: acc.gameName,
@@ -439,7 +448,10 @@ async function saveRankHistoryIfNeeded(acc, newSoloQ, prevSoloQ) {
         tier: newSoloQ.tier,
         division: newSoloQ.rank,
         lp: newSoloQ.leaguePoints
-      }
+      },
+      discordNotify: tierOrDivChanged,
+      oldRank: fmt(prevSoloQ),
+      promoted: nextScore > prevScore
     };
     await postRankHistory(entry);
   }
