@@ -248,13 +248,39 @@ function buildCardHTML(acc, position) {
     const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
 
     let streakClass = '';
-    if (acc.streak >= 3) streakClass = 'avatar-glow-fire';
-    else if (acc.streak <= -3) streakClass = 'avatar-glow-ice';
+    let glowClass = '';
+    if (acc.streak >= 3) {
+      streakClass = 'card-streak-win';
+      glowClass = 'avatar-glow-fire';
+    } else if (acc.streak <= -3) {
+      streakClass = 'card-streak-loss';
+      glowClass = 'avatar-glow-ice';
+    }
+
+    // --- Funcionalidad: Badge de Especialista (Idea 7) ---
+    let specialistChamp = null;
+    if (acc.matches && acc.matches.length >= 10) {
+      const counts = {};
+      acc.matches.forEach(m => {
+        counts[m.champion] = (counts[m.champion] || 0) + 1;
+      });
+      for (const champ in counts) {
+        if (counts[champ] >= 10) {
+          specialistChamp = champ;
+          break;
+        }
+      }
+    }
+    const specialistHTML = specialistChamp 
+      ? '<div class="specialist-badge" title="Especialista en ' + escapeHTML(specialistChamp) + '"><span>OTP</span> ' + escapeHTML(specialistChamp) + '</div>' 
+      : '';
+    const specialistClass = specialistChamp ? 'specialist-card' : '';
+
 
     return watermarkHTML +
     '<div class="card-main-grid">' +
       '<div class="card-left">' +
-        '<div class="icon-wrap ' + streakClass + '">' +
+        '<div class="icon-wrap ' + glowClass + '">' +
           frameHTML +
           '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
           '<span class="icon-level">' + acc.summonerLevel + '</span>' +
@@ -265,6 +291,7 @@ function buildCardHTML(acc, position) {
             '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
           '</div>' +
           '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
+          specialistHTML +
           '<div class="summoner-meta">' +
             '<span class="summoner-region">LAN</span>' +
             '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
@@ -323,7 +350,7 @@ function renderAccounts(accounts) {
   }
   grid.innerHTML = accounts.map(function(acc, idx) {
     const topRank = idx < 3 ? (idx + 1) : null;
-    const cardCls = 'account-card' + (topRank ? ' top-' + topRank : '');
+    const cardCls = 'account-card ' + (topRank ? ' top-' + topRank : '') + ' ' + streakClass + ' ' + specialistClass;
     var div = document.createElement('div');
     div.className = cardCls;
     div.id = 'card-' + acc.puuid;
@@ -687,7 +714,25 @@ function buildPlayerModalHTML(acc) {
   const stats = calculateGlobalStats(acc.matches);
   const r = getRankInfo(acc);
   const color = RANK_COLORS[r.tier] || '#fff';
-  const rankText = r.tier === 'UNRANKED' ? 'UNRANKED' : `${r.tier} ${r.division} - ${r.lp} LP`;
+  const rankStr = r.tier === 'UNRANKED' ? 'UNRANKED' : `${r.tier} ${r.division}`;
+  
+  // --- Funcionalidad: Badge de Especialista (Idea 7) ---
+  let specialistChamp = null;
+  if (acc.matches && acc.matches.length >= 10) {
+    const counts = {};
+    acc.matches.forEach(m => {
+      counts[m.champion] = (counts[m.champion] || 0) + 1;
+    });
+    for (const champ in counts) {
+      if (counts[champ] >= 10) {
+        specialistChamp = champ;
+        break;
+      }
+    }
+  }
+  const specialistHTML = specialistChamp 
+    ? '<div class="specialist-badge" title="Especialista en ' + escapeHTML(specialistChamp) + '"><span>OTP</span> ' + escapeHTML(specialistChamp) + '</div>' 
+    : '';
 
   const statsHTML = stats ? `
     <div class="player-stats-grid">
@@ -779,9 +824,10 @@ function buildPlayerModalHTML(acc) {
       <div class="player-modal__header">
         <div class="player-modal__profile">
           <img class="player-modal__avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
-          <div class="player-modal__names">
-            <h2>${escapeHTML(acc.gameName)} <span class="tag">#${escapeHTML(acc.tagLine)}</span></h2>
-            <p style="color:${color}">${rankText}</p>
+          <div class="names-wrap">
+            <h3>${escapeHTML(acc.gameName)} <span class="tag">#${escapeHTML(acc.tagLine)}</span></h3>
+            ${specialistHTML}
+            <p style="color:${color}">${rankStr} - ${r.lp} LP</p>
           </div>
         </div>
         <button class="player-modal__close" onclick="closePlayerModal()">✕</button>

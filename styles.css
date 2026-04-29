@@ -2855,5 +2855,50 @@ body::before {
   .activity-sidebar { display: none; }
 }
 
+/* --- Badge de Especialista (OTP) --- */
+.specialist-card {
+  position: relative;
+  border: 1px solid rgba(244, 200, 116, 0.3) !important;
+  box-shadow: 0 0 20px rgba(244, 200, 116, 0.1);
+}
+
+.specialist-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, transparent 40%, rgba(244, 200, 116, 0.2), transparent 60%);
+  pointer-events: none;
+  animation: shineGold 4s infinite linear;
+}
+
+@keyframes shineGold {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.specialist-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(90deg, #f4c874, #cd8837);
+  color: #1a1c2c;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 4px 0;
+  box-shadow: 0 0 10px rgba(244, 200, 116, 0.4);
+}
+
+.specialist-badge span {
+  background: rgba(0,0,0,0.8);
+  color: #f4c874;
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
+
 
 
