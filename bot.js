@@ -48,7 +48,7 @@ function initBot(db) {
     const command = args.shift().toLowerCase();
 
     if (command === 'perfil') {
-      let slug = args[0]; // Nombre#Tag
+      let slug = args.join(' '); // Soporta nombres con espacios
       let acc = null;
 
       if (!slug) {
@@ -106,7 +106,7 @@ function initBot(db) {
     }
 
     if (command === 'vincular') {
-      const slug = args[0];
+      const slug = args.join(' '); // Soporta nombres con espacios
       if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
       const [name, tag] = slug.split('#');
       
@@ -180,8 +180,8 @@ function initBot(db) {
     if (command === 'apostar') {
       const amount = parseInt(args[0]);
       const choice = args[1]?.toLowerCase(); // gana / pierde
-      const targetSlug = args[2];
-      const isAnonymous = args[3]?.toLowerCase() === 'anonimo';
+      const targetSlug = args.slice(2).join(' '); // El nombre puede tener espacios y ser el último argumento
+      const isAnonymous = args.includes('anonimo');
 
       if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
         return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');
