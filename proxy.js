@@ -4,7 +4,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, sendDailySummary } = require('./bot.js');
+const { initBot, notifyRankChange, sendDailySummary, notifyBetResults } = require('./bot.js');
 
 const app      = express();
 const PORT     = process.env.PORT || 3000;
@@ -68,13 +68,15 @@ async function connectDB() {
           const res = await fetch(url);
           if (res.ok) {
             if (!liveCache.has(acc.puuid)) {
-              const game = await res.json();
-              const p = game.participants.find(x => x.puuid === acc.puuid);
-              notifyLiveGame(acc, { championName: '?' }); // Champion name mapping would need more logic or DDragon
               liveCache.add(acc.puuid);
+              notifyLiveGame(acc, { championName: '?' });
             }
           } else {
-            liveCache.delete(acc.puuid);
+            // Si estaba en cache y ya no, es que terminó la partida
+            if (liveCache.has(acc.puuid)) {
+              liveCache.delete(acc.puuid);
+              settleBets(acc); // Iniciar liquidación
+            }
           }
         }
       } catch(e) {}
@@ -85,6 +87,60 @@ async function connectDB() {
     setTimeout(connectDB, 5000);
   }
 }
+// Función para liquidar apuestas
+async function settleBets(acc) {
+  try {
+    // 1. Esperar a que la API actualice el historial (60 seg)
+    console.log(`[Bets] Procesando resultados para ${acc.gameName}...`);
+    await new Promise(r => setTimeout(r, 60000));
+
+    // 2. Obtener el resultado de la última partida
+    const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid}/ids?count=1&api_key=${API_KEY}`;
+    const matchIdsRes = await fetch(matchUrl);
+    const matchIds = await matchIdsRes.json();
+    
+    if (!matchIds || matchIds.length === 0) return;
+
+    const detailUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}?api_key=${API_KEY}`;
+    const detailRes = await fetch(detailUrl);
+    const match = await detailRes.json();
+    
+    const p = match.info.participants.find(x => x.puuid === acc.puuid);
+    if (!p) return;
+
+    const gameResult = p.win ? 'gana' : 'pierde';
+    
+    // 3. Buscar apuestas abiertas
+    const openBets = await db.collection('bets').find({ 
+      targetPuuid: acc.puuid, 
+      status: 'open' 
+    }).toArray();
+
+    if (openBets.length === 0) return;
+
+    const winners = [];
+    for (const bet of openBets) {
+      if (bet.choice === gameResult) {
+        // Pagar 2x la apuesta
+        await db.collection('economy').updateOne(
+          { discordId: bet.discordId },
+          { $inc: { coins: bet.amount * 2 } }
+        );
+        winners.push(bet);
+        await db.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'won' } });
+      } else {
+        await db.collection('bets').updateOne({ _id: bet._id }, { $set: { status: 'lost' } });
+      }
+    }
+
+    // 4. Notificar en Discord
+    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners);
+
+  } catch (e) {
+    console.error('[Bets Error]', e);
+  }
+}
+
 connectDB();
 
 function getCollection() {

@@ -87,6 +87,16 @@ function initBot(db) {
 
     // --- Fase 1: Vínculo y Economía ---
     
+    // Función auxiliar para buscar cuenta por slug
+    async function findAccountBySlug(slug) {
+      if (!slug) return null;
+      const [name, tag] = slug.split('#');
+      return await db.collection('accounts').findOne({ 
+        gameName: { $regex: new RegExp(`^${name}$`, 'i') },
+        tagLine: { $regex: new RegExp(`^${tag}$`, 'i') }
+      });
+    }
+
     if (command === 'vincular') {
       const slug = args[0];
       if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
@@ -155,28 +165,35 @@ function initBot(db) {
     if (command === 'apostar') {
       const amount = parseInt(args[0]);
       const choice = args[1]?.toLowerCase(); // gana / pierde
-      const targetSlug = args[2]; // opcional
+      const targetSlug = args[2];
+      const isAnonymous = args[3]?.toLowerCase() === 'anonimo';
 
-      if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice)) {
-        return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG`');
+      if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
+        return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');
       }
+
+      const targetAcc = await findAccountBySlug(targetSlug);
+      if (!targetAcc) return msg.reply('❌ Ese jugador no está registrado en el dashboard.');
 
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!user || user.coins < amount) return msg.reply('❌ No tienes suficientes Naafiri Coins.');
 
-      // Guardar apuesta (esto se procesaría al terminar la partida en proxy.js)
+      // Guardar apuesta
       await db.collection('bets').insertOne({
         discordId: msg.author.id,
         amount,
         choice,
-        target: targetSlug,
+        targetPuuid: targetAcc.puuid,
+        targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
         status: 'open',
+        anonymous: isAnonymous,
         date: new Date()
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada: **${amount} coins** a que **${choice.toUpperCase()}**. ¡Suerte!`);
+      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** a que **${targetAcc.gameName} ${choice.toUpperCase()}**. ¡Suerte!`);
     }
+
   });
 
   client.login(process.env.DISCORD_TOKEN);
@@ -293,4 +310,24 @@ async function sendDailySummary(db) {
   channel.send({ embeds: [embed] });
 }
 
-module.exports = { initBot, notifyRankChange, sendDailySummary };
+// Notificación de resultados de apuestas
+async function notifyBetResults(targetName, result, winners) {
+  if (!client || !targetChannelId) return;
+  const channel = client.channels.cache.get(targetChannelId);
+  if (!channel) return;
+
+  const emoji = result === 'gana' ? '💰' : '📉';
+  const description = winners.length > 0 
+    ? `**Ganadores:**\n${winners.map(w => w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`).join(', ')}`
+    : 'No hubo ganadores esta vez.';
+
+  const embed = new EmbedBuilder()
+    .setTitle(`${emoji} Resultados de Apuestas: ${targetName}`)
+    .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
+    .setColor(winners.length > 0 ? 0xf1c40f : 0x95a5a6)
+    .setTimestamp();
+
+  channel.send({ embeds: [embed] });
+}
+
+module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults };
