@@ -1343,6 +1343,13 @@ async function renderActivityFeed() {
       return;
     }
 
+    // --- Apertura automática si hay nuevas actividades ---
+    const lastCount = parseInt(sessionStorage.getItem('last_activity_count') || '0');
+    if (logs.length > lastCount && lastCount > 0) {
+      openActivitySidebar(true); // Abrir con timer
+    }
+    sessionStorage.setItem('last_activity_count', logs.length);
+
     container.innerHTML = logs.map(function(log) {
       return '<div class="activity-item activity-item--' + log.type + '">' +
         '<div class="activity-msg">' + log.message + '</div>' +
@@ -1350,6 +1357,43 @@ async function renderActivityFeed() {
       '</div>';
     }).join('');
   } catch(e) {}
+}
+
+let activityCloseTimer = null;
+let isActivityPinned = false;
+
+function openActivitySidebar(withTimer = false) {
+  const sidebar = document.getElementById('activity-sidebar');
+  const toggle = document.getElementById('activity-toggle');
+  if (!sidebar) return;
+
+  sidebar.classList.remove('collapsed');
+  if (toggle) toggle.textContent = '«';
+
+  if (withTimer && !isActivityPinned) {
+    if (activityCloseTimer) clearTimeout(activityCloseTimer);
+    activityCloseTimer = setTimeout(() => {
+      if (!isActivityPinned) closeActivitySidebar();
+    }, 5000);
+  }
+}
+
+function closeActivitySidebar() {
+  const sidebar = document.getElementById('activity-sidebar');
+  const toggle = document.getElementById('activity-toggle');
+  if (!sidebar) return;
+
+  sidebar.classList.add('collapsed');
+  if (toggle) toggle.textContent = '»';
+}
+
+function toggleActivityPin(e) {
+  if (e) e.stopPropagation();
+  const btn = document.getElementById('activity-pin');
+  isActivityPinned = !isActivityPinned;
+  
+  if (btn) btn.classList.toggle('activity-pin--active', isActivityPinned);
+  if (isActivityPinned && activityCloseTimer) clearTimeout(activityCloseTimer);
 }
 
 function formatRelativeTime(timestamp) {
@@ -1368,11 +1412,19 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(renderActivityFeed, 30000); // Cada 30s
   
   const sidebar = document.getElementById('activity-sidebar');
-  const toggle = document.getElementById('activity-toggle');
-  if (sidebar && toggle) {
-    toggle.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      toggle.textContent = sidebar.classList.contains('collapsed') ? '»' : '«';
+  const pinBtn = document.getElementById('activity-pin');
+
+  if (sidebar) {
+    sidebar.addEventListener('click', () => {
+      if (sidebar.classList.contains('collapsed')) {
+        openActivitySidebar(true); // Abrir con auto-cierre
+      } else {
+        closeActivitySidebar();
+      }
     });
+  }
+
+  if (pinBtn) {
+    pinBtn.addEventListener('click', toggleActivityPin);
   }
 });
