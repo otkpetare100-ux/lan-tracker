@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
 let targetChannelId = process.env.DISCORD_CHANNEL_ID;
@@ -174,6 +175,21 @@ function initBot(db) {
 
       const targetAcc = await findAccountBySlug(targetSlug);
       if (!targetAcc) return msg.reply('❌ Ese jugador no está registrado en el dashboard.');
+
+      // Validación de tiempo de partida (Límite 5 min)
+      try {
+        const liveUrl = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${targetAcc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
+        const liveRes = await fetch(liveUrl);
+        if (liveRes.ok) {
+          const gameData = await liveRes.json();
+          // gameLength en spectator v5 es el tiempo transcurrido en segundos
+          if (gameData.gameLength > 300) {
+            return msg.reply(`❌ **Demasiado tarde.** La partida de **${targetAcc.gameName}** ya lleva ${Math.floor(gameData.gameLength / 60)} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
+          }
+        }
+      } catch (e) {
+        console.error('Error validando tiempo de partida:', e);
+      }
 
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!user || user.coins < amount) return msg.reply('❌ No tienes suficientes Naafiri Coins.');
