@@ -146,17 +146,27 @@ async function toggleReaction(puuid, emoji) {
       body: JSON.stringify({ emoji: emoji, userId: 'local-user' })
     });
     if (res.ok) {
-      const acc = accounts.find(function(a) { return a.puuid === puuid; });
+      const globalAccs = window._accounts_ref || [];
+      const acc = globalAccs.find(function(a) { return a.puuid === puuid; });
       if (acc) {
         if (!acc.reactions) acc.reactions = {};
         if (!acc.reactions[emoji]) acc.reactions[emoji] = [];
         const idx = acc.reactions[emoji].indexOf('local-user');
         if (idx > -1) acc.reactions[emoji].splice(idx, 1);
         else acc.reactions[emoji].push('local-user');
-        renderAccounts(); // Re-renderizar dashboard
+        
+        // Usar applyFilters si existe para mantener el estado actual, 
+        // de lo contrario renderAccounts con la referencia global
+        if (typeof applyFilters === 'function') {
+          applyFilters();
+        } else {
+          renderAccounts(globalAccs);
+        }
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('Error toggling reaction:', e);
+  }
 }
 
 function buildCardHTML(acc, position) {
