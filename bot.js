@@ -185,11 +185,13 @@ async function notifyRankChange(data) {
 
   channel.send({ embeds: [embed] });
 
-  // Actualizar Rol si está vinculado
+  /* 
+  // Actualizar Rol si está vinculado (Desactivado temporalmente)
   const acc = await db.collection('accounts').findOne({ gameName: name });
   if (acc && acc.discordId) {
     updateUserRoles(acc.discordId, newRank.split(' ')[0]);
   }
+  */
 }
 
 async function updateUserRoles(discordId, tier) {
