@@ -139,34 +139,48 @@ function buildReactionsHTML(reactions, puuid) {
 }
 
 async function toggleReaction(puuid, emoji) {
+  const globalAccs = window._accounts_ref || [];
+  const acc = globalAccs.find(function(a) { return a.puuid === puuid; });
+  if (!acc) return;
+
+  // --- Lógica Optimista: Actualizar UI antes de que responda el servidor ---
+  if (!acc.reactions) acc.reactions = {};
+  if (!acc.reactions[emoji]) acc.reactions[emoji] = [];
+  
+  const idx = acc.reactions[emoji].indexOf('local-user');
+  const wasReacted = idx > -1;
+  
+  // Guardamos estado previo por si falla el servidor (Rollback)
+  if (wasReacted) acc.reactions[emoji].splice(idx, 1);
+  else acc.reactions[emoji].push('local-user');
+
+  // Actualizar DOM inmediatamente
+  const updateUI = () => {
+    const card = document.getElementById('card-' + puuid);
+    if (card) {
+      const container = card.querySelector('.card-reactions');
+      if (container) container.outerHTML = buildReactionsHTML(acc.reactions, puuid);
+    }
+  };
+  updateUI();
+
   try {
     const res = await fetch('/accounts/' + puuid + '/react', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ emoji: emoji, userId: 'local-user' })
     });
-    if (res.ok) {
-      const globalAccs = window._accounts_ref || [];
-      const acc = globalAccs.find(function(a) { return a.puuid === puuid; });
-      if (acc) {
-        if (!acc.reactions) acc.reactions = {};
-        if (!acc.reactions[emoji]) acc.reactions[emoji] = [];
-        const idx = acc.reactions[emoji].indexOf('local-user');
-        if (idx > -1) acc.reactions[emoji].splice(idx, 1);
-        else acc.reactions[emoji].push('local-user');
-        
-        // Actualizar solo el contenedor de reacciones de esta tarjeta para evitar parpadeo
-        const card = document.getElementById('card-' + puuid);
-        if (card) {
-          const reactionsContainer = card.querySelector('.card-reactions');
-          if (reactionsContainer) {
-            reactionsContainer.outerHTML = buildReactionsHTML(acc.reactions, puuid);
-          }
-        }
-      }
-    }
+    
+    if (!res.ok) throw new Error('Servidor no respondió');
   } catch(e) {
-    console.error('Error toggling reaction:', e);
+    // --- Rollback: Si falla la red, volvemos atrás ---
+    const currentIdx = acc.reactions[emoji].indexOf('local-user');
+    if (currentIdx > -1) acc.reactions[emoji].splice(currentIdx, 1);
+    else acc.reactions[emoji].push('local-user');
+    updateUI();
+    
+    if (typeof showError === 'function') showError('Error de conexión al reaccionar');
+    console.error('Error in optimistic reaction:', e);
   }
 }
 
