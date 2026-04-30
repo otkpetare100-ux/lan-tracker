@@ -6,6 +6,26 @@ const { MongoClient } = require('mongodb');
 try { require('dotenv').config(); } catch(e) {}
 const { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete } = require('./bot.js');
 
+// ---- Configuración y Variables Globales ----
+let DDRAGON_VERSION = '15.8.1'; 
+
+// Función para obtener la versión más reciente de Data Dragon
+async function updateDDragonVersion() {
+  try {
+    const res = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+    const versions = await res.json();
+    if (versions && versions.length > 0) {
+      DDRAGON_VERSION = versions[0];
+      console.log(`[DDragon] Versión actualizada: ${DDRAGON_VERSION}`);
+    }
+  } catch (e) {
+    console.error('[DDragon] Error al actualizar versión:', e);
+  }
+}
+updateDDragonVersion();
+// Actualizar cada 24 horas
+setInterval(updateDDragonVersion, 1000 * 60 * 60 * 24);
+
 const app      = express();
 const PORT     = process.env.PORT || 3000;
 const API_KEY  = process.env.RIOT_API_KEY;
@@ -578,7 +598,8 @@ app.get('/player/:slug', async (req, res) => {
     // Corrección de URL de emblemas (usando una fuente más fiable)
     const rankImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/emblem-${tier.toLowerCase()}.png`;
     
-    const profileIconUrl = `https://ddragon.leagueoflegends.com/cdn/14.21.1/img/profileicon/${acc.profileIconId}.png`;
+    const profileIconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`;
+    const faviconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/Naafiri.png`;
     
     const rankColors = {
       IRON: '#51484a', BRONZE: '#8c5230', SILVER: '#80989d', GOLD: '#cd8837',
@@ -606,8 +627,8 @@ app.get('/player/:slug', async (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${acc.gameName}#${acc.tagLine} - LAN Tracker</title>
-      <link rel="icon" type="image/png" href="https://ddragon.leagueoflegends.com/cdn/14.21.1/img/champion/Naafiri.png">
-      <link rel="icon" type="image/x-icon" href="https://ddragon.leagueoflegends.com/cdn/14.21.1/img/profileicon/${acc.profileIconId}.png">
+      <link rel="icon" type="image/png" href="${faviconUrl}">
+      <link rel="icon" type="image/x-icon" href="${profileIconUrl}">
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Cinzel:wght@700&display=swap" rel="stylesheet">
       <style>
         :root { --rank-color: ${themeColor}; }
