@@ -79,7 +79,8 @@ async function handleSearch() {
     return;
   }
 
-  const [gameName, tagLine] = parts;
+  const gameName = parts[0].trim();
+  const tagLine = parts[1].trim();
   searchBtn.disabled = true;
   searchBtn.textContent = '...';
 

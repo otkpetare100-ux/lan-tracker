@@ -1,4 +1,4 @@
-﻿const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
@@ -19,6 +19,10 @@ const DIV_ORDER = { I: 4, II: 3, III: 2, IV: 1 };
 
 function isAdmin(userId) {
   return userId === process.env.ADMIN_DISCORD_ID;
+}
+
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function getRankScore(acc) {
@@ -60,11 +64,7 @@ function initBot(db) {
         acc = await db.collection('accounts').findOne({ discordId: msg.author.id });
         if (!acc) return msg.reply('âŒ No estÃ¡s vinculado. Usa `!perfil Nombre#TAG` o vincÃºlate con `!vincular`.');
       } else {
-        const [name, tag] = slug.split('#');
-        acc = await db.collection('accounts').findOne({ 
-          gameName: { $regex: new RegExp(`^${name}$`, 'i') },
-          tagLine: { $regex: new RegExp(`^${tag}$`, 'i') }
-        });
+        acc = await findAccountBySlug(slug);
       }
 
       if (!acc) return msg.reply('Jugador no encontrado en el dashboard.');
@@ -101,26 +101,30 @@ function initBot(db) {
     
     // FunciÃ³n auxiliar para buscar cuenta por slug
     async function findAccountBySlug(slug) {
-      if (!slug) return null;
-      const [name, tag] = slug.split('#');
+      if (!slug || !slug.includes('#')) return null;
+      const [rawName, rawTag] = slug.split('#');
+      const name = rawName.trim();
+      const tag = rawTag.trim();
+      
       return await db.collection('accounts').findOne({ 
-        gameName: { $regex: new RegExp(`^${name}$`, 'i') },
-        tagLine: { $regex: new RegExp(`^${tag}$`, 'i') }
+        gameName: { $regex: new RegExp(`^${escapeRegex(name)}$`, 'i') },
+        tagLine: { $regex: new RegExp(`^${escapeRegex(tag)}$`, 'i') }
       });
     }
 
     if (command === 'vincular') {
       const slug = args.join(' '); // Soporta nombres con espacios
       if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
-      const [name, tag] = slug.split('#');
-      
+      const acc = await findAccountBySlug(slug);
+      if (!acc) return msg.reply('â Œ No encontrÃ© esa cuenta en el dashboard.');
+
       const res = await db.collection('accounts').updateOne(
-        { gameName: { $regex: new RegExp(`^${name}$`, 'i') }, tagLine: { $regex: new RegExp(`^${tag}$`, 'i') } },
+        { puuid: acc.puuid },
         { $set: { discordId: msg.author.id } }
       );
 
       if (res.modifiedCount > 0) {
-        msg.reply(`âœ… Â¡Cuenta vinculada! Ahora eres oficialmente **${name}#${tag}**.`);
+        msg.reply(`âœ… Â¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
       } else {
         msg.reply('âŒ No encontrÃ© esa cuenta en el dashboard.');
       }
@@ -182,10 +186,12 @@ function initBot(db) {
     }
 
     if (command === 'apostar') {
-      const amount = parseInt(args[0]);
-      const choice = args[1]?.toLowerCase(); // gana / pierde
-      const targetSlug = args.slice(2).join(' '); // El nombre puede tener espacios y ser el Ãºltimo argumento
       const isAnonymous = args.includes('anonimo');
+      const filteredArgs = args.filter(arg => arg.toLowerCase() !== 'anonimo');
+      
+      const amount = parseInt(filteredArgs[0]);
+      const choice = filteredArgs[1]?.toLowerCase();
+      const targetSlug = filteredArgs.slice(2).join(' ');
 
       if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
         return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');

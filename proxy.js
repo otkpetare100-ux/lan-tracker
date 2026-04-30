@@ -560,7 +560,10 @@ app.post('/splits/archive', async (req, res) => {
 // ---- Perfil Público (Compartir) ----
 app.get('/player/:slug', async (req, res) => {
   try {
-    const [gameName, tagLine] = req.params.slug.split('-');
+    const parts = req.params.slug.split('-');
+    if (parts.length < 2) return res.status(400).send('URL invÃ¡lida');
+    const tagLine = parts.pop();
+    const gameName = parts.join('-');
     if (!gameName || !tagLine) return res.status(400).send('URL inválida');
 
     const acc = await db.collection('accounts').findOne({ 
