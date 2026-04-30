@@ -310,15 +310,22 @@ function initBot(db) {
 
       const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Épico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
 
-      const embed = new EmbedBuilder()
+      // Probabilidades de monedas por separado
+      const coinItems = GACHA_ITEMS.filter(i => i.type === 'coins');
+      const coinsStr = coinItems.map(i => `**${i.name}:** ${((i.weight / totalWeight) * 100).toFixed(1)}%`).join('  ·  ');
+
+      const embedGacha = new EmbedBuilder()
         .setTitle(`🎰 ¡GACHAPON DE LA PERRERA!`)
         .setDescription(`¡Has obtenido **${selected.name}**!\n\n✨ Rareza: **${selected.rarity}**${selected.type === 'coins' ? `\n💰 ¡Has ganado **${selected.amount} coins**!` : ''}`)
-        .addFields({ name: '📈 Probabilidades', value: probabilitiesStr })
+        .addFields(
+          { name: '📈 Probabilidades por Rareza', value: probabilitiesStr },
+          { name: '💰 Probabilidades de Monedas', value: coinsStr }
+        )
         .setImage(selected.type === 'coins' ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`)
         .setColor(color)
         .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST + (selected.type === 'coins' ? selected.amount : 0)} 💰 · Naafiri Bot` });
 
-      msg.reply({ embeds: [embed] });
+      msg.reply({ embeds: [embedGacha] });
 
       if (selected.rarity === 'Legendario') {
         msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
@@ -621,7 +628,7 @@ async function sendDailySummary(db) {
     .setColor(0x576bce)
     .setFooter({ text: 'Actualizado automáticamente' });
 
-  channel.send({ embeds: [embed] });
+  channel.send({ embeds: [embedBet] });
 }
 
 // Notificación de resultados de apuestas
@@ -638,13 +645,14 @@ async function notifyBetResults(targetName, result, winners) {
       }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
-  const embed = new EmbedBuilder()
+  const emoji = result === 'gana' ? '🏆' : '💀';
+  const embedBet = new EmbedBuilder()
     .setTitle(`${emoji} Resultados de Apuestas: ${targetName}`)
     .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
     .setColor(winners.length > 0 ? 0xf1c40f : 0x95a5a6)
     .setTimestamp();
 
-  channel.send({ embeds: [embed] });
+  channel.send({ embeds: [embedBet] });
 }
 
 // Notificación de Remake
@@ -653,7 +661,13 @@ async function notifyRemake(targetName) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
-  channel.send({ embeds: [embed] });
+  const embedRemake = new EmbedBuilder()
+    .setTitle('🔄 Remake Detectado')
+    .setDescription(`La partida de **${targetName}** fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automáticamente. 💰`)
+    .setColor(0xf39c12)
+    .setTimestamp();
+
+  channel.send({ embeds: [embedRemake] });
 }
 
 // Notificación de Reto Completado
