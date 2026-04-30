@@ -27,6 +27,9 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Ignorar peticiones de extensiones de Chrome o esquemas no soportados
+  if (!event.request.url.startsWith('http')) return;
+
   // Estrategia: Network First para archivos HTML/JS críticos
   if (event.request.mode === 'navigate' || ASSETS.some(asset => event.request.url.includes(asset))) {
     event.respondWith(
