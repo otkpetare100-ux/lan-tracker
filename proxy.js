@@ -575,7 +575,10 @@ app.get('/player/:slug', async (req, res) => {
     if (!acc) return res.status(404).send('Jugador no encontrado en LAN Tracker');
 
     const tier = acc.soloQ ? acc.soloQ.tier : 'UNRANKED';
+    // Corrección de URL de emblemas (usando una fuente más fiable)
     const rankImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/emblem-${tier.toLowerCase()}.png`;
+    
+    const profileIconUrl = `https://ddragon.leagueoflegends.com/cdn/14.21.1/img/profileicon/${acc.profileIconId}.png`;
     
     const rankColors = {
       IRON: '#51484a', BRONZE: '#8c5230', SILVER: '#80989d', GOLD: '#cd8837',
@@ -684,7 +687,7 @@ app.get('/player/:slug', async (req, res) => {
       <div class="bg-glow"></div>
       <div class="card">
         <div class="profile-header">
-          <img src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png" class="avatar">
+          <img src="${profileIconUrl}" class="avatar">
           <span class="level-badge">LVL ${acc.summonerLevel}</span>
         </div>
         
