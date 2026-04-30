@@ -728,8 +728,11 @@ window.closePlayerModal = function() {
 function buildPlayerModalHTML(acc) {
   const stats = calculateGlobalStats(acc.matches);
   const r = getRankInfo(acc);
+  const noDivisionTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
+  const rankStr = noDivisionTiers.includes(r.tier) 
+    ? r.tier 
+    : `${r.tier} ${r.division || ''}`;
   const color = RANK_COLORS[r.tier] || '#fff';
-  const rankStr = r.tier === 'UNRANKED' ? 'UNRANKED' : `${r.tier} ${r.division}`;
   
   // --- Funcionalidad: Badge de Especialista (Idea 7) ---
   let specialistChamp = null;
