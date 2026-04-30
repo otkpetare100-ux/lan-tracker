@@ -11,7 +11,7 @@ const ENDPOINTS = {
   LAN:      'https://la1.api.riotgames.com',
 };
 
-const DDRAGON_VERSION = '15.8.1';
+// DDRAGON_VERSION se declara en render.js y es compartida globalmente
 
 window.POSITION_LABELS = {
   TOP: 'TOP',
