@@ -575,9 +575,26 @@ app.get('/player/:slug', async (req, res) => {
     if (!acc) return res.status(404).send('Jugador no encontrado en LAN Tracker');
 
     const tier = acc.soloQ ? acc.soloQ.tier : 'UNRANKED';
-    const rankStr = tier === 'UNRANKED' ? 'Unranked' : `${tier} ${acc.soloQ.rank || ''} - ${acc.soloQ.leaguePoints || 0} LP`;
-    const wr = acc.soloQ && acc.soloQ.wins ? Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100) : null;
-    const wrStr = wr !== null ? `${wr}% Winrate` : 'Sin partidas';
+    const rankImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/emblem-${tier.toLowerCase()}.png`;
+    
+    const rankColors = {
+      IRON: '#51484a', BRONZE: '#8c5230', SILVER: '#80989d', GOLD: '#cd8837',
+      PLATINUM: '#4e9996', EMERALD: '#27a170', DIAMOND: '#576bce', MASTER: '#9d5ade',
+      GRANDMASTER: '#d93f3f', CHALLENGER: '#f4c874', UNRANKED: '#657099'
+    };
+    const themeColor = rankColors[tier] || '#ffffff';
+
+    const wins = acc.soloQ?.wins || 0;
+    const losses = acc.soloQ?.losses || 0;
+    const totalGames = wins + losses;
+    const wr = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+    const streakText = acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)} Loss` : '—';
+
+    // Datos de economía si está vinculado
+    let ecoData = null;
+    if (acc.discordId) {
+      ecoData = await db.collection('economy').findOne({ discordId: acc.discordId });
+    }
 
     const html = `
     <!DOCTYPE html>
@@ -586,36 +603,132 @@ app.get('/player/:slug', async (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${acc.gameName}#${acc.tagLine} - LAN Tracker</title>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Cinzel:wght@700&display=swap" rel="stylesheet">
       <style>
-        body { font-family: system-ui, sans-serif; background: #070810; color: #f2f4ff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: rgba(23, 28, 48, 0.92); border: 1px solid rgba(255,255,255,0.08); padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { margin: 0 0 10px 0; color: #d77aa8; font-size: 2rem; }
-        .tag { color: #657099; font-size: 1.2rem; font-weight: normal; }
-        .level { color: #9d6cff; font-weight: bold; margin-bottom: 20px; display: block; }
-        .stats { display: flex; justify-content: space-around; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-top: 20px; }
-        .stat-box { display: flex; flex-direction: column; padding: 0 15px;}
-        .stat-label { font-size: 0.8rem; color: #9aa3c7; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; color: #f2f4ff; }
-        .watermark { position: fixed; bottom: 20px; opacity: 0.5; font-size: 0.9rem; letter-spacing: 2px; }
+        :root { --rank-color: ${themeColor}; }
+        body { 
+          font-family: 'Inter', sans-serif; 
+          background: radial-gradient(circle at top, #1a1c2c, #070810); 
+          color: #f2f4ff; 
+          display: flex; 
+          justify-content: center; 
+          align-items: center; 
+          min-height: 100vh; 
+          margin: 0;
+          overflow: hidden;
+        }
+        .bg-glow {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: radial-gradient(circle at 50% -20%, var(--rank-color)33, transparent 70%);
+          z-index: -1;
+        }
+        .card { 
+          background: rgba(13, 17, 28, 0.8); 
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.1); 
+          width: 380px;
+          border-radius: 24px; 
+          padding: 30px;
+          text-align: center; 
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+          position: relative;
+          overflow: hidden;
+        }
+        .card::before {
+          content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+          background: linear-gradient(90deg, transparent, var(--rank-color), transparent);
+        }
+        .profile-header { position: relative; margin-bottom: 20px; }
+        .avatar {
+          width: 100px; height: 100px; border-radius: 50%;
+          border: 3px solid var(--rank-color);
+          padding: 5px; background: #070810;
+          box-shadow: 0 0 20px var(--rank-color)44;
+        }
+        .level-badge {
+          position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+          background: var(--rank-color); color: #000; font-weight: 900;
+          font-size: 0.7rem; padding: 2px 10px; border-radius: 10px;
+        }
+        h1 { font-family: 'Cinzel', serif; margin: 15px 0 5px 0; font-size: 1.8rem; letter-spacing: 1px; }
+        .tag { color: #657099; opacity: 0.7; }
+        .rank-emblem { width: 140px; filter: drop-shadow(0 0 15px var(--rank-color)66); margin: 10px 0; }
+        .rank-name { font-size: 1.4rem; font-weight: 900; color: var(--rank-color); text-transform: uppercase; margin-bottom: 5px; }
+        .lp { font-size: 0.9rem; color: #9aa3c7; letter-spacing: 2px; }
+        
+        .stats-grid { 
+          display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 25px;
+        }
+        .stat-card {
+          background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+        .stat-label { font-size: 0.65rem; color: #657099; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block; }
+        .stat-value { font-size: 1.1rem; font-weight: 800; }
+        
+        .wr-bar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+        .wr-bar-fill { height: 100%; background: var(--rank-color); border-radius: 3px; }
+
+        .discord-section {
+          margin-top: 25px; padding-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1);
+          display: flex; justify-content: space-around; align-items: center;
+        }
+        .eco-item { text-align: center; }
+        .eco-val { display: block; font-weight: 900; color: #f4c874; }
+        .eco-lab { font-size: 0.6rem; color: #657099; text-transform: uppercase; }
+
+        .watermark { position: fixed; bottom: 30px; opacity: 0.2; letter-spacing: 5px; font-weight: 900; font-size: 0.8rem; }
       </style>
     </head>
     <body>
+      <div class="bg-glow"></div>
       <div class="card">
-        <h1>${acc.gameName}<span class="tag">#${acc.tagLine}</span></h1>
-        <span class="level">Nivel ${acc.summonerLevel}</span>
+        <div class="profile-header">
+          <img src="https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png" class="avatar">
+          <span class="level-badge">LVL ${acc.summonerLevel}</span>
+        </div>
         
-        <div class="stats">
-          <div class="stat-box">
-            <span class="stat-label">Rango</span>
-            <span class="stat-value">${rankStr}</span>
+        <h1>${acc.gameName}<span class="tag">#${acc.tagLine}</span></h1>
+        
+        <img src="${rankImg}" class="rank-emblem">
+        <div class="rank-name">${tier} ${acc.soloQ?.rank || ''}</div>
+        <div class="lp">${acc.soloQ?.leaguePoints || 0} LP</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Winrate</span>
+            <span class="stat-value" style="color: ${wr > 50 ? '#00ff88' : '#ff4444'}">${wr}%</span>
+            <div class="wr-bar-container"><div class="wr-bar-fill" style="width: ${wr}%"></div></div>
           </div>
-          <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.1);">
-            <span class="stat-label">Rendimiento</span>
-            <span class="stat-value">${wrStr}</span>
+          <div class="stat-card">
+            <span class="stat-label">Racha Actual</span>
+            <span class="stat-value">${streakText}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Victorias</span>
+            <span class="stat-value" style="color: #00ff88">${wins}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Derrotas</span>
+            <span class="stat-value" style="color: #ff4444">${losses}</span>
           </div>
         </div>
+
+        ${ecoData ? `
+        <div class="discord-section">
+          <div class="eco-item">
+            <span class="eco-val">💰 ${ecoData.coins}</span>
+            <span class="eco-lab">Naafiri Coins</span>
+          </div>
+          <div class="eco-item">
+            <span class="eco-val">🎒 ${ecoData.inventory?.length || 0}</span>
+            <span class="eco-lab">Objetos</span>
+          </div>
+        </div>
+        ` : ''}
+
       </div>
-      <div class="watermark">LAN TRACKER</div>
+      <div class="watermark">LAN TRACKER PRO</div>
     </body>
     </html>
     `;
