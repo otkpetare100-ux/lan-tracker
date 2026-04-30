@@ -304,9 +304,17 @@ function initBot(db) {
         return msg.reply('🎒 Tu mochila está vacía. ¡Usa `!gacha` para empezar tu colección!');
       }
 
-      const items = userEco.inventory.map(item => {
+      // Agrupar items duplicados y contar cantidad
+      const grouped = {};
+      for (const item of userEco.inventory) {
+        if (!grouped[item.id]) grouped[item.id] = { ...item, count: 0 };
+        grouped[item.id].count++;
+      }
+
+      const items = Object.values(grouped).map(item => {
         const icon = item.rarity === 'Legendario' ? '⭐' : item.rarity === 'Épico' ? '💜' : item.rarity === 'Raro' ? '🔷' : '⚪';
-        return `${icon} **${item.name}** (${item.rarity})`;
+        const qty = item.count > 1 ? ` **x${item.count}**` : '';
+        return `${icon} **${item.name}**${qty} (${item.rarity})`;
       }).join('\n');
 
       const embed = new EmbedBuilder()
