@@ -342,7 +342,7 @@ function initBot(db) {
       // !admin_dar @usuario cantidad
       if (command === 'admin_dar') {
         const target = msg.mentions.users.first();
-        const amount = parseInt(args[1]);
+        const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
           return msg.reply('Uso: `!admin_dar @usuario cantidad`');
         await db.collection('economy').updateOne(
@@ -356,7 +356,7 @@ function initBot(db) {
       // !admin_quitar @usuario cantidad
       if (command === 'admin_quitar') {
         const target = msg.mentions.users.first();
-        const amount = parseInt(args[1]);
+        const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
           return msg.reply('Uso: `!admin_quitar @usuario cantidad`');
         await db.collection('economy').updateOne(
@@ -369,7 +369,7 @@ function initBot(db) {
       // !admin_setcoins @usuario cantidad
       if (command === 'admin_setcoins') {
         const target = msg.mentions.users.first();
-        const amount = parseInt(args[1]);
+        const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount < 0)
           return msg.reply('Uso: `!admin_setcoins @usuario cantidad`');
         await db.collection('economy').updateOne(
@@ -391,13 +391,11 @@ function initBot(db) {
         return msg.reply(`âœ… Cooldown de diario reseteado para **${target.username}**.`);
       }
 
-          return msg.reply('Uso: !admin_daritem @usuario ItemId\nIDs validos: ' + GACHA_ITEMS.map(i => i.id).join(', '));
       if (command === 'admin_daritem') {
         const target = msg.mentions.users.first();
         const itemId = args[1];
         const item = GACHA_ITEMS.find(i => i.id === itemId);
         if (!target || !item)
-          return msg.reply('Uso: !admin_daritem @usuario ItemId\nIDs validos: ' + GACHA_ITEMS.map(i => i.id).join(', '));
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $addToSet: { inventory: { id: item.id, name: item.name, rarity: item.rarity, date: new Date() } } },
