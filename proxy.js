@@ -519,8 +519,9 @@ app.get('/splits', async (req, res) => {
 });
 
 app.post('/splits/archive', async (req, res) => {
-  const { name } = req.body;
+  const { name, key } = req.body;
   if (!name) return res.status(400).json({ error: 'Falta el nombre del Split' });
+  if (key !== process.env.ADMIN_WEB_KEY) return res.status(401).json({ error: 'Clave de administrador incorrecta' });
 
   try {
     const accounts = await db.collection('accounts').find({}).toArray();

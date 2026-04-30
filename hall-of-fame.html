@@ -64,7 +64,7 @@
 
   <div class="hof-container">
     <header class="hof-header">
-      <h1>🏆 Salón de la Fama</h1>
+      <h1>🏆 Salón de la Fama <button id="archive-btn" style="background:none; border:none; cursor:pointer; font-size:1rem; vertical-align:middle; opacity:0.1; transition: opacity 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.1">⚙️</button></h1>
       <p style="color: var(--muted); letter-spacing: 2px;">LA HISTORIA DE LOS MEJORES DE LAN</p>
     </header>
 
@@ -106,6 +106,33 @@
     }
 
     window.onload = loadHofPage;
+
+    // Lógica para archivar splits (Solo visible/funcional para el admin)
+    document.getElementById('archive-btn').onclick = async () => {
+      const name = prompt('Nombre del nuevo Split (ej: Split 1 - 2024):');
+      if (!name) return;
+      const key = prompt('Clave de Administrador para confirmar:');
+      if (!key) return;
+
+      if (!confirm(`¿Estás seguro de que quieres finalizar el split actual y guardarlo como "${name}"?`)) return;
+
+      try {
+        const res = await fetch('/splits/archive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, key })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ ¡Split archivado con éxito!');
+          location.reload();
+        } else {
+          alert('❌ Error: ' + (data.error || 'No se pudo archivar'));
+        }
+      } catch (e) {
+        alert('❌ Error de conexión con el servidor');
+      }
+    };
   </script>
 </body>
 
