@@ -626,8 +626,8 @@ app.get('/player/:slug', async (req, res) => {
     if (!acc) return res.status(404).send('Jugador no encontrado en LAN Tracker');
 
     const tier = acc.soloQ ? acc.soloQ.tier : 'UNRANKED';
-    // Corrección de URL de emblemas (usando una fuente más fiable)
-    const rankImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/emblem-${tier.toLowerCase()}.png`;
+    // Corrección de URL de emblemas (usando una fuente más fiable y directa)
+    const rankImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/${tier.toLowerCase()}.png`;
     
     const profileIconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`;
     const faviconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/Naafiri.png`;
@@ -785,7 +785,7 @@ app.get('/player/:slug', async (req, res) => {
         ` : ''}
 
       </div>
-      <div class="watermark">LAN TRACKER PRO</div>
+      <div class="footer">LAS PERRAS DE NAAFIRI</div>
     </body>
     </html>
     `;
