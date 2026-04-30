@@ -164,6 +164,8 @@ async function settleBets(acc) {
     // --- NUEVO: Motor de Retos Automáticos ---
     await checkChallenges(acc, match);
 
+  } catch (e) {
+    console.error('[Bets Error]', e);
   }
 }
 
