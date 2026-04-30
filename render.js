@@ -298,13 +298,14 @@ function buildCardHTML(acc, position) {
           '<div class="summoner-name">' + 
             '<span>' + escapeHTML(acc.gameName) + '</span>' +
             '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
+            streakIcon +
           '</div>' +
           '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + '</div>' +
           specialistHTML +
           '<div class="summoner-meta">' +
             '<span class="summoner-region">LAN</span>' +
             '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
-            '<div style="display: flex; align-items: center; gap: 8px;">' + streakIcon + recentDots + '</div>' +
+            recentDots +
           '</div>' +
           (acc.economy ? '<div class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:6px; width:fit-content;">' +
             '<span style="color:#f4c874">💰 ' + (acc.economy.coins || 0) + '</span>' +
