@@ -17,6 +17,10 @@ const TIER_ORDER = {
 };
 const DIV_ORDER = { I: 4, II: 3, III: 2, IV: 1 };
 
+function isAdmin(userId) {
+  return userId === process.env.ADMIN_DISCORD_ID;
+}
+
 function getRankScore(acc) {
   const soloQ = acc.soloQ;
   if (!soloQ) return -1;
@@ -249,7 +253,7 @@ function initBot(db) {
     ];
 
     if (command === 'gacha' || command === 'tiro') {
-      const COST = 20;
+      const COST = 10;
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
       if (!userEco || userEco.coins < COST) {
@@ -311,6 +315,164 @@ function initBot(db) {
         .setColor(0x2ecc71);
 
       msg.reply({ embeds: [embed] });
+    }
+
+    // =============================================
+    // --- COMANDOS ADMIN (solo ADMIN_DISCORD_ID) ---
+    // =============================================
+    if (command.startsWith('admin_')) {
+      if (!isAdmin(msg.author.id)) {
+        return msg.reply('🚫 No tienes permisos de administrador.');
+      }
+
+      // !admin_dar @usuario cantidad
+      if (command === 'admin_dar') {
+        const target = msg.mentions.users.first();
+        const amount = parseInt(args[1]);
+        if (!target || isNaN(amount) || amount <= 0)
+          return msg.reply('Uso: `!admin_dar @usuario cantidad`');
+        await db.collection('economy').updateOne(
+          { discordId: target.id },
+          { $inc: { coins: amount }, $set: { discordTag: target.tag } },
+          { upsert: true }
+        );
+        return msg.reply(`✅ **+${amount} coins** dados a ${target.username}.`);
+      }
+
+      // !admin_quitar @usuario cantidad
+      if (command === 'admin_quitar') {
+        const target = msg.mentions.users.first();
+        const amount = parseInt(args[1]);
+        if (!target || isNaN(amount) || amount <= 0)
+          return msg.reply('Uso: `!admin_quitar @usuario cantidad`');
+        await db.collection('economy').updateOne(
+          { discordId: target.id },
+          { $inc: { coins: -amount } }
+        );
+        return msg.reply(`✅ **-${amount} coins** quitados a ${target.username}.`);
+      }
+
+      // !admin_setcoins @usuario cantidad
+      if (command === 'admin_setcoins') {
+        const target = msg.mentions.users.first();
+        const amount = parseInt(args[1]);
+        if (!target || isNaN(amount) || amount < 0)
+          return msg.reply('Uso: `!admin_setcoins @usuario cantidad`');
+        await db.collection('economy').updateOne(
+          { discordId: target.id },
+          { $set: { coins: amount, discordTag: target.tag } },
+          { upsert: true }
+        );
+        return msg.reply(`✅ Coins de ${target.username} fijados a **${amount}**.`);
+      }
+
+      // !admin_resetdiario @usuario
+      if (command === 'admin_resetdiario') {
+        const target = msg.mentions.users.first();
+        if (!target) return msg.reply('Uso: `!admin_resetdiario @usuario`');
+        await db.collection('economy').updateOne(
+          { discordId: target.id },
+          { $unset: { lastDaily: '' } }
+        );
+        return msg.reply(`✅ Cooldown de diario reseteado para **${target.username}**.`);
+      }
+
+      // !admin_daritem @usuario ItemId
+      if (command === 'admin_daritem') {
+        const target = msg.mentions.users.first();
+        const itemId = args[1];
+        const item = GACHA_ITEMS.find(i => i.id === itemId);
+        if (!target || !item)
+          return msg.reply(`Uso: \`!admin_daritem @usuario ItemId\`\nIDs válidos: ${GACHA_ITEMS.map(i => \`\${i.id}\`).join(', ')}`);
+        await db.collection('economy').updateOne(
+          { discordId: target.id },
+          { $addToSet: { inventory: { id: item.id, name: item.name, rarity: item.rarity, date: new Date() } } },
+          { upsert: true }
+        );
+        return msg.reply(`✅ Item **${item.name}** (${item.rarity}) dado a **${target.username}**.`);
+      }
+
+      // !admin_clearinv @usuario
+      if (command === 'admin_clearinv') {
+        const target = msg.mentions.users.first();
+        if (!target) return msg.reply('Uso: `!admin_clearinv @usuario`');
+        await db.collection('economy').updateOne(
+          { discordId: target.id },
+          { $set: { inventory: [] } }
+        );
+        return msg.reply(`✅ Inventario de **${target.username}** vaciado.`);
+      }
+
+      // !admin_anuncio [mensaje]
+      if (command === 'admin_anuncio') {
+        const message = args.join(' ');
+        if (!message) return msg.reply('Uso: `!admin_anuncio [mensaje]`');
+        const embed = new EmbedBuilder()
+          .setTitle('📢 ANUNCIO OFICIAL')
+          .setDescription(message)
+          .setColor(0xf4c874)
+          .setTimestamp()
+          .setFooter({ text: 'LAN Tracker Bot' });
+        await msg.channel.send({ embeds: [embed] });
+        return msg.delete().catch(() => {});
+      }
+
+      // !admin_stats
+      if (command === 'admin_stats') {
+        const totalUsers = await db.collection('economy').countDocuments();
+        const richest = await db.collection('economy').find({}).sort({ coins: -1 }).limit(1).toArray();
+        const allCoins = await db.collection('economy').aggregate([
+          { $group: { _id: null, total: { $sum: '$coins' } } }
+        ]).toArray();
+        const totalItems = await db.collection('economy').aggregate([
+          { $project: { count: { $size: { $ifNull: ['$inventory', []] } } } },
+          { $group: { _id: null, total: { $sum: '$count' } } }
+        ]).toArray();
+        const embed = new EmbedBuilder()
+          .setTitle('📊 Estadísticas Globales — Admin')
+          .addFields(
+            { name: '👥 Usuarios registrados', value: `${totalUsers}`, inline: true },
+            { name: '💰 Coins en circulación', value: `${allCoins[0]?.total || 0}`, inline: true },
+            { name: '🎰 Items en inventarios', value: `${totalItems[0]?.total || 0}`, inline: true },
+            { name: '🏆 Usuario más rico', value: richest[0] ? `${richest[0].discordTag} — ${richest[0].coins} coins` : 'N/A', inline: false }
+          )
+          .setColor(0x576bce);
+        return msg.reply({ embeds: [embed] });
+      }
+
+      // !admin_cancelarApuestas Nombre#TAG
+      if (command === 'admin_cancelarapuestas') {
+        const slug = args.join(' ');
+        if (!slug) return msg.reply('Uso: `!admin_cancelarApuestas Nombre#TAG`');
+        const [name, tag] = slug.split('#');
+        const acc = await db.collection('accounts').findOne({
+          gameName: { $regex: new RegExp(`^${name}$`, 'i') },
+          tagLine:  { $regex: new RegExp(`^${tag}$`, 'i') }
+        });
+        if (!acc) return msg.reply('❌ Jugador no encontrado en el dashboard.');
+        const openBets = await db.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
+        if (!openBets.length) return msg.reply('No hay apuestas abiertas para ese jugador.');
+        for (const bet of openBets) {
+          await db.collection('economy').updateOne(
+            { discordId: bet.discordId },
+            { $inc: { coins: bet.amount } }
+          );
+        }
+        await db.collection('bets').updateMany(
+          { targetPuuid: acc.puuid, status: 'open' },
+          { $set: { status: 'cancelled' } }
+        );
+        return msg.reply(`✅ **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
+      }
+
+      // !admin_resetAll CONFIRMAR
+      if (command === 'admin_resetall') {
+        if (args[0] !== 'CONFIRMAR') {
+          return msg.reply('⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR`');
+        }
+        const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
+        return msg.reply(`✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
+      }
     }
 
   });
