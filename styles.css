@@ -1057,15 +1057,9 @@ body::before {
 
 /* ---- Recent match dots ---- */
 .match-dots {
-  display: flex;
-  gap: 5px;
+  display: inline-flex;
+  gap: 4px;
   align-items: center;
-  margin-top: 8px;
-  height: 12px;
-  background: rgba(0,0,0,0.2);
-  padding: 4px 8px;
-  border-radius: 6px;
-  width: fit-content;
 }
 
 .mdot {
