@@ -241,7 +241,7 @@ function initBot(db) {
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! ðŸ¤`);
+      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! 🎲`);
     }
 
     // --- SISTEMA DE GACHAPON ---
@@ -250,10 +250,12 @@ function initBot(db) {
       { id: 'Aatrox', name: 'Aatrox', rarity: 'Común', weight: 70, img: 'Aatrox_0' },
       { id: 'Yasuo', name: 'Yasuo', rarity: 'Común', weight: 70, img: 'Yasuo_0' },
       { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
+      { id: 'coins_small', name: 'Bolsita de 50 Coins', rarity: 'Especial', weight: 15, isCoins: true, amount: 50 },
       { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
       { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
       { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
       { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
+      { id: 'coins_big', name: 'Cofre de 250 Coins', rarity: 'Legendario', weight: 3, isCoins: true, amount: 250 },
       { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
       { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' }
     ];
@@ -263,7 +265,7 @@ function initBot(db) {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
       if (!userEco || userEco.coins < COST) {
-        return msg.reply(`âŒ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
+        return msg.reply(`❌ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
       }
 
       // Sistema de Pesos para Probabilidades
@@ -289,29 +291,37 @@ function initBot(db) {
         random -= item.weight;
       }
 
-      // Guardar en Inventario
+      // Procesar Premio (Monedas o Item)
+      const economyUpdate = { $inc: { coins: -COST } };
+      if (selected.isCoins) {
+        economyUpdate.$inc.coins += selected.amount;
+      } else {
+        economyUpdate.$addToSet = { inventory: { id: selected.id, name: selected.name, rarity: selected.rarity, date: new Date() } };
+      }
+
       await db.collection('economy').updateOne(
         { discordId: msg.author.id },
-        { 
-          $inc: { coins: -COST },
-          $addToSet: { inventory: { id: selected.id, name: selected.name, rarity: selected.rarity, date: new Date() } }
-        }
+        economyUpdate
       );
 
       const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Épico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
+      const prizeText = selected.isCoins ? `¡Has ganado **${selected.amount} Coins**!` : `¡Has obtenido una carta **${selected.rarity}**!\n\n✨ **${selected.name}**`;
+      const prizeImg = selected.isCoins ? 'https://static.wikia.nocookie.net/leagueoflegends/images/e/e4/Gold_Circle.png' : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`;
 
       const embed = new EmbedBuilder()
         .setTitle(`🎰 ¡GACHAPON DE LA PERRERA!`)
-        .setDescription(`¡Has obtenido una carta **${selected.rarity}**!\n\n✨ **${selected.name}**`)
+        .setDescription(prizeText)
         .addFields({ name: '📈 Probabilidades', value: probabilitiesStr })
-        .setImage(`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`)
+        .setThumbnail(selected.isCoins ? prizeImg : null)
+        .setImage(selected.isCoins ? null : prizeImg)
         .setColor(color)
-        .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST} 💰 · Naafiri Bot` });
+        .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST + (selected.isCoins ? selected.amount : 0)} 💰 · Naafiri Bot` });
 
       msg.reply({ embeds: [embed] });
 
       if (selected.rarity === 'Legendario') {
-        msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
+        const announceText = selected.isCoins ? `🎊 ¡JACKPOT! **${msg.author.username}** ha ganado el premio gordo de **${selected.amount} COINS**! 🎊` : `🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`;
+        msg.channel.send(announceText);
       }
     }
 
