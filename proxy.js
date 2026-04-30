@@ -278,13 +278,28 @@ app.use('/accounts', (req, res, next) => {
 
 app.get('/accounts', async (req, res) => {
   try {
-    const accounts = await getCollection()
-      .find({})
-      .sort({ addedAt: -1 })
-      .toArray();
+    // Usamos agregación para traer los datos de economía vinculados por discordId
+    const accounts = await getCollection().aggregate([
+      { $sort: { addedAt: -1 } },
+      {
+        $lookup: {
+          from: 'economy',
+          localField: 'discordId',
+          foreignField: 'discordId',
+          as: 'eco'
+        }
+      },
+      {
+        $addFields: {
+          economy: { $arrayElemAt: ['$eco', 0] }
+        }
+      },
+      { $project: { eco: 0 } } // Limpiamos el array temporal
+    ]).toArray();
+    
     res.json(accounts);
   } catch(e) {
-    console.error('Error leyendo cuentas:', e);
+    console.error('Error leyendo cuentas con economía:', e);
     res.status(500).json({ error: 'Error leyendo cuentas' });
   }
 });
@@ -544,7 +559,22 @@ app.post('/splits/archive', async (req, res) => {
   if (key !== process.env.ADMIN_WEB_KEY) return res.status(401).json({ error: 'Clave de administrador incorrecta' });
 
   try {
-    const accounts = await db.collection('accounts').find({}).toArray();
+    const accounts = await db.collection('accounts').aggregate([
+      {
+        $lookup: {
+          from: 'economy',
+          localField: 'discordId',
+          foreignField: 'discordId',
+          as: 'eco'
+        }
+      },
+      {
+        $addFields: {
+          economy: { $arrayElemAt: ['$eco', 0] }
+        }
+      },
+      { $project: { eco: 0 } }
+    ]).toArray();
     
     // Función de puntuación interna para el archivado
     const getScore = (acc) => {
@@ -566,7 +596,8 @@ app.post('/splits/archive', async (req, res) => {
         tier: a.soloQ?.tier || 'UNRANKED',
         rank: a.soloQ?.rank || '',
         lp: a.soloQ?.leaguePoints || 0,
-        profileIconId: a.profileIconId
+        profileIconId: a.profileIconId,
+        economy: a.economy
       }))
     };
 
