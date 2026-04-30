@@ -653,6 +653,34 @@ app.get('/player/:slug', async (req, res) => {
     const noDivisionTiersList = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
     const rankDisplay = noDivisionTiersList.includes(tier) ? tier : `${tier} ${acc.soloQ?.rank || ''}`;
 
+    // -- LÓGICA DE PANELES LATERALES --
+    let kdaStr = '0.00';
+    let kpAvg = 0;
+    let goldMin = 0;
+    let dmgAvg = 0;
+    let recentWR = 0;
+    
+    if (acc.matches && acc.matches.length > 0) {
+      const mCount = acc.matches.length;
+      let k = 0, d = 0, a = 0, kp = 0, gold = 0, dur = 0, dmg = 0, w = 0;
+      acc.matches.forEach(m => {
+        k += m.kills || 0;
+        d += m.deaths || 0;
+        a += m.assists || 0;
+        kp += m.kp || 0;
+        gold += m.gold || 0;
+        dur += m.gameDuration || 0;
+        dmg += m.damage || 0;
+        if (m.win) w++;
+      });
+      const dSafe = d === 0 ? 1 : d;
+      kdaStr = ((k + a) / dSafe).toFixed(2);
+      kpAvg = Math.round(kp / mCount);
+      goldMin = dur > 0 ? Math.round(gold / (dur / 60)) : 0;
+      dmgAvg = Math.round(dmg / mCount);
+      recentWR = Math.round((w / mCount) * 100);
+    }
+
     const html = `
     <!DOCTYPE html>
     <html lang="es">
@@ -674,8 +702,21 @@ app.get('/player/:slug', async (req, res) => {
           align-items: center; 
           min-height: 100vh; 
           margin: 0;
-          overflow: hidden;
+          overflow-x: hidden;
         }
+        .layout-wrapper { display: flex; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 1100px; padding: 40px 20px; flex-wrap: wrap; }
+        .side-panel { background: rgba(13, 17, 28, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 25px; width: 260px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); opacity: 0; animation: fadeSide 0.6s ease forwards 0.2s; }
+        @keyframes fadeSide { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(20px); } }
+        .panel-title { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--rank-color); font-weight: 900; margin-bottom: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .champ-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .champ-row img { width: 45px; height: 45px; border-radius: 12px; border: 1px solid var(--rank-color); object-fit: cover; }
+        .c-name { display: block; font-weight: 800; font-size: 0.95rem; }
+        .c-pts { display: block; font-size: 0.75rem; color: #657099; }
+        .side-stat { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 10px; }
+        .s-label { font-size: 0.75rem; color: #9aa3c7; font-weight: 700; text-transform: uppercase; }
+        .s-val { font-size: 1.1rem; font-weight: 900; }
+        @media (max-width: 980px) { .layout-wrapper { flex-direction: column; } .side-panel { width: 380px; } }
+        
         .bg-glow {
           position: fixed; top: 0; left: 0; width: 100%; height: 100%;
           background: radial-gradient(circle at 50% -20%, var(--rank-color)33, transparent 70%);
@@ -742,7 +783,24 @@ app.get('/player/:slug', async (req, res) => {
     </head>
     <body>
       <div class="bg-glow"></div>
-      <div class="card">
+      
+      <div class="layout-wrapper">
+        <!-- PANEL IZQUIERDO -->
+        <div class="side-panel">
+          <div class="panel-title">Top Campeones</div>
+          ${acc.topChampions && acc.topChampions.length > 0 ? acc.topChampions.map(c => `
+            <div class="champ-row">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${c.image || c.name.replace(/ /g,'').replace(/'/g,'').replace(/\\./g,'') + '.png'}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'">
+              <div>
+                <span class="c-name">${c.name}</span>
+                <span class="c-pts">${(c.points || 0).toLocaleString()} pts</span>
+              </div>
+            </div>
+          `).join('') : '<div style="text-align:center; color:#657099; font-size:0.8rem;">Sin datos de maestría</div>'}
+        </div>
+
+        <!-- TARJETA CENTRAL -->
+        <div class="card">
         <div class="profile-header">
           <img src="${profileIconUrl}" class="avatar">
           <span class="level-badge">LVL ${acc.summonerLevel}</span>
@@ -788,6 +846,32 @@ app.get('/player/:slug', async (req, res) => {
         ` : ''}
 
         <div class="footer">LAS PERRAS DE NAAFIRI</div>
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div class="side-panel">
+          <div class="panel-title">Desempeño (${acc.matches?.length || 0} SoloQ)</div>
+          <div class="side-stat">
+            <span class="s-label">WR Reciente</span>
+            <span class="s-val" style="color: ${recentWR >= 50 ? '#00ff88' : '#ff4444'}">${recentWR}%</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">KDA Promedio</span>
+            <span class="s-val">${kdaStr}</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">Daño / Partida</span>
+            <span class="s-val">${dmgAvg.toLocaleString()}</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">Oro / Minuto</span>
+            <span class="s-val">${goldMin}</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">Part. Kills</span>
+            <span class="s-val">${kpAvg}%</span>
+          </div>
+        </div>
       </div>
     </body>
     </html>
