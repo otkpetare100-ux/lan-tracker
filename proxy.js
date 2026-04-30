@@ -681,6 +681,13 @@ app.get('/player/:slug', async (req, res) => {
       recentWR = Math.round((w / mCount) * 100);
     }
 
+    const getChampImg = (c) => {
+      if (typeof c.image === 'string') return c.image;
+      if (c.image && c.image.full) return c.image.full;
+      if (!c.name) return 'Unknown.png';
+      return c.name.replace(/ /g,'').replace(/'/g,'').replace(/\./g,'') + '.png';
+    };
+
     const html = `
     <!DOCTYPE html>
     <html lang="es">
@@ -704,8 +711,11 @@ app.get('/player/:slug', async (req, res) => {
           margin: 0;
           overflow-x: hidden;
         }
-        .layout-wrapper { display: flex; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 1100px; padding: 40px 20px; flex-wrap: wrap; }
+        .layout-wrapper { display: flex; align-items: flex-start; justify-content: center; gap: 30px; width: 100%; max-width: 1200px; padding: 40px 20px; }
         .side-panel { background: rgba(13, 17, 28, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 25px; width: 260px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); opacity: 0; animation: fadeSide 0.6s ease forwards 0.2s; }
+        .panel-left { order: 1; }
+        .center-card { order: 2; z-index: 10; }
+        .panel-right { order: 3; }
         @keyframes fadeSide { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(20px); } }
         .panel-title { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--rank-color); font-weight: 900; margin-bottom: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
         .champ-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
@@ -715,7 +725,13 @@ app.get('/player/:slug', async (req, res) => {
         .side-stat { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 10px; }
         .s-label { font-size: 0.75rem; color: #9aa3c7; font-weight: 700; text-transform: uppercase; }
         .s-val { font-size: 1.1rem; font-weight: 900; }
-        @media (max-width: 980px) { .layout-wrapper { flex-direction: column; } .side-panel { width: 380px; } }
+        
+        @media (max-width: 1050px) { 
+          .layout-wrapper { flex-direction: column; align-items: center; } 
+          .center-card { order: 1; }
+          .panel-left { order: 2; width: 380px; }
+          .panel-right { order: 3; width: 380px; }
+        }
         
         .bg-glow {
           position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -786,11 +802,11 @@ app.get('/player/:slug', async (req, res) => {
       
       <div class="layout-wrapper">
         <!-- PANEL IZQUIERDO -->
-        <div class="side-panel">
+        <div class="side-panel panel-left">
           <div class="panel-title">Top Campeones</div>
           ${acc.topChampions && acc.topChampions.length > 0 ? acc.topChampions.map(c => `
             <div class="champ-row">
-              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${c.image || c.name.replace(/ /g,'').replace(/'/g,'').replace(/\\./g,'') + '.png'}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg(c)}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'">
               <div>
                 <span class="c-name">${c.name}</span>
                 <span class="c-pts">${(c.points || 0).toLocaleString()} pts</span>
@@ -800,7 +816,7 @@ app.get('/player/:slug', async (req, res) => {
         </div>
 
         <!-- TARJETA CENTRAL -->
-        <div class="card">
+        <div class="card center-card">
         <div class="profile-header">
           <img src="${profileIconUrl}" class="avatar">
           <span class="level-badge">LVL ${acc.summonerLevel}</span>
@@ -849,7 +865,7 @@ app.get('/player/:slug', async (req, res) => {
         </div>
 
         <!-- PANEL DERECHO -->
-        <div class="side-panel">
+        <div class="side-panel panel-right">
           <div class="panel-title">Desempeño (${acc.matches?.length || 0} SoloQ)</div>
           <div class="side-stat">
             <span class="s-label">WR Reciente</span>
