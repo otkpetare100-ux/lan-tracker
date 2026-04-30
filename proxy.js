@@ -626,8 +626,7 @@ app.get('/player/:slug', async (req, res) => {
     if (!acc) return res.status(404).send('Jugador no encontrado en LAN Tracker');
 
     const tier = acc.soloQ ? acc.soloQ.tier : 'UNRANKED';
-    // Corrección de URL de emblemas (usando una fuente más fiable y directa)
-    const rankImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/${tier.toLowerCase()}.png`;
+    const rankImg = `/pic/ranks/${tier.toLowerCase()}.png`;
     
     const profileIconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`;
     const faviconUrl = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/Naafiri.png`;
@@ -650,6 +649,9 @@ app.get('/player/:slug', async (req, res) => {
     if (acc.discordId) {
       ecoData = await db.collection('economy').findOne({ discordId: acc.discordId });
     }
+
+    const noDivisionTiersList = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
+    const rankDisplay = noDivisionTiersList.includes(tier) ? tier : `${tier} ${acc.soloQ?.rank || ''}`;
 
     const html = `
     <!DOCTYPE html>
@@ -734,7 +736,8 @@ app.get('/player/:slug', async (req, res) => {
         .eco-val { display: block; font-weight: 900; color: #f4c874; }
         .eco-lab { font-size: 0.6rem; color: #657099; text-transform: uppercase; }
 
-        .watermark { position: fixed; bottom: 30px; opacity: 0.2; letter-spacing: 5px; font-weight: 900; font-size: 0.8rem; }
+        .watermark { display: none; }
+        .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); opacity: 0.35; letter-spacing: 5px; font-weight: 900; font-size: 0.72rem; text-align: center; }
       </style>
     </head>
     <body>
@@ -748,7 +751,7 @@ app.get('/player/:slug', async (req, res) => {
         <h1>${acc.gameName}<span class="tag">#${acc.tagLine}</span></h1>
         
         <img src="${rankImg}" class="rank-emblem">
-        <div class="rank-name">${tier} ${acc.soloQ?.rank || ''}</div>
+        <div class="rank-name">${rankDisplay}</div>
         <div class="lp">${acc.soloQ?.leaguePoints || 0} LP</div>
 
         <div class="stats-grid">
@@ -784,8 +787,8 @@ app.get('/player/:slug', async (req, res) => {
         </div>
         ` : ''}
 
+        <div class="footer">LAS PERRAS DE NAAFIRI</div>
       </div>
-      <div class="footer">LAS PERRAS DE NAAFIRI</div>
     </body>
     </html>
     `;
