@@ -626,6 +626,21 @@ app.get('/player/:slug', async (req, res) => {
   }
 });
 
+app.delete('/splits/last', async (req, res) => {
+  const { key } = req.body;
+  if (key !== process.env.ADMIN_WEB_KEY) return res.status(401).json({ error: 'Clave de administrador incorrecta' });
+
+  try {
+    const lastSplit = await db.collection('splits').find({}).sort({ date: -1 }).limit(1).toArray();
+    if (lastSplit.length === 0) return res.status(404).json({ error: 'No hay splits para borrar' });
+
+    await db.collection('splits').deleteOne({ _id: lastSplit[0]._id });
+    res.json({ ok: true, message: 'Ãšltimo split borrado correctamente' });
+  } catch(e) {
+    res.status(500).json({ error: 'Error al borrar el split' });
+  }
+});
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error('Error no manejado:', err);
