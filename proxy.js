@@ -606,6 +606,8 @@ app.get('/player/:slug', async (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${acc.gameName}#${acc.tagLine} - LAN Tracker</title>
+      <link rel="icon" type="image/png" href="https://ddragon.leagueoflegends.com/cdn/14.21.1/img/champion/Naafiri.png">
+      <link rel="icon" type="image/x-icon" href="https://ddragon.leagueoflegends.com/cdn/14.21.1/img/profileicon/${acc.profileIconId}.png">
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Cinzel:wght@700&display=swap" rel="stylesheet">
       <style>
         :root { --rank-color: ${themeColor}; }
