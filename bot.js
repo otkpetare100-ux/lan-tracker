@@ -156,7 +156,7 @@ function initBot(db) {
         { $inc: { coins: 100 }, $set: { lastDaily: now, discordTag: msg.author.tag } },
         { upsert: true }
       );
-      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Ãšsalas sabiamente.');
+      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.');
     }
 
     if (command === 'shame' || command === 'muro') {
@@ -166,7 +166,7 @@ function initBot(db) {
       const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) * 100)}% 🤡`).join('\n');
       
       const embed = new EmbedBuilder()
-        .setTitle('🤡 El Muro de la VergÃ¼enza')
+        .setTitle('🤡 El Muro de la Vergüenza')
         .setDescription(list || 'Todos son pro players por ahora.')
         .setColor(0xd93f3f);
 
@@ -252,8 +252,8 @@ function initBot(db) {
       { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
       { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
       { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
-      { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Ã‰pico', weight: 8, img: 'Jhin_5' },
-      { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Ã‰pico', weight: 8, img: 'Naafiri_1' },
+      { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
+      { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
       { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
       { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' }
     ];
@@ -268,6 +268,16 @@ function initBot(db) {
 
       // Sistema de Pesos para Probabilidades
       const totalWeight = GACHA_ITEMS.reduce((sum, item) => sum + item.weight, 0);
+      
+      // Calcular porcentajes por rareza
+      const rarityWeights = {};
+      GACHA_ITEMS.forEach(item => {
+        rarityWeights[item.rarity] = (rarityWeights[item.rarity] || 0) + item.weight;
+      });
+      const probabilitiesStr = Object.entries(rarityWeights)
+        .map(([rarity, weight]) => `**${rarity}:** ${((weight / totalWeight) * 100).toFixed(1)}%`)
+        .join('  ·  ');
+
       let random = Math.random() * totalWeight;
       let selected = GACHA_ITEMS[0];
 
@@ -288,19 +298,20 @@ function initBot(db) {
         }
       );
 
-      const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Ã‰pico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
+      const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Épico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
 
       const embed = new EmbedBuilder()
         .setTitle(`🎰 ¡GACHAPON DE LA PERRERA!`)
         .setDescription(`¡Has obtenido una carta **${selected.rarity}**!\n\n✨ **${selected.name}**`)
+        .addFields({ name: '📈 Probabilidades', value: probabilitiesStr })
         .setImage(`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`)
         .setColor(color)
-        .setFooter({ text: `Gastaste ${COST} coins · Naafiri Bot` });
+        .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST} 💰 · Naafiri Bot` });
 
       msg.reply({ embeds: [embed] });
 
       if (selected.rarity === 'Legendario') {
-        msg.channel.send(`🎊 ¡ATENCIÃ“N! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
+        msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
       }
     }
 
@@ -318,7 +329,7 @@ function initBot(db) {
       }
 
       const items = Object.values(grouped).map(item => {
-        const icon = item.rarity === 'Legendario' ? 'â­' : item.rarity === 'Ã‰pico' ? '💜' : item.rarity === 'Raro' ? '🔹' : '⚪';
+        const icon = item.rarity === 'Legendario' ? 'â­' : item.rarity === 'Épico' ? '💜' : item.rarity === 'Raro' ? '🔹' : '⚪';
         const qty = item.count > 1 ? ` **x${item.count}**` : '';
         return `${icon} **${item.name}**${qty} (${item.rarity})`;
       }).join('\n');
@@ -501,7 +512,7 @@ async function notifyRankChange(data) {
   const { name, oldRank, newRank, promoted } = data;
   const color = promoted ? 0x00C65E : 0xd93f3f;
   const emoji = promoted ? '🎉' : '💀';
-  const action = promoted ? '¡SUBIÃ“ DE RANGO!' : 'BAJÃ“ DE RANGO...';
+  const action = promoted ? '¡SUBIÓ DE RANGO!' : 'BAJÓ DE RANGO...';
 
   const embed = new EmbedBuilder()
     .setTitle(`${emoji} ${action}`)
