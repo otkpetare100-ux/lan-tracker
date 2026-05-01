@@ -1233,20 +1233,20 @@ app.get('/player/:slug', async (req, res) => {
         }
 
         function renderStatsContent(data) {
-          let html = '<div style="display:grid; grid-template-columns: 1fr; gap:40px; margin-top:20px;">';
+          let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">';
           
           // Gráfica de Ventaja de Oro (si hay timeline)
           if (data.timeline) {
             html += '<div>';
-            html += '<h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff; text-align:center;">Ventaja de Oro del Equipo</h3>';
-            html += '<div style="height:300px; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px;"><canvas id="goldChart"></canvas></div>';
+            html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Ventaja de Oro</h3>';
+            html += '<div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;"><canvas id="goldChart"></canvas></div>';
             html += '</div>';
           }
 
           // Gráfica de Daño
           html += '<div>';
-          html += '<h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff; text-align:center;">Daño Infligido a Campeones</h3>';
-          html += '<div style="height:350px; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px;"><canvas id="dmgChart"></canvas></div>';
+          html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3>';
+          html += '<div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;"><canvas id="dmgChart"></canvas></div>';
           html += '</div>';
 
           html += '</div>';
