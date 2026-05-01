@@ -1945,6 +1945,6 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     html += '</tr>';
   });
 
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   return html;
 }
