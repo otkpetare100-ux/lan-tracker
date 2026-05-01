@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+﻿const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
@@ -36,7 +36,7 @@ function getRankScore(acc) {
 
 function initBot(db) {
   if (!process.env.DISCORD_TOKEN) {
-    console.warn('âš ï¸ No se detectó DISCORD_TOKEN. El bot no iniciará.');
+    console.warn('Ã¢Å¡Â Ã¯Â¸Â No se detectÃ³ DISCORD_TOKEN. El bot no iniciarÃ¡.');
     return;
   }
 
@@ -45,10 +45,10 @@ function initBot(db) {
   });
 
   client.on('ready', () => {
-    console.log(`✅ Bot conectado como: ${client.user.tag}`);
+    console.log(`âœ… Bot conectado como: ${client.user.tag}`);
   });
 
-  // Comandos básicos por mensaje (Prefijo !)
+  // Comandos bÃ¡sicos por mensaje (Prefijo !)
   client.on('messageCreate', async (msg) => {
     if (msg.author.bot || !msg.content.startsWith('!')) return;
 
@@ -60,9 +60,9 @@ function initBot(db) {
       let acc = null;
 
       if (!slug) {
-        // Intentar buscar vinculación automática
+        // Intentar buscar vinculaciÃ³n automÃ¡tica
         acc = await db.collection('accounts').findOne({ discordId: msg.author.id });
-        if (!acc) return msg.reply('âŒ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.');
+        if (!acc) return msg.reply('Ã¢ÂÅ’ No estÃ¡s vinculado. Usa `!perfil Nombre#TAG` o vincÃºlate con `!vincular`.');
       } else {
         acc = await findAccountBySlug(slug);
       }
@@ -76,7 +76,7 @@ function initBot(db) {
         .addFields(
           { name: 'Rango SoloQ', value: acc.soloQ ? `${acc.soloQ.tier} ${acc.soloQ.rank} (${acc.soloQ.leaguePoints} LP)` : 'Unranked', inline: true },
           { name: 'Winrate', value: acc.soloQ ? `${Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100)}%` : 'N/A', inline: true },
-          { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `â„ï¸ ${Math.abs(acc.streak)} Loss` : '—', inline: true }
+          { name: 'Racha', value: acc.streak > 0 ? `ðŸ”¥ ${acc.streak} Wins` : acc.streak < 0 ? `Ã¢Ââ€žÃ¯Â¸Â ${Math.abs(acc.streak)} Loss` : 'â€”', inline: true }
         )
         .setFooter({ text: 'LAN Tracker Bot' });
 
@@ -90,16 +90,16 @@ function initBot(db) {
       const list = sorted.map((a, i) => `${i+1}. **${a.gameName}** - ${a.soloQ?.tier || 'Unranked'} ${a.soloQ?.rank || ''}`).join('\n');
       
       const embed = new EmbedBuilder()
-        .setTitle('ðŸ† Top 10 de La Perrera')
+        .setTitle('Ã°Å¸Ââ€  Top 10 de La Perrera')
         .setDescription(list || 'No hay jugadores registrados.')
         .setColor(0xf4c874);
 
       msg.reply({ embeds: [embed] });
     }
 
-    // --- Fase 1: Vínculo y Economía ---
+    // --- Fase 1: VÃ­nculo y EconomÃ­a ---
     
-    // Función auxiliar para buscar cuenta por slug
+    // FunciÃ³n auxiliar para buscar cuenta por slug
     async function findAccountBySlug(slug) {
       if (!slug || !slug.includes('#')) return null;
       const [rawName, rawTag] = slug.split('#');
@@ -116,7 +116,7 @@ function initBot(db) {
       const slug = args.join(' '); // Soporta nombres con espacios
       if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
       const acc = await findAccountBySlug(slug);
-      if (!acc) return msg.reply('❌ No encontré esa cuenta en el dashboard.');
+      if (!acc) return msg.reply('âŒ No encontrÃ© esa cuenta en el dashboard.');
 
       const res = await db.collection('accounts').updateOne(
         { puuid: acc.puuid },
@@ -124,16 +124,16 @@ function initBot(db) {
       );
 
       if (res.modifiedCount > 0) {
-        msg.reply(`✅ ¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
+        msg.reply(`âœ… Â¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
       } else {
-        msg.reply('âŒ No encontré esa cuenta en el dashboard.');
+        msg.reply('Ã¢ÂÅ’ No encontrÃ© esa cuenta en el dashboard.');
       }
     }
 
     if (command === 'monedas' || command === 'bal') {
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
       const bal = user ? user.coins : 0;
-      msg.reply(`💰 Tienes **${bal} Naafiri Coins**. Use \`!diario\` para reclamar más.`);
+      msg.reply(`ðŸ’° Tienes **${bal} Naafiri Coins**. Use \`!diario\` para reclamar mÃ¡s.`);
     }
 
     if (command === 'diario') {
@@ -147,7 +147,7 @@ function initBot(db) {
           const remaining = waitTime - diff;
           const hours = Math.floor(remaining / (1000 * 60 * 60));
           const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-          return msg.reply(`â³ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
+          return msg.reply(`Ã¢ÂÂ³ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
         }
       }
 
@@ -156,17 +156,17 @@ function initBot(db) {
         { $inc: { coins: 100 }, $set: { lastDaily: now, discordTag: msg.author.tag } },
         { upsert: true }
       );
-      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.');
+      msg.reply('ðŸª™ Â¡Recibiste **100 Naafiri Coins**! Ãšsalas sabiamente.');
     }
 
     if (command === 'shame' || command === 'muro') {
       const accounts = await db.collection('accounts').find({}).toArray();
       const losers = accounts.sort((a,b) => (a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) - (b.soloQ?.wins / (b.soloQ?.wins + b.soloQ?.losses || 1))).slice(0, 5);
       
-      const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) * 100)}% 🤡`).join('\n');
+      const list = losers.map((a, i) => `${i+1}. **${a.gameName}** - WR: ${Math.round((a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) * 100)}% ðŸ¤¡`).join('\n');
       
       const embed = new EmbedBuilder()
-        .setTitle('🤡 El Muro de la Vergüenza')
+        .setTitle('ðŸ¤¡ El Muro de la VergÃ¼enza')
         .setDescription(list || 'Todos son pro players por ahora.')
         .setColor(0xd93f3f);
 
@@ -175,11 +175,11 @@ function initBot(db) {
 
     if (command === 'top_ricos' || command === 'top_coins') {
       const top = await db.collection('economy').find({}).sort({ coins: -1 }).limit(10).toArray();
-      const list = top.map((u, i) => `${i+1}. **${u.discordTag || 'Usuario'}** - ${u.coins} 💰`).join('\n');
+      const list = top.map((u, i) => `${i+1}. **${u.discordTag || 'Usuario'}** - ${u.coins} ðŸ’°`).join('\n');
       
       const embed = new EmbedBuilder()
-        .setTitle('💰 Los Más Ricos de la Perrera')
-        .setDescription(list || 'Nadie tiene monedas aún.')
+        .setTitle('ðŸ’° Los MÃ¡s Ricos de la Perrera')
+        .setDescription(list || 'Nadie tiene monedas aÃºn.')
         .setColor(0xf1c40f);
 
       msg.reply({ embeds: [embed] });
@@ -198,9 +198,9 @@ function initBot(db) {
       }
 
       const targetAcc = await findAccountBySlug(targetSlug);
-      if (!targetAcc) return msg.reply('âŒ Ese jugador no está registrado en el dashboard.');
+      if (!targetAcc) return msg.reply('Ã¢ÂÅ’ Ese jugador no estÃ¡ registrado en el dashboard.');
 
-      // Calcular multiplicador dinámico basado en Winrate
+      // Calcular multiplicador dinÃ¡mico basado en Winrate
       let multiplier = 2.0;
       if (targetAcc.soloQ && (targetAcc.soloQ.wins + targetAcc.soloQ.losses) > 0) {
         const totalGames = targetAcc.soloQ.wins + targetAcc.soloQ.losses;
@@ -209,7 +209,7 @@ function initBot(db) {
         else if (wr < 45) multiplier = 3.0; // Underdog
       }
 
-      // Validación de tiempo de partida (Límite 5 min)
+      // ValidaciÃ³n de tiempo de partida (LÃ­mite 5 min)
       try {
         const liveUrl = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${targetAcc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
         const liveRes = await fetch(liveUrl);
@@ -217,7 +217,7 @@ function initBot(db) {
           const gameData = await liveRes.json();
           // gameLength en spectator v5 es el tiempo transcurrido en segundos
           if (gameData.gameLength > 300) {
-            return msg.reply(`âŒ **Demasiado tarde.** La partida de **${targetAcc.gameName}** ya lleva ${Math.floor(gameData.gameLength / 60)} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
+            return msg.reply(`Ã¢ÂÅ’ **Demasiado tarde.** La partida de **${targetAcc.gameName}** ya lleva ${Math.floor(gameData.gameLength / 60)} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
           }
         }
       } catch (e) {
@@ -225,7 +225,7 @@ function initBot(db) {
       }
 
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
-      if (!user || user.coins < amount) return msg.reply('âŒ No tienes suficientes Naafiri Coins.');
+      if (!user || user.coins < amount) return msg.reply('Ã¢ÂÅ’ No tienes suficientes Naafiri Coins.');
 
       // Guardar apuesta
       await db.collection('bets').insertOne({
@@ -241,21 +241,21 @@ function initBot(db) {
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! ðŸ¤`);
+      msg.reply(`âœ… Apuesta registrada ${isAnonymous ? '(AnÃ³nima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). Â¡La elecciÃ³n se revelarÃ¡ al final! Ã°Å¸Â¤Â`);
     }
 
     // --- SISTEMA DE GACHAPON ---
     const GACHA_ITEMS = [
-      { id: 'Naafiri', name: 'Naafiri (Base)', rarity: 'Común', weight: 70, img: 'Naafiri_0' },
-      { id: 'Aatrox', name: 'Aatrox', rarity: 'Común', weight: 70, img: 'Aatrox_0' },
-      { id: 'Yasuo', name: 'Yasuo', rarity: 'Común', weight: 70, img: 'Yasuo_0' },
-      { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
-      { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 },
+      { id: 'Naafiri', name: 'Naafiri (Base)', rarity: 'ComÃºn', weight: 70, img: 'Naafiri_0' },
+      { id: 'Aatrox', name: 'Aatrox', rarity: 'ComÃºn', weight: 70, img: 'Aatrox_0' },
+      { id: 'Yasuo', name: 'Yasuo', rarity: 'ComÃºn', weight: 70, img: 'Yasuo_0' },
+      { id: 'Zed', name: 'Zed', rarity: 'ComÃºn', weight: 70, img: 'Zed_0' },
+      { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'ComÃºn', weight: 50, type: 'coins', amount: 50 },
       { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
       { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
       { id: 'COINS_250', name: 'Cofre de 250 Coins', rarity: 'Raro', weight: 15, type: 'coins', amount: 250 },
-      { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
-      { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
+      { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Ã‰pico', weight: 8, img: 'Jhin_5' },
+      { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Ã‰pico', weight: 8, img: 'Naafiri_1' },
       { id: 'COINS_1000', name: 'Tesoro de 1000 Coins', rarity: 'Legendario', weight: 2, type: 'coins', amount: 1000 },
       { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
       { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' }
@@ -266,7 +266,7 @@ function initBot(db) {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
       if (!userEco || userEco.coins < COST) {
-        return msg.reply(`âŒ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
+        return msg.reply(`Ã¢ÂÅ’ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} ðŸ’°**.`);
       }
 
       // Sistema de Pesos para Probabilidades
@@ -279,7 +279,7 @@ function initBot(db) {
       });
       const probabilitiesStr = Object.entries(rarityWeights)
         .map(([rarity, weight]) => `**${rarity}:** ${((weight / totalWeight) * 100).toFixed(1)}%`)
-        .join('  ·  ');
+        .join('  Â·  ');
 
       let random = Math.random() * totalWeight;
       let selected = GACHA_ITEMS[0];
@@ -308,34 +308,34 @@ function initBot(db) {
         );
       }
 
-      const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Épico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
+      const color = selected.rarity === 'Legendario' ? 0xf1c40f : selected.rarity === 'Ã‰pico' ? 0x9b59b6 : selected.rarity === 'Raro' ? 0x3498db : 0x95a5a6;
 
       // Probabilidades de monedas por separado
       const coinItems = GACHA_ITEMS.filter(i => i.type === 'coins');
-      const coinsStr = coinItems.map(i => `**${i.name}:** ${((i.weight / totalWeight) * 100).toFixed(1)}%`).join('  ·  ');
+      const coinsStr = coinItems.map(i => `**${i.name}:** ${((i.weight / totalWeight) * 100).toFixed(1)}%`).join('  Â·  ');
 
       const embedGacha = new EmbedBuilder()
-        .setTitle(`🎰 ¡GACHAPON DE LA PERRERA!`)
-        .setDescription(`¡Has obtenido **${selected.name}**!\n\n✨ Rareza: **${selected.rarity}**${selected.type === 'coins' ? `\n💰 ¡Has ganado **${selected.amount} coins**!` : ''}`)
+        .setTitle(`ðŸŽ° Â¡GACHAPON DE LA PERRERA!`)
+        .setDescription(`Â¡Has obtenido **${selected.name}**!\n\nâœ¨ Rareza: **${selected.rarity}**${selected.type === 'coins' ? `\nðŸ’° Â¡Has ganado **${selected.amount} coins**!` : ''}`)
         .addFields(
-          { name: '📈 Probabilidades por Rareza', value: probabilitiesStr },
-          { name: '💰 Probabilidades de Monedas', value: coinsStr }
+          { name: 'ðŸ“ˆ Probabilidades por Rareza', value: probabilitiesStr },
+          { name: 'ðŸ’° Probabilidades de Monedas', value: coinsStr }
         )
         .setImage(selected.type === 'coins' ? 'https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Gold_icon.png' : `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selected.img}.jpg`)
         .setColor(color)
-        .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST + (selected.type === 'coins' ? selected.amount : 0)} 💰 · Naafiri Bot` });
+        .setFooter({ text: `Gastaste ${COST} coins Â· Saldo restante: ${userEco.coins - COST + (selected.type === 'coins' ? selected.amount : 0)} ðŸ’° Â· Naafiri Bot` });
 
       msg.reply({ embeds: [embedGacha] });
 
       if (selected.rarity === 'Legendario') {
-        msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
+        msg.channel.send(`ðŸŽŠ Â¡ATENCIÃ“N! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! ðŸŽŠ`);
       }
     }
 
     if (command === 'mochila' || command === 'inv') {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!userEco || !userEco.inventory || userEco.inventory.length === 0) {
-        return msg.reply('🎒 Tu mochila está vacía. ¡Usa `!gacha` para empezar tu colección!');
+        return msg.reply('ðŸŽ’ Tu mochila estÃ¡ vacÃ­a. Â¡Usa `!gacha` para empezar tu colecciÃ³n!');
       }
 
       // Agrupar items duplicados y contar cantidad
@@ -346,13 +346,13 @@ function initBot(db) {
       }
 
       const items = Object.values(grouped).map(item => {
-        const icon = item.rarity === 'Legendario' ? 'â­' : item.rarity === 'Épico' ? '💜' : item.rarity === 'Raro' ? '🔹' : '⚪';
+        const icon = item.rarity === 'Legendario' ? 'Ã¢Â­Â' : item.rarity === 'Ã‰pico' ? 'ðŸ’œ' : item.rarity === 'Raro' ? 'ðŸ”¹' : 'âšª';
         const qty = item.count > 1 ? ` **x${item.count}**` : '';
         return `${icon} **${item.name}**${qty} (${item.rarity})`;
       }).join('\n');
 
       const embed = new EmbedBuilder()
-        .setTitle(`🎒 Mochila de ${msg.author.username}`)
+        .setTitle(`ðŸŽ’ Mochila de ${msg.author.username}`)
         .setDescription(items)
         .setColor(0x2ecc71);
 
@@ -364,7 +364,7 @@ function initBot(db) {
     // =============================================
     if (command.startsWith('admin_')) {
       if (!isAdmin(msg.author.id)) {
-        return msg.reply('🚫 No tienes permisos de administrador.');
+        return msg.reply('ðŸš« No tienes permisos de administrador.');
       }
 
       // !admin_dar @usuario cantidad
@@ -378,7 +378,7 @@ function initBot(db) {
           { $inc: { coins: amount }, $set: { discordTag: target.tag } },
           { upsert: true }
         );
-        return msg.reply(`✅ **+${amount} coins** dados a ${target.username}.`);
+        return msg.reply(`âœ… **+${amount} coins** dados a ${target.username}.`);
       }
 
       // !admin_quitar @usuario cantidad
@@ -391,7 +391,7 @@ function initBot(db) {
           { discordId: target.id },
           { $inc: { coins: -amount } }
         );
-        return msg.reply(`✅ **-${amount} coins** quitados a ${target.username}.`);
+        return msg.reply(`âœ… **-${amount} coins** quitados a ${target.username}.`);
       }
 
       // !admin_setcoins @usuario cantidad
@@ -405,7 +405,7 @@ function initBot(db) {
           { $set: { coins: amount, discordTag: target.tag } },
           { upsert: true }
         );
-        return msg.reply(`✅ Coins de ${target.username} fijados a **${amount}**.`);
+        return msg.reply(`âœ… Coins de ${target.username} fijados a **${amount}**.`);
       }
 
       // !admin_resetdiario @usuario
@@ -416,20 +416,20 @@ function initBot(db) {
           { discordId: target.id },
           { $unset: { lastDaily: '' } }
         );
-        return msg.reply(`✅ Cooldown de diario reseteado para **${target.username}**.`);
+        return msg.reply(`âœ… Cooldown de diario reseteado para **${target.username}**.`);
       }
 
       if (command === 'admin_daritem') {
         const target = msg.mentions.users.first();
         const itemId = args[1];
         const item = GACHA_ITEMS.find(i => i.id === itemId);
-        if (!target || !item)
+        if (!target || !item) return msg.reply('Uso: `!admin_daritem @usuario <itemId>`');
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $addToSet: { inventory: { id: item.id, name: item.name, rarity: item.rarity, date: new Date() } } },
           { upsert: true }
         );
-        return msg.reply(`✅ Item **${item.name}** (${item.rarity}) dado a **${target.username}**.`);
+        return msg.reply(`âœ… Item **${item.name}** (${item.rarity}) dado a **${target.username}**.`);
       }
 
       // !admin_clearinv @usuario
@@ -440,7 +440,7 @@ function initBot(db) {
           { discordId: target.id },
           { $set: { inventory: [] } }
         );
-        return msg.reply(`✅ Inventario de **${target.username}** vaciado.`);
+        return msg.reply(`âœ… Inventario de **${target.username}** vaciado.`);
       }
 
       // !admin_anuncio [mensaje]
@@ -448,7 +448,7 @@ function initBot(db) {
         const message = args.join(' ');
         if (!message) return msg.reply('Uso: `!admin_anuncio [mensaje]`');
         const embed = new EmbedBuilder()
-          .setTitle('📢 ANUNCIO OFICIAL')
+          .setTitle('ðŸ“¢ ANUNCIO OFICIAL')
           .setDescription(message)
           .setColor(0xf4c874)
           .setTimestamp()
@@ -469,12 +469,12 @@ function initBot(db) {
           { $group: { _id: null, total: { $sum: '$count' } } }
         ]).toArray();
         const embed = new EmbedBuilder()
-          .setTitle('📊 Estadísticas Globales — Admin')
+          .setTitle('ðŸ“Š EstadÃ­sticas Globales â€” Admin')
           .addFields(
-            { name: '👥 Usuarios registrados', value: `${totalUsers}`, inline: true },
-            { name: '💰 Coins en circulación', value: `${allCoins[0]?.total || 0}`, inline: true },
-            { name: '🎰 Items en inventarios', value: `${totalItems[0]?.total || 0}`, inline: true },
-            { name: 'ðŸ† Usuario más rico', value: richest[0] ? `${richest[0].discordTag} — ${richest[0].coins} coins` : 'N/A', inline: false }
+            { name: 'ðŸ‘¥ Usuarios registrados', value: `${totalUsers}`, inline: true },
+            { name: 'ðŸ’° Coins en circulaciÃ³n', value: `${allCoins[0]?.total || 0}`, inline: true },
+            { name: 'ðŸŽ° Items en inventarios', value: `${totalItems[0]?.total || 0}`, inline: true },
+            { name: 'Ã°Å¸Ââ€  Usuario mÃ¡s rico', value: richest[0] ? `${richest[0].discordTag} â€” ${richest[0].coins} coins` : 'N/A', inline: false }
           )
           .setColor(0x576bce);
         return msg.reply({ embeds: [embed] });
@@ -489,7 +489,7 @@ function initBot(db) {
           gameName: { $regex: new RegExp(`^${name}$`, 'i') },
           tagLine:  { $regex: new RegExp(`^${tag}$`, 'i') }
         });
-        if (!acc) return msg.reply('âŒ Jugador no encontrado en el dashboard.');
+        if (!acc) return msg.reply('Ã¢ÂÅ’ Jugador no encontrado en el dashboard.');
         const openBets = await db.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
         if (!openBets.length) return msg.reply('No hay apuestas abiertas para ese jugador.');
         for (const bet of openBets) {
@@ -502,16 +502,16 @@ function initBot(db) {
           { targetPuuid: acc.puuid, status: 'open' },
           { $set: { status: 'cancelled' } }
         );
-        return msg.reply(`✅ **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
+        return msg.reply(`âœ… **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
       }
 
       // !admin_resetAll CONFIRMAR
       if (command === 'admin_resetall') {
         if (args[0] !== 'CONFIRMAR') {
-          return msg.reply('âš ï¸ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR`');
+          return msg.reply('Ã¢Å¡Â Ã¯Â¸Â Esto pondrÃ¡ a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR`');
         }
         const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
-        return msg.reply(`✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
+        return msg.reply(`âœ… Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
       }
     }
 
@@ -520,7 +520,7 @@ function initBot(db) {
   client.login(process.env.DISCORD_TOKEN);
 }
 
-// Función para enviar notificaciones de rango
+// FunciÃ³n para enviar notificaciones de rango
 async function notifyRankChange(data) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
@@ -528,8 +528,8 @@ async function notifyRankChange(data) {
 
   const { name, oldRank, newRank, promoted } = data;
   const color = promoted ? 0x00C65E : 0xd93f3f;
-  const emoji = promoted ? '🎉' : '💀';
-  const action = promoted ? '¡SUBIÓ DE RANGO!' : 'BAJÓ DE RANGO...';
+  const emoji = promoted ? 'ðŸŽ‰' : 'ðŸ’€';
+  const action = promoted ? 'Â¡SUBIÃ“ DE RANGO!' : 'BAJÃ“ DE RANGO...';
 
   const embed = new EmbedBuilder()
     .setTitle(`${emoji} ${action}`)
@@ -540,7 +540,7 @@ async function notifyRankChange(data) {
   channel.send({ embeds: [embed] });
 
   /* 
-  // Actualizar Rol si está vinculado (Desactivado temporalmente)
+  // Actualizar Rol si estÃ¡ vinculado (Desactivado temporalmente)
   const acc = await db.collection('accounts').findOne({ gameName: name });
   if (acc && acc.discordId) {
     updateUserRoles(acc.discordId, newRank.split(' ')[0]);
@@ -569,7 +569,7 @@ async function updateUserRoles(discordId, tier) {
     const allRankRoles = Object.values(roleEnvMap).map(v => process.env[v]).filter(id => id);
     await member.roles.remove(allRankRoles);
     
-    // Añadir nuevo rol
+    // AÃ±adir nuevo rol
     await member.roles.add(targetRoleId);
   } catch (e) {
     console.error('Error actualizando roles:', e);
@@ -583,8 +583,8 @@ async function notifyLiveGame(acc, gameData) {
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle('âš”ï¸ ¡PARTIDA EN VIVO!')
-    .setDescription(`**${acc.gameName}** acaba de entrar en una partida.\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
+    .setTitle('Ã¢Å¡â€Ã¯Â¸Â Â¡PARTIDA EN VIVO!')
+    .setDescription(`**${acc.gameName}** acaba de entrar en una partida.\n**CampeÃ³n:** ${gameData.championName || 'Desconocido'}`)
     .setColor(0x576bce)
     .setTimestamp();
 
@@ -598,8 +598,8 @@ async function sendDailyMotivation(db) {
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle('â˜€ï¸ ¡Buenos días, Perrera!')
-    .setDescription('¿Quién se va a sacar la primera victoria hoy? âš”ï¸\nUsen `!diario` para sus monedas.')
+    .setTitle('Ã¢Ëœâ‚¬Ã¯Â¸Â Â¡Buenos dÃ­as, Perrera!')
+    .setDescription('Â¿QuiÃ©n se va a sacar la primera victoria hoy? Ã¢Å¡â€Ã¯Â¸Â\nUsen `!diario` para sus monedas.')
     .setColor(0xf4c874);
 
   channel.send({ embeds: [embed] });
@@ -621,17 +621,17 @@ async function sendDailySummary(db) {
   })[0];
 
   const embed = new EmbedBuilder()
-    .setTitle('📊 Resumen Diario de la Perrera')
+    .setTitle('ðŸ“Š Resumen Diario de la Perrera')
     .addFields(
-      { name: '🔥 El más tryhard', value: `${topWinrate.gameName} (${Math.round((topWinrate.soloQ.wins/(topWinrate.soloQ.wins+topWinrate.soloQ.losses))*100)}% WR)`, inline: false }
+      { name: 'ðŸ”¥ El mÃ¡s tryhard', value: `${topWinrate.gameName} (${Math.round((topWinrate.soloQ.wins/(topWinrate.soloQ.wins+topWinrate.soloQ.losses))*100)}% WR)`, inline: false }
     )
     .setColor(0x576bce)
-    .setFooter({ text: 'Actualizado automáticamente' });
+    .setFooter({ text: 'Actualizado automÃ¡ticamente' });
 
-  channel.send({ embeds: [embedBet] });
+  channel.send({ embeds: [embed] });
 }
 
-// Notificación de resultados de apuestas
+// NotificaciÃ³n de resultados de apuestas
 async function notifyBetResults(targetName, result, winners) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
@@ -639,13 +639,13 @@ async function notifyBetResults(targetName, result, winners) {
 
   const description = winners.length > 0 
     ? `**Ganadores:**\n${winners.map(w => {
-        const userStr = w.anonymous ? 'ðŸ‘¤ *Anónimo*' : `<@${w.discordId}>`;
+        const userStr = w.anonymous ? 'Ã°Å¸â€˜Â¤ *AnÃ³nimo*' : `<@${w.discordId}>`;
         const prize = Math.floor(w.amount * (w.multiplier || 2));
-        return `${userStr} (Elección: **${w.choice.toUpperCase()}**) - Ganó **${prize} 💰**`;
+        return `${userStr} (ElecciÃ³n: **${w.choice.toUpperCase()}**) - GanÃ³ **${prize} ðŸ’°**`;
       }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
-  const emoji = result === 'gana' ? '🏆' : '💀';
+  const emoji = result === 'gana' ? 'ðŸ†' : 'ðŸ’€';
   const embedBet = new EmbedBuilder()
     .setTitle(`${emoji} Resultados de Apuestas: ${targetName}`)
     .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
@@ -655,30 +655,30 @@ async function notifyBetResults(targetName, result, winners) {
   channel.send({ embeds: [embedBet] });
 }
 
-// Notificación de Remake
+// NotificaciÃ³n de Remake
 async function notifyRemake(targetName) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
   const embedRemake = new EmbedBuilder()
-    .setTitle('🔄 Remake Detectado')
-    .setDescription(`La partida de **${targetName}** fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automáticamente. 💰`)
+    .setTitle('ðŸ”„ Remake Detectado')
+    .setDescription(`La partida de **${targetName}** fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automÃ¡ticamente. ðŸ’°`)
     .setColor(0xf39c12)
     .setTimestamp();
 
   channel.send({ embeds: [embedRemake] });
 }
 
-// Notificación de Reto Completado
+// NotificaciÃ³n de Reto Completado
 async function notifyChallengeComplete(targetName, challenges, coins) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle('✨ ¡RETO COMPLETADO! ✨')
-    .setDescription(`¡Increíble! **${targetName}** ha superado los siguientes retos en su última partida:\n\n${challenges.map(c => `ðŸ”¹ ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** 💰`)
+    .setTitle('âœ¨ Â¡RETO COMPLETADO! âœ¨')
+    .setDescription(`Â¡IncreÃ­ble! **${targetName}** ha superado los siguientes retos en su Ãºltima partida:\n\n${challenges.map(c => `Ã°Å¸â€Â¹ ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** ðŸ’°`)
     .setColor(0xf4c874)
     .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png') // Icono de Master para darle prestigio
     .setTimestamp();
@@ -687,3 +687,4 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 }
 
 module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete };
+

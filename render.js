@@ -33,16 +33,24 @@ const RANK_ICONS = {
 };
 
 const CHAMP_NAME_FIX = {
-  'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'Chogath': 'Chogath',
-  'DrMundo': 'DrMundo', 'JarvanIV': 'JarvanIV', 'Kaisa': 'Kaisa',
-  'Khazix': 'Khazix', 'KogMaw': 'KogMaw', 'KSante': 'KSante',
-  'Leblanc': 'Leblanc', 'LeeSin': 'LeeSin', 'MasterYi': 'MasterYi',
-  'MissFortune': 'MissFortune', 'MonkeyKing': 'MonkeyKing', 'Wukong': 'MonkeyKing',
-  'Nunu': 'Nunu', 'NunuWillump': 'Nunu', 'RekSai': 'RekSai',
-  'TahmKench': 'TahmKench', 'TwistedFate': 'TwistedFate', 'Velkoz': 'Velkoz',
-  'XinZhao': 'XinZhao', 'Fiddlesticks': 'Fiddlesticks', 'FiddleSticks': 'Fiddlesticks',
-  'fiddlesticks': 'Fiddlesticks', 'Renata': 'Renata', 'RenataGlasc': 'Renata', 'Mel': 'Mel',
-  'NunuyWillump': 'Nunu', 'NunuWillump': 'Nunu', 'Nunu': 'Nunu',
+  // Entradas unificadas de ambas listas
+  'AurelionSol': 'AurelionSol', 'Belveth': 'Belveth', 'BelVeth': 'Belveth',
+  'Chogath': 'Chogath', 'ChoGath': 'Chogath',
+  'DrMundo': 'DrMundo', 'JarvanIV': 'JarvanIV',
+  'Kaisa': 'Kaisa', 'KaiSa': 'Kaisa',
+  'Khazix': 'Khazix', 'KhaZix': 'Khazix',
+  'KogMaw': 'KogMaw', 'KSante': 'KSante',
+  'Leblanc': 'Leblanc', 'LeBlanc': 'Leblanc',
+  'LeeSin': 'LeeSin', 'MasterYi': 'MasterYi',
+  'MissFortune': 'MissFortune',
+  'MonkeyKing': 'MonkeyKing', 'Wukong': 'MonkeyKing',
+  'Nunu': 'Nunu', 'NunuWillump': 'Nunu', 'NunuyWillump': 'Nunu',
+  'RekSai': 'RekSai', 'TahmKench': 'TahmKench', 'TwistedFate': 'TwistedFate',
+  'Velkoz': 'Velkoz', 'VelKoz': 'Velkoz',
+  'XinZhao': 'XinZhao',
+  'Fiddlesticks': 'Fiddlesticks', 'FiddleSticks': 'Fiddlesticks', 'fiddlesticks': 'Fiddlesticks',
+  'Renata': 'Renata', 'RenataGlasc': 'Renata',
+  'Mel': 'Mel',
 };
 
 function getRankInfo(acc) {
@@ -96,19 +104,7 @@ function formatDuration(seconds) {
   return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
-const CHAMP_NAME_FIX = {
-  'Wukong': 'MonkeyKing',
-  'RenataGlasc': 'Renata',
-  'BelVeth': 'Belveth',
-  'ChoGath': 'Chogath',
-  'KhaZix': 'Khazix',
-  'KaiSa': 'Kaisa',
-  'LeBlanc': 'Leblanc',
-  'VelKoz': 'Velkoz',
-  'FiddleSticks': 'Fiddlesticks',
-  'Nunu': 'Nunu',
-  'JarvanIV': 'JarvanIV'
-};
+// (mapeo unificado arriba — se eliminó la redeclaración)
 
 function getChampImageName(name) {
   if (!name) return 'Unknown.png';
@@ -117,20 +113,7 @@ function getChampImageName(name) {
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
 }
 
-function timeAgo(date) {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + " años";
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + " meses";
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + " días";
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + " horas";
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + " min";
-    return Math.floor(seconds) + " seg";
-}
+// timeAgo unificada: acepta tanto un timestamp numérico como un objeto Date/string
 
 function buildStreakHTML(streak) {
   if (!streak || streak === 0) return '';
