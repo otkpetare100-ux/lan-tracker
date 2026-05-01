@@ -539,7 +539,7 @@ function initBot(db) {
           const me = game.participants.find(p => p.puuid === acc.puuid);
           const champName = me ? (Object.values(champData.data).find(c => c.key == me.championId)?.name || 'Desconocido') : 'Desconocido';
 
-          await notifyLiveGame(acc, { championName: champName });
+          const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId); const cName = champKey ? champData.data[champKey].name : 'Desconocido'; await notifyLiveGame(acc, { championName: cName, championId: champKey });
           return msg.reply(`✅ **${acc.gameName}** está en partida. Notificación enviada.`);
         } else {
           return msg.reply(`💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
@@ -696,9 +696,14 @@ async function notifyLiveGame(acc, gameData) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
+  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png`;
+  const champIcon = gameData.championId ? `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${gameData.championId}.png` : null;
+
   const embed = new EmbedBuilder()
+    .setAuthor({ name: acc.gameName, iconURL: playerIcon })
     .setTitle('PARTIDA EN VIVO')
-    .setDescription('**' + acc.gameName + '** acaba de entrar en una partida.\n**Campeon:** ' + (gameData.championName || 'Desconocido'))
+    .setDescription(`¡Acaba de entrar en una partida!\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
+    .setThumbnail(champIcon)
     .setColor(0x576bce)
     .setTimestamp();
 

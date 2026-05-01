@@ -110,10 +110,12 @@ async function connectDB() {
               
               // Buscar el campeón del jugador en la partida
               const me = game.participants.find(p => p.puuid === acc.puuid);
-              const champName = me ? (champMap[me.championId] || 'Desconocido') : 'Desconocido';
+              // Necesitamos el ID interno para el icono (ej: 'Naafiri')
+              const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
+              const champName = champKey ? champData.data[champKey].name : 'Desconocido';
               
               console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName}`);
-              notifyLiveGame(acc, { championName: champName });
+              notifyLiveGame(acc, { championName: champName, championId: champKey });
             }
           } else {
             // Si estaba en cache y ya no (404), es que terminó la partida
