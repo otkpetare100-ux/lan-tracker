@@ -477,6 +477,11 @@ function initBot(db) {
         return msg.reply('✅ Notificación de prueba enviada al canal de anuncios.');
       }
 
+      if (command === 'admin_testsummary') {
+        await sendDailySummary();
+        return msg.reply('✅ Resumen diario de prueba enviado.');
+      }
+
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
