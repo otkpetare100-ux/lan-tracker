@@ -459,6 +459,12 @@ function initBot(db) {
         return;
       }
 
+      if (command === 'admin_debug_key') {
+        const key = process.env.RIOT_API_KEY || 'NO DEFINIDA';
+        const masked = key.length > 10 ? `${key.substring(0, 7)}...${key.substring(key.length - 4)}` : 'Muy corta';
+        return msg.reply(`🔑 **Debug Key:**\n- Máscara: \`${masked}\`\n- Longitud: \`${key.length}\`\n- Variable ENV: \`${process.env.RIOT_API_KEY ? 'Detectada ✅' : 'No detectada ❌'}\``);
+      }
+
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
