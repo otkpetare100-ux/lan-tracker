@@ -529,11 +529,11 @@ function initBot(db) {
         return msg.reply('✅ Resumen diario de prueba enviado.');
       }
 
-      if (command === 'admin_testbet') {
+            if (command === 'admin_testbet') {
         const testWinners = [
           { discordId: msg.author.id, amount: 50, multiplier: 2.0, choice: 'gana', anonymous: false }
         ];
-        await notifyBetResults('Jugador de Prueba', 'gana', testWinners);
+        await notifyBetResults('Jugador de Prueba', 'gana', testWinners, 0, 'Naafiri', '+25 LP (Platino I)', '15/2/8');
         return msg.reply('✅ Notificación de apuesta de prueba enviada.');
       }
 
