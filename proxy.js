@@ -849,6 +849,7 @@ app.get('/player/:slug', async (req, res) => {
     <body>
       <div class="bg-glow"></div>
       
+      ${req.query.admin === '1' ? `
       <button class="admin-force-btn" onclick="forceUpdate()">⚙️ FORZAR ACTUALIZACIÓN</button>
       <script>
         async function forceUpdate() {
@@ -876,6 +877,7 @@ app.get('/player/:slug', async (req, res) => {
           }
         }
       </script>
+      ` : ''}
 
       <div class="layout-wrapper">
         <!-- PANEL IZQUIERDO -->
