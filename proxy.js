@@ -212,7 +212,7 @@ async function settleBets(acc) {
     }
 
     // 4. Notificar en Discord
-    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners);
+    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName);
 
     // --- NUEVO: Motor de Retos Automáticos ---
     await checkChallenges(acc, match);

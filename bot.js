@@ -751,10 +751,13 @@ async function sendDailySummary(db) {
 }
 
 // Notificación de resultados de apuestas
-async function notifyBetResults(targetName, result, winners) {
+async function notifyBetResults(targetName, result, winners, profileIconId, championId) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
+
+  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${profileIconId || 0}.png`;
+  const champIcon = championId ? `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${championId}.png` : null;
 
   const description = winners.length > 0 
     ? `**Ganadores:**\n${winners.map(w => {
@@ -766,8 +769,10 @@ async function notifyBetResults(targetName, result, winners) {
 
   const emoji = result === 'gana' ? '\uD83C\uDFC6' : '💀';
   const embedBet = new EmbedBuilder()
-    .setTitle(`${emoji} Resultados de Apuestas: ${targetName}`)
+    .setAuthor({ name: targetName, iconURL: playerIcon })
+    .setTitle(`${emoji} Resultados de Apuestas`)
     .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
+    .setThumbnail(champIcon)
     .setColor(winners.length > 0 ? 0xf1c40f : 0x95a5a6)
     .setTimestamp();
 
