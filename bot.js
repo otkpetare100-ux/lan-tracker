@@ -1,4 +1,4 @@
-﻿const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
@@ -430,6 +430,34 @@ function initBot(db) {
           { upsert: true }
         );
         return msg.reply(`âœ… Item **${item.name}** (${item.rarity}) dado a **${target.username}**.`);
+      }
+
+      if (command === 'admin_scan') {
+        const accounts = await db.collection('accounts').find({}).toArray();
+        const statusMsg = await msg.reply(`🔍 Escaneando partidas en vivo para **${accounts.length}** cuentas...`);
+        
+        let found = 0;
+        let results = [];
+
+        for (const acc of accounts) {
+          try {
+            const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
+            const res = await fetch(url);
+            if (res.ok) {
+              const game = await res.json();
+              found++;
+              results.push(`✅ **${acc.gameName}**: En partida`);
+              // Intentar disparar notificación si es nueva (opcional, el proxy lo hará en su próximo ciclo)
+            } else {
+              results.push(`💤 **${acc.gameName}**: No está en partida`);
+            }
+          } catch (e) {
+            results.push(`❌ **${acc.gameName}**: Error de conexión`);
+          }
+        }
+
+        await statusMsg.edit(`📊 **Resultado del Escaneo:**\n${results.join('\n')}\n\nTotal en vivo: **${found}**`);
+        return;
       }
 
       // !admin_clearinv @usuario
