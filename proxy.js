@@ -858,30 +858,30 @@ app.get('/player/:slug', async (req, res) => {
 
         /* --- Historial de Partidas V2 --- */
         .match-v2-card {
-            display: grid; grid-template-columns: 4px 64px 100px 180px 110px 1fr 40px;
+            display: grid; grid-template-columns: 70px 110px 180px 110px 1fr 50px;
             align-items: center; background: rgba(16, 20, 34, 0.7); border-radius: 8px;
             overflow: hidden; height: 75px; transition: all 0.2s ease; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.03); position: relative; margin-bottom: 8px;
             text-align: left;
         }
         .match-v2-card:hover { background: rgba(23, 28, 48, 0.9); transform: translateX(4px); border-color: rgba(255,255,255,0.1); }
-        .mv2-win { border-left: 4px solid #28ab66; }
-        .mv2-loss { border-left: 4px solid #e84057; }
-        .mv2-champ-block { display: flex; justify-content: center; align-items: center; }
-        .mv2-main-icon { width: 48px; height: 48px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .mv2-win { border-left: 5px solid #28ab66 !important; }
+        .mv2-loss { border-left: 5px solid #e84057 !important; }
+        .mv2-champ-block { display: flex; justify-content: center; align-items: center; width: 70px; }
+        .mv2-main-icon { width: 50px; height: 50px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); object-fit: cover; }
         .mv2-info-block { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
-        .mv2-result { font-weight: 900; font-size: 0.85rem; letter-spacing: 0.5px; }
+        .mv2-result { font-weight: 900; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; }
         .mv2-queue { font-size: 0.72rem; color: #657099; }
-        .mv2-kda-block { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding-left: 10px; }
-        .mv2-kda-text { font-weight: 900; font-size: 1.15rem; color: #f2f4ff; letter-spacing: -0.5px; }
-        .mv2-stats { font-size: 0.72rem; color: #657099; }
+        .mv2-kda-block { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+        .mv2-kda-text { font-weight: 900; font-size: 1.2rem; color: #f2f4ff; letter-spacing: -0.5px; line-height: 1; }
+        .mv2-stats { font-size: 0.72rem; color: #657099; margin-top: 2px; }
         .mv2-items-grid { display: grid; grid-template-columns: repeat(4, 24px); grid-template-rows: repeat(2, 24px); gap: 2px; }
         .mv2-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
         .mv2-item.empty { background: rgba(255,255,255,0.03); }
         .mv2-meta { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #657099; font-size: 0.72rem; }
-        .mv2-meta-label { opacity: 0.6; }
-        .mv2-duration { font-weight: 600; }
-        .mv2-expand-icon { display: flex; justify-content: center; align-items: center; color: #657099; font-size: 1rem; opacity: 0.5; padding-right: 10px; }
+        .mv2-meta-label { opacity: 0.6; margin-bottom: 2px; }
+        .mv2-duration { font-weight: 700; color: #8c96bc; }
+        .mv2-expand-icon { display: flex; justify-content: center; align-items: center; color: #657099; font-size: 1.1rem; opacity: 0.5; }
         .text-win { color: #28ab66; }
         .text-loss { color: #e84057; }
 
