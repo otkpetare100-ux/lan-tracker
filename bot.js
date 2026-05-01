@@ -578,8 +578,8 @@ async function notifyRankChange(data) {
 
   const { name, oldRank, newRank, promoted } = data;
   const color = promoted ? 0x00C65E : 0xd93f3f;
-  const emoji = promoted ? 'ðŸŽ‰' : 'ðŸ’€';
-  const action = promoted ? 'Â¡SUBIÃ“ DE RANGO!' : 'BAJÃ“ DE RANGO...';
+  const emoji = promoted ? '🎉' : '💀';
+  const action = promoted ? '¡SUBIÓ DE RANGO!' : 'BAJÓ DE RANGO...';
 
   const embed = new EmbedBuilder()
     .setTitle(`${emoji} ${action}`)
@@ -634,7 +634,7 @@ async function notifyLiveGame(acc, gameData) {
 
   const embed = new EmbedBuilder()
     .setTitle('Ã¢Å¡â€Ã¯Â¸Â Â¡PARTIDA EN VIVO!')
-    .setDescription(`**${acc.gameName}** acaba de entrar en una partida.\n**CampeÃ³n:** ${gameData.championName || 'Desconocido'}`)
+    .setDescription(`**${acc.gameName}** acaba de entrar en una partida.\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
     .setColor(0x576bce)
     .setTimestamp();
 
@@ -649,7 +649,7 @@ async function sendDailyMotivation(db) {
 
   const embed = new EmbedBuilder()
     .setTitle('Ã¢Ëœâ‚¬Ã¯Â¸Â Â¡Buenos dÃ­as, Perrera!')
-    .setDescription('Â¿QuiÃ©n se va a sacar la primera victoria hoy? Ã¢Å¡â€Ã¯Â¸Â\nUsen `!diario` para sus monedas.')
+    .setDescription('¿Quién se va a sacar la primera victoria hoy? Ã¢Å¡â€Ã¯Â¸Â\nUsen `!diario` para sus monedas.')
     .setColor(0xf4c874);
 
   channel.send({ embeds: [embed] });
@@ -671,17 +671,17 @@ async function sendDailySummary(db) {
   })[0];
 
   const embed = new EmbedBuilder()
-    .setTitle('ðŸ“Š Resumen Diario de la Perrera')
+    .setTitle('📊 Resumen Diario de la Perrera')
     .addFields(
-      { name: 'ðŸ”¥ El mÃ¡s tryhard', value: `${topWinrate.gameName} (${Math.round((topWinrate.soloQ.wins/(topWinrate.soloQ.wins+topWinrate.soloQ.losses))*100)}% WR)`, inline: false }
+      { name: '🔥 El más tryhard', value: `${topWinrate.gameName} (${Math.round((topWinrate.soloQ.wins/(topWinrate.soloQ.wins+topWinrate.soloQ.losses))*100)}% WR)`, inline: false }
     )
     .setColor(0x576bce)
-    .setFooter({ text: 'Actualizado automÃ¡ticamente' });
+    .setFooter({ text: 'Actualizado automáticamente' });
 
   channel.send({ embeds: [embed] });
 }
 
-// NotificaciÃ³n de resultados de apuestas
+// Notificación de resultados de apuestas
 async function notifyBetResults(targetName, result, winners) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
@@ -689,13 +689,13 @@ async function notifyBetResults(targetName, result, winners) {
 
   const description = winners.length > 0 
     ? `**Ganadores:**\n${winners.map(w => {
-        const userStr = w.anonymous ? 'Ã°Å¸â€˜Â¤ *AnÃ³nimo*' : `<@${w.discordId}>`;
+        const userStr = w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`;
         const prize = Math.floor(w.amount * (w.multiplier || 2));
-        return `${userStr} (ElecciÃ³n: **${w.choice.toUpperCase()}**) - GanÃ³ **${prize} ðŸ’°**`;
+        return `${userStr} (Elección: **${w.choice.toUpperCase()}**) - GanÃ³ **${prize} ðŸ’°**`;
       }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
-  const emoji = result === 'gana' ? 'ðŸ†' : 'ðŸ’€';
+  const emoji = result === 'gana' ? 'ðŸ†' : '💀';
   const embedBet = new EmbedBuilder()
     .setTitle(`${emoji} Resultados de Apuestas: ${targetName}`)
     .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
@@ -705,30 +705,30 @@ async function notifyBetResults(targetName, result, winners) {
   channel.send({ embeds: [embedBet] });
 }
 
-// NotificaciÃ³n de Remake
+// Notificación de Remake
 async function notifyRemake(targetName) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
   const embedRemake = new EmbedBuilder()
-    .setTitle('ðŸ”„ Remake Detectado')
-    .setDescription(`La partida de **${targetName}** fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automÃ¡ticamente. ðŸ’°`)
+    .setTitle('🔄 Remake Detectado')
+    .setDescription(`La partida de **${targetName}** fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automáticamente. 💰`)
     .setColor(0xf39c12)
     .setTimestamp();
 
   channel.send({ embeds: [embedRemake] });
 }
 
-// NotificaciÃ³n de Reto Completado
+// Notificación de Reto Completado
 async function notifyChallengeComplete(targetName, challenges, coins) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle('âœ¨ Â¡RETO COMPLETADO! âœ¨')
-    .setDescription(`Â¡IncreÃ­ble! **${targetName}** ha superado los siguientes retos en su Ãºltima partida:\n\n${challenges.map(c => `Ã°Å¸â€Â¹ ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** ðŸ’°`)
+    .setTitle('✨ ¡RETO COMPLETADO! ✨')
+    .setDescription(`¡Increíble! **${targetName}** ha superado los siguientes retos en su última partida:\n\n${challenges.map(c => `Ã°Å¸â€Â¹ ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** 💰`)
     .setColor(0xf4c874)
     .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png') // Icono de Master para darle prestigio
     .setTimestamp();
