@@ -180,22 +180,19 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
       participantsHTML = '<div class="mv2-participants"><div class="mv2-p-col">' + team1.map(renderPart).join('') + '</div><div class="mv2-p-col">' + team2.map(renderPart).join('') + '</div></div>';
     }
 
+    const shortQueue = queue.replace('Clasificatoria ', '').replace('Normal (Recluta)', 'Draft').replace('Normal (Oculta)', 'Blind');
+
     return '<div class="match-v2-card ' + cls + '" onclick="event.stopPropagation(); openMatchModal(\'' + m.matchId + '\')">' +
       '<div class="mv2-champ-block">' +
         '<img class="mv2-main-icon" src="' + champImg + '" />' +
       '</div>' +
-      '<div class="mv2-main-block">' +
-        '<div class="mv2-meta-top">' + queue + ' · ' + time + '</div>' +
-        '<div class="mv2-kda-line">' +
-          '<span class="mv2-kda-val">' + kda + '</span>' +
-          '<span class="mv2-cs-val">' + (m.cs || 0) + ' CS</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="mv2-items-block">' +
+      '<div class="mv2-flat-info">' +
+        '<span class="mv2-queue-flat">' + shortQueue + '</span>' +
+        '<span class="mv2-kda-flat">' + kda + '</span>' +
+        '<span class="mv2-cs-flat">' + (m.cs || 0) + ' CS</span>' +
         '<div class="mv2-items-row">' + itemsHTML + '</div>' +
-      '</div>' +
-      '<div class="mv2-meta-block">' +
-        '<div class="mv2-duration">' + dur + '</div>' +
+        '<span class="mv2-duration-flat">' + dur + '</span>' +
+        '<span class="mv2-time-flat">' + time + '</span>' +
       '</div>' +
       '<div class="mv2-expand-icon">📈</div>' +
     '</div>';
