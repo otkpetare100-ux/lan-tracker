@@ -1190,8 +1190,8 @@ app.get('/player/:slug', async (req, res) => {
 
           // Pestañas
           html += '<div class="modal-tabs">';
-          html += '<div class="modal-tab active" onclick="switchTab(event, \'tab-scoreboard\')">SCOREBOARD</div>';
-          html += '<div class="modal-tab" onclick="switchTab(event, \'tab-stats\')">DAÑO Y ORO</div>';
+          html += '<div class="modal-tab active" onclick="switchTab(event, \\'tab-scoreboard\\')">SCOREBOARD</div>';
+          html += '<div class="modal-tab" onclick="switchTab(event, \\'tab-stats\\')">DAÑO Y ORO</div>';
           html += '</div>';
 
           // Contenido de Pestañas
