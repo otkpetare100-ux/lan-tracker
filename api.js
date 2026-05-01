@@ -139,6 +139,7 @@ async function fetchMatchHistory(puuid, onProgress) {
         if (!p) continue;
         
         details.push({
+          matchId: match.metadata.matchId || id,
           champion: p.championName,
           win: p.win,
           kills: p.kills,

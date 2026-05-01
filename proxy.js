@@ -864,6 +864,47 @@ app.get('/player/:slug', async (req, res) => {
         .d-label { font-size: 0.65rem; color: #657099; text-transform: uppercase; font-weight: 800; }
         .d-val { font-size: 0.95rem; color: #f2f4ff; font-weight: 700; }
         
+        /* Estilos del Modal */
+        .modal-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+          display: none; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .modal-content {
+          background: #0d111c; width: 95%; max-width: 1100px; max-height: 90vh;
+          border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+          overflow-y: auto; position: relative; padding: 30px;
+          box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+        .modal-close {
+          position: absolute; top: 20px; right: 20px; font-size: 1.5rem;
+          color: #657099; cursor: pointer; transition: 0.3s;
+        }
+        .modal-close:hover { color: #f2f4ff; }
+        
+        .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; }
+        .scoreboard-table th { text-align: left; padding: 10px; color: #657099; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .scoreboard-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        
+        .team-header { font-weight: 900; font-size: 1.1rem; padding: 15px 10px; display: flex; align-items: center; gap: 10px; }
+        .blue-team { color: #00b4ff; background: rgba(0, 180, 255, 0.05); }
+        .red-team { color: #ff4b4b; background: rgba(255, 75, 75, 0.05); }
+        
+        .player-cell { display: flex; align-items: center; gap: 10px; }
+        .player-champ-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+        .player-name-link { font-weight: 700; color: #f2f4ff; text-decoration: none; }
+        
+        .item-list { display: flex; gap: 4px; }
+        .item-icon { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.5); }
+        .empty-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(255,255,255,0.02); }
+        
+        .score-kda { font-weight: 800; font-size: 0.9rem; }
+        .score-sub { font-size: 0.75rem; color: #657099; display: block; }
+        
+        .loading-modal { text-align: center; padding: 50px; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #f4c874; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         /* Contenedor principal de layout vertical */
         .page-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
       </style>
@@ -1036,7 +1077,7 @@ app.get('/player/:slug', async (req, res) => {
           const kda = m.deaths === 0 ? 'Perfecto' : ((m.kills + m.assists) / m.deaths).toFixed(2);
           
           return `
-          <div class="match-card" style="background: ${cardColor}; border-left: 4px solid ${borderColor};" onclick="toggleMatch(${i})">
+          <div class="match-card" style="background: ${cardColor}; border-left: 4px solid ${borderColor};" onclick="${m.matchId ? `openMatchModal('${m.matchId}')` : `toggleMatch(${i})`}">
             <div class="match-header">
               <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}" class="match-champ-img">
               <div class="match-info-main">
@@ -1046,9 +1087,10 @@ app.get('/player/:slug', async (req, res) => {
               <div class="match-info-sub">
                 <span>${m.cs} CS</span>
                 <span>${Math.floor(m.gameDuration / 60)}m ${m.gameDuration % 60}s</span>
-                <span style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">VER MÁS ▼</span>
+                <span style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">${m.matchId ? 'VER DETALLES ➕' : 'VER MÁS ▼'}</span>
               </div>
             </div>
+            ${m.matchId ? '' : `
             <div class="match-details" id="match-detail-${i}">
               <div class="detail-grid">
                 <div class="detail-item"><span class="d-label">Daño a Campeones</span><span class="d-val">${m.damage.toLocaleString()}</span></div>
@@ -1059,6 +1101,7 @@ app.get('/player/:slug', async (req, res) => {
                 <div class="detail-item"><span class="d-label">Posición</span><span class="d-val">${m.position || '—'}</span></div>
               </div>
             </div>
+            `}
           </div>
           `;
         }).join('')}
@@ -1066,17 +1109,119 @@ app.get('/player/:slug', async (req, res) => {
       ` : ''}
       </div> <!-- fin page-container -->
 
+      <!-- MODAL DE DETALLES -->
+      <div id="matchModal" class="modal-overlay" onclick="closeMatchModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+          <span class="modal-close" onclick="closeMatchModal(event)">×</span>
+          <div id="modalBody">
+            <div class="loading-modal">
+              <div class="spinner"></div>
+              <p>Consultando a Riot Games...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <script>
         function toggleMatch(index) {
           const el = document.getElementById('match-detail-' + index);
+          if (!el) return;
           if (el.style.maxHeight && el.style.maxHeight !== '0px') {
             el.style.maxHeight = '0px';
-            el.style.paddingTop = '0px';
             el.style.opacity = '0';
           } else {
             el.style.maxHeight = '200px';
             el.style.opacity = '1';
           }
+        }
+
+        function closeMatchModal(e) {
+          document.getElementById('matchModal').style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+
+        async function openMatchModal(matchId) {
+          const modal = document.getElementById('matchModal');
+          const body = document.getElementById('modalBody');
+          modal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+          
+          body.innerHTML = '<div class="loading-modal"><div class="spinner"></div><p>Obteniendo scoreboard desde Riot Games...</p></div>';
+
+          try {
+            const res = await fetch('/api/match/' + matchId);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            renderScoreboard(data);
+          } catch(e) {
+            body.innerHTML = '<div style="text-align:center; padding:40px; color:#ff4b4b;"><h3>Error al cargar partida</h3><p>' + e.message + '</p></div>';
+          }
+        }
+
+        function renderScoreboard(data) {
+          const body = document.getElementById('modalBody');
+          const duration = Math.floor(data.gameDuration / 60) + 'm ' + (data.gameDuration % 60) + 's';
+          
+          let html = '<h2 style="margin-bottom:5px;">Detalles de la Partida</h2>';
+          html += '<div style="color:#657099; font-size:0.8rem; margin-bottom:20px;">' + data.gameMode + ' • ' + duration + '</div>';
+
+          // Grupos por equipos
+          const blueTeam = data.participants.filter(p => p.teamId === 100);
+          const redTeam = data.participants.filter(p => p.teamId === 200);
+
+          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100]);
+          html += '<div style="height:30px;"></div>';
+          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200]);
+
+          body.innerHTML = html;
+        }
+
+        function renderTeamTable(title, players, teamClass, teamData) {
+          const result = players[0].win ? 'VICTORIA' : 'DERROTA';
+          const kills = players.reduce((sum, p) => sum + p.kills, 0);
+          const deaths = players.reduce((sum, p) => sum + p.deaths, 0);
+          const assists = players.reduce((sum, p) => sum + p.assists, 0);
+
+          let html = '<div class="team-header ' + teamClass + '">';
+          html += '<span>' + title + ' (' + result + ')</span>';
+          html += '<span style="margin-left:auto; font-size:0.9rem; opacity:0.8;">' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
+          html += '</div>';
+
+          html += '<table class="scoreboard-table">';
+          html += '<thead><tr><th>Campeón</th><th>KDA</th><th>Daño</th><th>Visión</th><th>CS</th><th>Oro</th><th>Objetos</th></tr></thead>';
+          html += '<tbody>';
+
+          players.forEach(p => {
+            const kda = p.deaths === 0 ? 'Perfect' : ((p.kills + p.assists) / p.deaths).toFixed(2);
+            html += '<tr>';
+            html += '<td><div class="player-cell">';
+            html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" class="player-champ-icon">';
+            html += '<div style="display:flex; flex-direction:column;"><span class="player-name-link">' + p.gameName + '</span><span style="font-size:0.7rem; color:#657099;">Nvl ' + p.champLevel + '</span></div>';
+            html += '</div></td>';
+            
+            html += '<td><span class="score-kda">' + p.kills + ' / ' + p.deaths + ' / ' + p.assists + '</span><span class="score-sub">' + kda + ' KDA</span></td>';
+            html += '<td><span class="score-kda">' + p.totalDamageDealtToChampions.toLocaleString() + '</span></td>';
+            html += '<td><span class="score-kda">' + p.visionScore + '</span></td>';
+            html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span></td>';
+            html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
+            
+            // Items
+            html += '<td><div class="item-list">';
+            p.items.forEach(itemId => {
+              if (itemId > 0) {
+                html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/' + itemId + '.png" class="item-icon">';
+              } else {
+                html += '<div class="empty-item"></div>';
+              }
+            });
+            html += '</div></td>';
+            
+            html += '</tr>';
+          });
+
+          html += '</tbody></table>';
+          return html;
         }
       </script>
     </body>
@@ -1160,6 +1305,7 @@ async function backendFetchMatchHistory(puuid) {
         const p = match.info.participants.find(x => x.puuid === puuid);
         if (!p) continue;
         details.push({
+          matchId: match.metadata?.matchId || matchIds[i],
           champion: p.championName,
           win: p.win,
           kills: p.kills,
@@ -1250,6 +1396,61 @@ app.post('/player/:puuid/force-update', async (req, res) => {
   } catch(e) {
     console.error('Error forzando actualización:', e);
     res.status(500).json({ error: 'Error del servidor al buscar en Riot' });
+  }
+});
+
+// Endpoint para obtener detalles de una partida específica (Scoreboard)
+app.get('/api/match/:matchId', async (req, res) => {
+  const { matchId } = req.params;
+  try {
+    const url = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${API_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) return res.status(404).json({ error: 'Partida no encontrada en Riot' });
+    
+    const data = await response.json();
+    if (!data || !data.info) return res.status(404).json({ error: 'Datos de partida inválidos' });
+
+    // Estructurar la respuesta para el frontend
+    const participants = data.info.participants.map(p => ({
+      puuid: p.puuid,
+      gameName: p.riotIdGameName || p.summonerName,
+      tagLine: p.riotIdTagline || '',
+      championId: p.championId,
+      championName: p.championName,
+      teamId: p.teamId,
+      win: p.win,
+      kills: p.kills,
+      deaths: p.deaths,
+      assists: p.assists,
+      totalDamageDealtToChampions: p.totalDamageDealtToChampions,
+      totalDamageDealtToObjectives: p.totalDamageDealtToObjectives,
+      goldEarned: p.goldEarned,
+      visionScore: p.visionScore,
+      totalMinionsKilled: p.totalMinionsKilled + (p.neutralMinionsKilled || 0),
+      items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6],
+      summoner1Id: p.summoner1Id,
+      summoner2Id: p.summoner2Id,
+      perks: p.perks, // Para las runas
+      champLevel: p.champLevel,
+      individualPosition: p.individualPosition,
+      challenges: p.challenges
+    }));
+
+    const teams = {
+      100: data.info.teams.find(t => t.teamId === 100),
+      200: data.info.teams.find(t => t.teamId === 200)
+    };
+
+    res.json({
+      gameDuration: data.info.gameDuration,
+      gameMode: data.info.gameMode,
+      gameCreation: data.info.gameCreation,
+      participants,
+      teams
+    });
+  } catch (e) {
+    console.error('Error al obtener partida:', e);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 // -----------------------------------------------------------
