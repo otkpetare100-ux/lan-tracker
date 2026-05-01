@@ -882,9 +882,9 @@ app.get('/player/:slug', async (req, res) => {
           display: none; justify-content: center; align-items: center; z-index: 2000;
         }
         .modal-content {
-          background: #0d111c; width: 95%; max-width: 1100px; max-height: 90vh;
+          background: #0d111c; width: 95%; max-width: 1000px; max-height: 85vh;
           border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-          overflow-y: auto; position: relative; padding: 30px;
+          overflow-y: auto; position: relative; padding: 20px;
           box-shadow: 0 0 50px rgba(0,0,0,1);
         }
         .modal-close {
@@ -893,26 +893,26 @@ app.get('/player/:slug', async (req, res) => {
         }
         .modal-close:hover { color: #f2f4ff; }
         
-        .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.85rem; }
-        .scoreboard-table th { text-align: left; padding: 10px; color: #657099; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .scoreboard-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.82rem; }
+        .scoreboard-table th { text-align: left; padding: 6px 10px; color: #657099; border-bottom: 1px solid rgba(255,255,255,0.05); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; }
+        .scoreboard-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
         
-        .team-header { font-weight: 900; font-size: 1.1rem; padding: 15px 10px; display: flex; align-items: center; gap: 10px; border-radius: 8px 8px 0 0; }
+        .team-header { font-weight: 900; font-size: 1rem; padding: 10px 12px; display: flex; align-items: center; gap: 10px; border-radius: 8px 8px 0 0; }
         .blue-team { color: #00b4ff; background: rgba(0, 180, 255, 0.1); border-bottom: 2px solid #00b4ff; }
         .red-team { color: #ff4b4b; background: rgba(255, 75, 75, 0.1); border-bottom: 2px solid #ff4b4b; }
         
-        .player-cell { display: flex; align-items: center; gap: 8px; min-width: 150px; }
-        .player-champ-icon { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
-        .spells-runes { display: flex; flex-direction: column; gap: 2px; }
-        .spell-icon, .rune-icon { width: 16px; height: 16px; border-radius: 2px; }
-        .player-name-link { font-weight: 700; color: #f2f4ff; text-decoration: none; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+        .player-cell { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+        .player-champ-icon { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+        .spells-runes { display: flex; flex-direction: column; gap: 1px; }
+        .spell-icon, .rune-icon { width: 14px; height: 14px; border-radius: 2px; }
+        .player-name-link { font-weight: 700; color: #f2f4ff; text-decoration: none; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
         
-        .item-list { display: flex; gap: 3px; }
-        .item-icon { width: 26px; height: 26px; border-radius: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
-        .empty-item { width: 26px; height: 26px; border-radius: 4px; background: rgba(255,255,255,0.02); }
+        .item-list { display: flex; gap: 2px; }
+        .item-icon { width: 22px; height: 22px; border-radius: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        .empty-item { width: 22px; height: 22px; border-radius: 4px; background: rgba(255,255,255,0.02); }
         
-        .score-kda { font-weight: 800; font-size: 0.9rem; display: block; }
-        .score-sub { font-size: 0.7rem; color: #657099; display: block; }
+        .score-kda { font-weight: 800; font-size: 0.85rem; display: block; }
+        .score-sub { font-size: 0.65rem; color: #657099; display: block; }
         
         .dmg-bar-container { width: 80px; height: 14px; background: rgba(255,255,255,0.05); border-radius: 2px; position: relative; overflow: hidden; }
         .dmg-bar-fill { height: 100%; background: #ff4b4b; opacity: 0.7; }
@@ -1206,9 +1206,7 @@ app.get('/player/:slug', async (req, res) => {
           html += '<div class="modal-tab" onclick="switchTab(event, \\'tab-stats\\')">DAÑO Y ORO</div>';
           html += '</div>';
 
-          // Contenido de Pestañas
-          html += '<div id="tab-scoreboard" class="tab-content active">' + renderScoreboardContent(data) + '</div>';
-          html += '<div id="tab-stats" class="tab-content">' + renderStatsContent(data) + '</div>';
+          html += renderScoreboardContent(data);
 
           body.innerHTML = html;
         }
@@ -1225,9 +1223,12 @@ app.get('/player/:slug', async (req, res) => {
           const redTeam = data.participants.filter(p => p.teamId === 200);
           const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
           
-          let html = renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
-          html += '<div style="height:30px;"></div>';
+          let html = '<div id="tab-scoreboard" class="tab-content active">';
+          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
+          html += '<div style="height:15px;"></div>';
           html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
+          html += '</div>';
+          html += '<div id="tab-stats" class="tab-content">' + renderStatsContent(data) + '</div>';
           return html;
         }
 
