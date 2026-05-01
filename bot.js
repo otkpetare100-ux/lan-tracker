@@ -215,7 +215,7 @@ function initBot(db) {
     }
 
     if (command === 'apostar') {
-      const isAnonymous = args.includes('anonimo');
+      const isAnonymous = true;
       const filteredArgs = args.filter(arg => arg.toLowerCase() !== 'anonimo');
       
       const amount = parseInt(filteredArgs[0]);
@@ -264,7 +264,7 @@ function initBot(db) {
         targetPuuid: targetAcc.puuid,
         targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
         status: 'open',
-        anonymous: isAnonymous,
+        anonymous: true,
         multiplier: multiplier,
         date: new Date()
       });
