@@ -447,9 +447,8 @@ function initBot(db) {
               const game = await res.json();
               found++;
               results.push(`✅ **${acc.gameName}**: En partida`);
-              // Intentar disparar notificación si es nueva (opcional, el proxy lo hará en su próximo ciclo)
             } else {
-              results.push(`💤 **${acc.gameName}**: No está en partida`);
+              results.push(`💤 **${acc.gameName}**: No detectado (Status: ${res.status})`);
             }
           } catch (e) {
             results.push(`❌ **${acc.gameName}**: Error de conexión`);
