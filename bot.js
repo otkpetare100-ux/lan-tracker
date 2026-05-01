@@ -266,30 +266,6 @@ function initBot(db) {
       const targetAcc = await findAccountBySlug(targetSlug); if (!targetAcc) return msg.reply('❌ Ese jugador no esta registrado en el dashboard.'); const existingBet = await db.collection('bets').findOne({ discordId: msg.author.id, targetPuuid: targetAcc.puuid, status: 'open' }); if (existingBet) return msg.reply('⚠️ Ya tienes una apuesta activa por este jugador en esta partida.');
       if (!targetAcc) return msg.reply('Ã¢ÂÅ’ Ese jugador no está registrado en el dashboard.');
 
-      // Calcular multiplicador dinámico basado en Winrate
-      let multiplier = 2.0;
-      if (targetAcc.soloQ && (targetAcc.soloQ.wins + targetAcc.soloQ.losses) > 0) {
-        const totalGames = targetAcc.soloQ.wins + targetAcc.soloQ.losses;
-        const wr = (targetAcc.soloQ.wins / totalGames) * 100;
-        if (wr > 60) multiplier = 1.5; // Favorito
-        else if (wr < 45) multiplier = 3.0; // Underdog
-      }
-
-      // Validación de tiempo de partida (Límite 5 min)
-      try {
-        const liveUrl = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${targetAcc.puuid.trim()}`;
-        const liveRes = await fetch(liveUrl, { headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() } });
-        if (liveRes.ok) {
-          const gameData = await liveRes.json();
-          // gameLength en spectator v5 es el tiempo transcurrido en segundos
-          if (gameData.gameLength > 300) {
-            return msg.reply(`Ã¢ÂÅ’ **Demasiado tarde.** La partida de **${targetAcc.gameName}** ya lleva ${Math.floor(gameData.gameLength / 60)} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
-          }
-        }
-      } catch (e) {
-        console.error('Error validando tiempo de partida:', e);
-      }
-
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!user || user.coins < amount) return msg.reply('Ã¢ÂÅ’ No tienes suficientes Naafiri Coins.');
 

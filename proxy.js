@@ -116,6 +116,8 @@ async function connectDB() {
               const champName = champKey ? champData.data[champKey].name : 'Desconocido';
               
               console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName}`);
+              const now = new Date();
+              await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { liveGameStartedAt: now } });
               notifyLiveGame(acc, { championName: champName, championId: champKey });
             }
           } else {
