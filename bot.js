@@ -240,8 +240,8 @@ function initBot(db) {
 
       // Validación de tiempo de partida (Límite 5 min)
       try {
-        const liveUrl = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${targetAcc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
-        const liveRes = await fetch(liveUrl);
+        const liveUrl = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${targetAcc.puuid.trim()}`;
+        const liveRes = await fetch(liveUrl, { headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() } });
         if (liveRes.ok) {
           const gameData = await liveRes.json();
           // gameLength en spectator v5 es el tiempo transcurrido en segundos
