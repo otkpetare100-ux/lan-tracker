@@ -151,7 +151,11 @@ async function settleBets(acc) {
     });
     const matchIds = await matchIdsRes.json();
     
-    if (!matchIds || matchIds.length === 0) return;
+    if (!matchIds || matchIds.length === 0) {
+      // Si no hay partidas nuevas tras 100seg, quizá fue un error de Riot
+      // Limpiamos el cache tras 5 minutos de inactividad para no trabar
+      return;
+    }
 
     const detailUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}`;
     const detailRes = await fetch(detailUrl, {
@@ -160,7 +164,10 @@ async function settleBets(acc) {
     const match = await detailRes.json();
     
     const p = match.info.participants.find(x => x.puuid === acc.puuid);
-    if (!p) return;
+    if (!p) {
+      clearCache();
+      return;
+    }
 
     // --- Funcionalidad: Seguro contra Remake (< 3.5 min) ---
     const isRemake = match.info.gameDuration < 210;
@@ -191,8 +198,6 @@ async function settleBets(acc) {
       targetPuuid: acc.puuid, 
       status: 'open' 
     }).toArray();
-
-    if (openBets.length === 0) return;
 
     const winners = [];
     for (const bet of openBets) {
@@ -244,12 +249,17 @@ async function settleBets(acc) {
 
     // 4. Notificar en Discord con toda la info
     notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDisplay, kda);
+    
+    // IMPORTANTE: Limpiar cache para permitir nueva partida
+    clearCache();
 
     // --- NUEVO: Motor de Retos Automáticos ---
     await checkChallenges(acc, match);
 
   } catch (e) {
     console.error('[Bets Error]', e);
+    // Limpiar de todos modos para no trabar el bot
+    liveCache.delete(acc.puuid);
   }
 }
 
