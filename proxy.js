@@ -856,24 +856,32 @@ app.get('/player/:slug', async (req, res) => {
         .watermark { display: none; }
         .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); opacity: 0.35; letter-spacing: 5px; font-weight: 900; font-size: 0.72rem; text-align: center; }
 
-        /* Estilos del Historial de Partidas */
-        .history-container { width: 100%; max-width: 800px; margin: 0 auto 50px auto; display: flex; flex-direction: column; gap: 10px; padding: 0 20px; animation: fadeSide 0.6s ease forwards 0.4s; opacity: 0; }
-        .history-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #f2f4ff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
-        .match-card { background: rgba(13, 17, 28, 0.6); backdrop-filter: blur(10px); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; }
-        .match-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
-        .match-header { display: flex; align-items: center; padding: 12px 20px; gap: 20px; }
-        .match-champ-img { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
-        .match-info-main { flex: 1; display: flex; flex-direction: column; }
-        .match-result { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-        .match-kda { font-size: 1.1rem; font-weight: 700; color: #f2f4ff; margin-top: 2px; }
-        .kda-ratio { font-size: 0.8rem; color: #9aa3c7; font-weight: 400; }
-        .match-info-sub { display: flex; flex-direction: column; align-items: flex-end; color: #9aa3c7; font-size: 0.8rem; font-weight: 600; gap: 2px; }
-        
-        .match-details { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); }
-        .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px 20px; }
-        .detail-item { display: flex; flex-direction: column; }
-        .d-label { font-size: 0.65rem; color: #657099; text-transform: uppercase; font-weight: 800; }
-        .d-val { font-size: 0.95rem; color: #f2f4ff; font-weight: 700; }
+        /* --- Historial de Partidas V2 --- */
+        .match-v2-card {
+            display: grid; grid-template-columns: 4px 60px 120px 150px 100px 1fr 120px 40px;
+            align-items: center; background: rgba(16, 20, 34, 0.7); border-radius: 8px;
+            overflow: hidden; height: 70px; transition: all 0.2s ease; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.03); position: relative; margin-bottom: 8px;
+            text-align: left;
+        }
+        .match-v2-card:hover { background: rgba(23, 28, 48, 0.9); transform: translateX(4px); border-color: rgba(255,255,255,0.1); }
+        .mv2-win { border-left: 4px solid #28ab66; }
+        .mv2-loss { border-left: 4px solid #e84057; }
+        .mv2-champ-block { display: flex; justify-content: center; align-items: center; padding: 0 10px; }
+        .mv2-main-icon { width: 44px; height: 44px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
+        .mv2-game-info { display: flex; flex-direction: column; gap: 2px; }
+        .mv2-result { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
+        .mv2-queue { font-size: 0.75rem; color: #657099; }
+        .mv2-kda-block { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .mv2-kda-text { font-weight: 700; font-size: 1rem; color: #f2f4ff; }
+        .mv2-stats { font-size: 0.7rem; color: #657099; }
+        .mv2-items-grid { display: grid; grid-template-columns: repeat(4, 24px); grid-template-rows: repeat(2, 24px); gap: 2px; }
+        .mv2-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+        .mv2-item.empty { background: rgba(255,255,255,0.03); }
+        .mv2-meta { text-align: right; font-size: 0.7rem; color: #657099; display: flex; flex-direction: column; gap: 2px; padding-right: 10px; }
+        .mv2-expand-icon { display: flex; justify-content: center; align-items: center; color: #657099; font-size: 0.9rem; opacity: 0.5; }
+        .text-win { color: #28ab66; }
+        .text-loss { color: #e84057; }
         
         /* Estilos del Modal */
         .modal-overlay {
@@ -1099,38 +1107,35 @@ app.get('/player/:slug', async (req, res) => {
         <h2 class="history-title">Últimas Partidas</h2>
         ${acc.matches.map((m, i) => {
           const isWin = m.win;
-          const cardColor = isWin ? 'rgba(0, 255, 136, 0.05)' : 'rgba(255, 68, 68, 0.05)';
-          const borderColor = isWin ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 68, 68, 0.3)';
-          const resultText = isWin ? 'VICTORIA' : 'DERROTA';
-          const resultColor = isWin ? '#00ff88' : '#ff4444';
-          const kda = m.deaths === 0 ? 'Perfecto' : ((m.kills + m.assists) / m.deaths).toFixed(2);
+          const cls = isWin ? 'mv2-win' : 'mv2-loss';
+          const kda = m.kills + ' / ' + m.deaths + ' / ' + m.assists;
+          const dur = Math.floor(m.gameDuration / 60) + 'm ' + (m.gameDuration % 60) + 's';
+          const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
+          const itemsHTML = (m.items || [0,0,0,0,0,0,0]).map(id => {
+            if (!id || id === 0) return '<div class="mv2-item empty"></div>';
+            return `<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png">`;
+          }).join('');
+
           return `
-          <div class="match-card" style="background: ${cardColor}; border-left: 4px solid ${borderColor};" onclick="${m.matchId ? `openMatchModal('${m.matchId}')` : `toggleMatch(${i})`}">
-            <div class="match-header">
-              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}" class="match-champ-img">
-              <div class="match-info-main">
-                <span class="match-result" style="color: ${resultColor}">${resultText}</span>
-                <span class="match-kda">${m.kills} / ${m.deaths} / ${m.assists} <span class="kda-ratio">(${kda} KDA)</span></span>
-              </div>
-              <div class="match-info-sub">
-                <span>${m.cs} CS</span>
-                <span>${Math.floor(m.gameDuration / 60)}m ${m.gameDuration % 60}s</span>
-                <span style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">${m.matchId ? 'VER DETALLES ➕' : 'VER MÁS ▼'}</span>
-              </div>
+          <div class="match-v2-card ${cls}" onclick="openMatchModal('${m.matchId}')">
+            <div class="mv2-champ-block">
+              <img class="mv2-main-icon" src="${champImg}">
             </div>
-            ${m.matchId ? '' : `
-            <div class="match-details" id="match-detail-${i}">
-              <div class="detail-grid">
-                <div class="detail-item"><span class="d-label">Daño a Campeones</span><span class="d-val">${m.damage.toLocaleString()}</span></div>
-                <div class="detail-item"><span class="d-label">Daño a Objetivos</span><span class="d-val">${m.dmgObj.toLocaleString()}</span></div>
-                <div class="detail-item"><span class="d-label">Oro</span><span class="d-val">${m.gold.toLocaleString()}</span></div>
-                <div class="detail-item"><span class="d-label">Puntuación Visión</span><span class="d-val">${m.vision}</span></div>
-                <div class="detail-item"><span class="d-label">Participación Kills</span><span class="d-val">${m.kp}%</span></div>
-                <div class="detail-item"><span class="d-label">Posición</span><span class="d-val">${m.position || '—'}</span></div>
-              </div>
+            <div class="mv2-game-info">
+              <div class="mv2-result ${isWin ? 'text-win' : 'text-loss'}">${isWin ? 'Victoria' : 'Derrota'}</div>
+              <div class="mv2-queue">SoloQ</div>
             </div>
-            `}
+            <div class="mv2-kda-block">
+              <div class="mv2-kda-text">${kda}</div>
+              <div class="mv2-stats">${m.cs || 0} CS - ${m.kp || 0}% P. asesinat.</div>
+            </div>
+            <div class="mv2-items-grid">${itemsHTML}</div>
+            <div class="mv2-meta">
+              <div>Partida</div>
+              <div>${dur}</div>
+            </div>
+            <div class="mv2-expand-icon">📈</div>
           </div>
           `;
         }).join('')}
@@ -1152,317 +1157,7 @@ app.get('/player/:slug', async (req, res) => {
       </div>
 
       <script src="/chart.min.js"></script>
-      <script>
-        function toggleMatch(index) {
-          const el = document.getElementById('match-detail-' + index);
-          if (!el) return;
-          if (el.style.maxHeight && el.style.maxHeight !== '0px') {
-            el.style.maxHeight = '0px';
-            el.style.opacity = '0';
-          } else {
-            el.style.maxHeight = '200px';
-            el.style.opacity = '1';
-          }
-        }
-
-        function closeMatchModal(e) {
-          document.getElementById('matchModal').style.display = 'none';
-          document.body.style.overflow = 'auto';
-        }
-
-        async function openMatchModal(matchId) {
-          const modal = document.getElementById('matchModal');
-          const body = document.getElementById('modalBody');
-          modal.style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-          
-          body.innerHTML = '<div class="loading-modal"><div class="spinner"></div><p>Obteniendo scoreboard desde Riot Games...</p></div>';
-
-          try {
-            const res = await fetch('/api/match/' + matchId);
-            const data = await res.json();
-            if (data.error) throw new Error(data.error);
-
-            renderScoreboard(data);
-          } catch(e) {
-            body.innerHTML = '<div style="text-align:center; padding:40px; color:#ff4b4b;"><h3>Error al cargar partida</h3><p>' + e.message + '</p></div>';
-          }
-        }
-
-        let lastMatchData = null;
-
-        function renderScoreboard(data) {
-          lastMatchData = data;
-          const body = document.getElementById('modalBody');
-          const duration = Math.floor(data.gameDuration / 60) + 'm ' + (data.gameDuration % 60) + 's';
-          
-          let html = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">';
-          html += '<div><h2 style="margin:0;">Detalles de la Partida</h2><div style="color:#657099; font-size:0.8rem;">' + data.gameMode + ' • ' + duration + '</div></div>';
-          html += '</div>';
-
-          // Pestañas
-          html += '<div class="modal-tabs">';
-          html += '<div class="modal-tab active" onclick="switchTab(event, \\'tab-scoreboard\\')">SCOREBOARD</div>';
-          html += '<div class="modal-tab" onclick="switchTab(event, \\'tab-stats\\')">DAÑO Y ORO</div>';
-          html += '</div>';
-
-          html += renderScoreboardContent(data);
-
-          body.innerHTML = html;
-        }
-
-        function switchTab(e, tabId) {
-          document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          e.target.classList.add('active');
-          document.getElementById(tabId).classList.add('active');
-        }
-
-        function renderScoreboardContent(data) {
-          const blueTeam = data.participants.filter(p => p.teamId === 100);
-          const redTeam = data.participants.filter(p => p.teamId === 200);
-          const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
-          
-          let html = '<div id="tab-scoreboard" class="tab-content active">';
-          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
-          html += '<div style="height:15px;"></div>';
-          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
-          html += '</div>';
-          html += '<div id="tab-stats" class="tab-content">' + renderStatsContent(data) + '</div>';
-          return html;
-        }
-
-        function renderStatsContent(data) {
-          let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">';
-          
-          // Gráfica de Ventaja de Oro (si hay timeline)
-          if (data.timeline) {
-            html += '<div>';
-            html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Ventaja de Oro</h3>';
-            html += '<div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;"><canvas id="goldChart"></canvas></div>';
-            html += '</div>';
-          }
-
-          // Gráfica de Daño
-          html += '<div>';
-          html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3>';
-          html += '<div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px; position:relative; overflow:hidden;">';
-          html += '<canvas id="dmgChart"></canvas>';
-          html += '</div>';
-          html += '</div>';
-
-          html += '</div>';
-          
-          // Ejecutamos la creación de gráficas después de un pequeño delay para que el DOM esté listo
-          setTimeout(() => initCharts(data), 100);
-
-          return html;
-        }
-
-        function initCharts(data) {
-          // Gráfica de Oro (Line Chart)
-          if (data.timeline && document.getElementById('goldChart')) {
-            const ctx = document.getElementById('goldChart').getContext('2d');
-            const labels = data.timeline.map((_, i) => i + 'm');
-            const goldData = data.timeline.map(f => f.goldDiff);
-
-            new Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: labels,
-                datasets: [{
-                  label: 'Ventaja (Azul vs Rojo)',
-                  data: goldData,
-                  borderColor: (context) => {
-                    const chart = context.chart;
-                    const {ctx, chartArea, scales} = chart;
-                    if (!chartArea || !scales.y) return '#00b4ff';
-                    const zeroY = scales.y.getPixelForValue(0);
-                    const diff = chartArea.bottom - chartArea.top;
-                    let zeroPos = diff > 0 ? (zeroY - chartArea.top) / diff : 0.5;
-                    if (!isFinite(zeroPos)) zeroPos = 0.5;
-                    zeroPos = Math.min(Math.max(zeroPos, 0), 1);
-
-                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                    gradient.addColorStop(0, '#00b4ff');
-                    gradient.addColorStop(zeroPos, '#00b4ff');
-                    gradient.addColorStop(zeroPos, '#ff4b4b');
-                    gradient.addColorStop(1, '#ff4b4b');
-                    return gradient;
-                  },
-                  backgroundColor: (context) => {
-                    const chart = context.chart;
-                    const {ctx, chartArea, scales} = chart;
-                    if (!chartArea || !scales.y) return 'transparent';
-                    const zeroY = scales.y.getPixelForValue(0);
-                    const diff = chartArea.bottom - chartArea.top;
-                    let zeroPos = diff > 0 ? (zeroY - chartArea.top) / diff : 0.5;
-                    if (!isFinite(zeroPos)) zeroPos = 0.5;
-                    zeroPos = Math.min(Math.max(zeroPos, 0), 1);
-
-                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                    gradient.addColorStop(0, 'rgba(0, 180, 255, 0.4)');
-                    gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
-                    gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
-                    gradient.addColorStop(1, 'rgba(255, 75, 75, 0.4)');
-                    return gradient;
-                  },
-                  fill: true,
-                  tension: 0.4,
-                  pointRadius: 0,
-                  borderWidth: 3
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099' } },
-                  x: { grid: { display: false }, ticks: { color: '#657099', font: { size: 9 } } }
-                },
-                plugins: { legend: { display: false } }
-              }
-            });
-          }
-
-          // Gráfica de Daño (Bar Chart)
-          if (document.getElementById('dmgChart')) {
-            const ctx = document.getElementById('dmgChart').getContext('2d');
-            // Ordenar por equipo
-            const sorted = [...data.participants].sort((a,b) => a.teamId - b.teamId);
-            const labels = sorted.map(p => p.championName);
-            const dmgData = sorted.map(p => p.totalDamageDealtToChampions);
-            const colors = sorted.map(p => p.teamId === 100 ? 'rgba(0, 180, 255, 0.7)' : 'rgba(255, 75, 75, 0.7)');
-            const borders = sorted.map(p => p.teamId === 100 ? '#00b4ff' : '#ff4b4b');
-
-            // Pre-cargar imágenes
-            const images = sorted.map(p => {
-              const img = new Image();
-              img.src = 'https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png';
-              return img;
-            });
-
-            new Chart(ctx, {
-              type: 'bar',
-              data: {
-                labels: labels,
-                datasets: [{
-                  data: dmgData,
-                  backgroundColor: colors,
-                  borderColor: borders,
-                  borderWidth: 2,
-                  borderRadius: 4
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: { padding: { bottom: 25 } },
-                scales: {
-                  y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099', font: { size: 9 } } },
-                  x: { display: false }
-                },
-                plugins: { legend: { display: false } }
-              },
-              plugins: [{
-                afterDraw: (chart) => {
-                  const ctx = chart.ctx;
-                  const meta = chart.getDatasetMeta(0);
-                  const xAxis = chart.scales.x;
-                  if (!xAxis || !meta.data.length) return;
-                  const bottom = xAxis.bottom;
-                  
-                  images.forEach((img, i) => {
-                    if (img.complete && img.naturalWidth > 0 && meta.data[i]) {
-                      const x = meta.data[i].x;
-                      const size = 18;
-                      ctx.drawImage(img, x - size/2, bottom + 5, size, size);
-                      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-                      ctx.lineWidth = 1;
-                      ctx.strokeRect(x - size/2, bottom + 5, size, size);
-                    } else {
-                      img.onload = () => chart.draw();
-                    }
-                  });
-                }
-              }]
-            });
-          }
-        }
-
-        const SPELL_MAP = {
-          1: 'SummonerBoost', 3: 'SummonerExhaust', 4: 'SummonerFlash', 6: 'SummonerHaste',
-          7: 'SummonerHeal', 11: 'SummonerSmite', 12: 'SummonerTeleport', 13: 'SummonerMana',
-          14: 'SummonerDot', 21: 'SummonerBarrier', 32: 'SummonerSnowball'
-        };
-
-        function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDuration) {
-          const result = players[0].win ? 'VICTORIA' : 'DERROTA';
-          const kills = players.reduce((sum, p) => sum + p.kills, 0);
-          const deaths = players.reduce((sum, p) => sum + p.deaths, 0);
-          const assists = players.reduce((sum, p) => sum + p.assists, 0);
-          const gold = (players.reduce((sum, p) => sum + p.goldEarned, 0) / 1000).toFixed(1);
-
-          let html = '<div class="team-header ' + teamClass + '">';
-          html += '<span>' + title + ' (' + result + ')</span>';
-          html += '<div style="margin-left:auto; display:flex; gap:15px; align-items:center;">';
-          html += '<span style="font-size:0.9rem;">' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
-          html += '<span style="font-size:0.8rem; opacity:0.7;">💰 ' + gold + 'k</span>';
-          if (teamData && teamData.objectives) {
-            html += '<span style="font-size:0.8rem; opacity:0.7;">🗼 ' + (teamData.objectives.tower?.kills || 0) + '</span>';
-            html += '<span style="font-size:0.8rem; opacity:0.7;">🐉 ' + (teamData.objectives.dragon?.kills || 0) + '</span>';
-          }
-          html += '</div></div>';
-
-          html += '<table class="scoreboard-table">';
-          html += '<thead><tr><th>Jugador</th><th>KDA</th><th>Daño</th><th>Visión</th><th>CS</th><th>Oro</th><th>Objetos</th></tr></thead>';
-          html += '<tbody>';
-
-          players.forEach(p => {
-            const kda = p.deaths === 0 ? 'Perfect' : ((p.kills + p.assists) / p.deaths).toFixed(2);
-            const dmgPct = (p.totalDamageDealtToChampions / maxDmg) * 100;
-            
-            html += '<tr>';
-            html += '<td><div class="player-cell">';
-            html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" class="player-champ-icon">';
-            
-            // Hechizos y Runas
-            html += '<div class="spells-runes">';
-            html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/spell/' + (SPELL_MAP[p.summoner1Id] || 'SummonerFlash') + '.png" class="spell-icon">';
-            html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/spell/' + (SPELL_MAP[p.summoner2Id] || 'SummonerDot') + '.png" class="spell-icon">';
-            html += '</div>';
-
-            html += '<div style="display:flex; flex-direction:column; margin-left:2px;"><span class="player-name-link">' + p.gameName + '</span><span style="font-size:0.65rem; color:#657099;">Nivel ' + p.champLevel + '</span></div>';
-            html += '</div></td>';
-            
-            html += '<td><span class="score-kda">' + p.kills + ' / ' + p.deaths + ' / ' + p.assists + '</span><span class="score-sub">' + kda + ' KDA</span></td>';
-            
-            html += '<td>';
-            html += '<div class="dmg-bar-container"><div class="dmg-bar-fill" style="width:' + dmgPct + '%"></div><div class="dmg-bar-text">' + p.totalDamageDealtToChampions.toLocaleString() + '</div></div>';
-            html += '</td>';
-
-            html += '<td><span class="score-kda">' + p.visionScore + '</span></td>';
-            html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + (p.totalMinionsKilled / (gameDuration/60)).toFixed(1) + '/m</span></td>';
-            html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
-            
-            // Items
-            html += '<td><div class="item-list">';
-            p.items.forEach(itemId => {
-              if (itemId > 0) {
-                html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/' + itemId + '.png" class="item-icon">';
-              } else {
-                html += '<div class="empty-item"></div>';
-              }
-            });
-            html += '</div></td>';
-            
-            html += '</tr>';
-          });
-
-          html += '</tbody></table>';
-          return html;
-        }
-      </script>
+      <script src="/render.js"></script>
     </body>
     </html>
     `;

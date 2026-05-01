@@ -99,5 +99,17 @@
     });
   }
 </script>
+  <!-- MODAL DE DETALLES DE PARTIDA -->
+  <div id="matchModal" class="modal-overlay" onclick="closeMatchModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeMatchModal(event)">×</span>
+      <div id="modalBody">
+        <div class="loading-modal">
+          <div class="spinner"></div>
+          <p>Consultando a Riot Games...</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

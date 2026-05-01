@@ -3074,3 +3074,161 @@ body::before {
   color: #fff;
   text-shadow: 0 0 10px rgba(217, 184, 95, 0.5);
 }
+
+/* --- Historial de Partidas V2 (Estilo Premium) --- */
+.match-history-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+}
+
+.match-v2-card {
+    display: grid;
+    grid-template-columns: 4px 60px 120px 150px 100px 1fr 120px 40px;
+    align-items: center;
+    background: rgba(16, 20, 34, 0.7);
+    border-radius: 8px;
+    overflow: hidden;
+    height: 70px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.03);
+    position: relative;
+}
+
+.match-v2-card:hover {
+    background: rgba(23, 28, 48, 0.9);
+    transform: translateX(4px);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.mv2-win { border-left: 4px solid #28ab66; }
+.mv2-loss { border-left: 4px solid #e84057; }
+
+.mv2-side-bar { width: 4px; height: 100%; }
+
+.mv2-champ-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.mv2-main-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.mv2-game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mv2-result {
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.mv2-queue {
+    font-size: 0.75rem;
+    color: var(--dim);
+}
+
+.mv2-kda-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.mv2-kda-text {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.mv2-stats {
+    font-size: 0.7rem;
+    color: var(--dim);
+}
+
+.mv2-items-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 24px);
+    grid-template-rows: repeat(2, 24px);
+    gap: 2px;
+}
+
+.mv2-item {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.3);
+}
+
+.mv2-item.empty {
+    background: rgba(255,255,255,0.03);
+}
+
+.mv2-participants {
+    display: flex;
+    gap: 12px;
+    padding-left: 15px;
+}
+
+.mv2-p-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mv2-p-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.mv2-p-icon img {
+    width: 100%;
+    height: 100%;
+}
+
+.mv2-p-icon.me {
+    border: 1px solid var(--gold);
+    box-shadow: 0 0 5px rgba(217, 184, 95, 0.4);
+}
+
+.mv2-meta {
+    text-align: right;
+    font-size: 0.7rem;
+    color: var(--dim);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mv2-expand-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--dim);
+    font-size: 0.9rem;
+    opacity: 0.5;
+}
+
+.match-v2-card:hover .mv2-expand-icon {
+    opacity: 1;
+    color: var(--gold);
+}
+
+.text-win { color: #28ab66; }
+.text-loss { color: #e84057; }
+

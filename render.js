@@ -111,19 +111,83 @@ function buildStreakHTML(streak) {
   return '<span class="streak-badge ' + cls + '">' + label + '</span>';
 }
 
-function buildMatchHistoryHTML(matches) {
+const QUEUE_TYPES = {
+  420: 'Clasificatoria Solo',
+  440: 'Clasificatoria Flexible',
+  400: 'Normal (Recluta)',
+  430: 'Normal (Oculta)',
+  450: 'ARAM',
+  1700: 'Arena',
+  1900: 'U.R.F.',
+  700: 'Clash'
+};
+
+function timeAgo(timestamp) {
+  const diff = Date.now() - timestamp;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days > 0) return `Hace ${days} d${days > 1 ? 'ías' : 'ía'}`;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  if (hours > 0) return `Hace ${hours} h`;
+  const mins = Math.floor(diff / (1000 * 60));
+  return `Hace ${mins} m`;
+}
+
+function buildMatchHistoryHTML(matches, playerPuuid) {
   if (!matches || matches.length === 0) return '<div class="match-empty">Sin partidas registradas</div>';
-  return '<div class="match-history">' + matches.map(function(m) {
-    const cls = m.win ? 'match-win' : 'match-loss';
-    const kda = m.kills + '/' + m.deaths + '/' + m.assists;
-    const dur = formatDuration(m.gameDuration);
-    const img = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
-    return '<div class="match-item ' + cls + '">' +
-      '<img class="match-champ" src="' + img + '" alt="' + escapeHTML(m.champion) + '" onerror="this.style.display=\'none\'" />' +
-      '<div class="match-result-dot ' + (m.win ? 'dot-win' : 'dot-loss') + '"></div>' +
-      '<span class="match-champ-name">' + escapeHTML(m.champion) + '</span>' +
-      '<span class="match-kda">' + kda + '</span>' +
-      '<span class="match-dur">' + dur + '</span>' +
+  
+  return '<div class="match-history-v2">' + matches.map(function(m) {
+    const isWin = m.win;
+    const cls = isWin ? 'mv2-win' : 'mv2-loss';
+    const kda = m.kills + ' / ' + m.deaths + ' / ' + m.assists;
+    const dur = Math.floor(m.gameDuration / 60) + 'min ' + (m.gameDuration % 60) + 's';
+    const time = timeAgo(m.timestamp);
+    const queue = QUEUE_TYPES[m.queueId] || 'Partida';
+    const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
+    
+    // Items
+    const itemsHTML = (m.items || [0,0,0,0,0,0,0]).map(id => {
+      if (!id || id === 0) return '<div class="mv2-item empty"></div>';
+      return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
+    }).join('');
+
+    // Participants (2 columns of 5)
+    const parts = m.participants || [];
+    const team1 = parts.slice(0, 5);
+    const team2 = parts.slice(5, 10);
+    
+    const renderPart = (p) => {
+        const isMe = p.puuid === playerPuuid;
+        const pImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.champion);
+        return '<div class="mv2-p-icon ' + (isMe ? 'me' : '') + '">' +
+          '<img src="' + pImg + '" title="' + escapeHTML(p.champion) + '" />' +
+        '</div>';
+    };
+
+    const participantsHTML = '<div class="mv2-participants">' +
+      '<div class="mv2-p-col">' + team1.map(renderPart).join('') + '</div>' +
+      '<div class="mv2-p-col">' + team2.map(renderPart).join('') + '</div>' +
+    '</div>';
+
+    return '<div class="match-v2-card ' + cls + '" onclick="event.stopPropagation(); openMatchModal(\'' + m.matchId + '\')">' +
+      '<div class="mv2-side-bar"></div>' +
+      '<div class="mv2-champ-block">' +
+        '<img class="mv2-main-icon" src="' + champImg + '" />' +
+      '</div>' +
+      '<div class="mv2-game-info">' +
+        '<div class="mv2-result ' + (isWin ? 'text-win' : 'text-loss') + '">' + (isWin ? 'Victoria' : 'Derrota') + '</div>' +
+        '<div class="mv2-queue">' + queue + '</div>' +
+      '</div>' +
+      '<div class="mv2-kda-block">' +
+        '<div class="mv2-kda-text">' + kda + '</div>' +
+        '<div class="mv2-stats">' + (m.cs || 0) + ' CS - ' + (m.kp || 0) + '% P. asesinat.</div>' +
+      '</div>' +
+      '<div class="mv2-items-grid">' + itemsHTML + '</div>' +
+      participantsHTML +
+      '<div class="mv2-meta">' +
+        '<div>' + time + '</div>' +
+        '<div>' + dur + '</div>' +
+      '</div>' +
+      '<div class="mv2-expand-icon">📈</div>' +
     '</div>';
   }).join('') + '</div>';
 }
@@ -347,7 +411,7 @@ function buildCardHTML(acc, position) {
       '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
     '</div>' +
     '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
-      buildMatchHistoryHTML(acc.matches) +
+      buildMatchHistoryHTML(acc.matches, acc.puuid) +
     '</div>' +
   '</div>';
 }
@@ -1595,4 +1659,282 @@ function renderHallOfFame(splits) {
       </div>
     `;
   }).join('');
+}
+
+/* --- Lógica del Modal de Detalles de Partida --- */
+window.openMatchModal = async function(matchId) {
+  const modal = document.getElementById('matchModal');
+  const body = document.getElementById('modalBody');
+  if (!modal || !body) return;
+
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  body.innerHTML = '<div class="loading-modal"><div class="spinner"></div><p>Obteniendo scoreboard desde Riot Games...</p></div>';
+
+  try {
+    const res = await fetch('/api/match/' + matchId);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderScoreboard(data);
+  } catch(e) {
+    body.innerHTML = '<div style="text-align:center; padding:40px; color:#ff4b4b;"><h3>Error al cargar partida</h3><p>' + e.message + '</p></div>';
+  }
+};
+
+window.closeMatchModal = function(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
+  const modal = document.getElementById('matchModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    const body = document.getElementById('modalBody');
+    if (body) body.innerHTML = ''; 
+  }
+};
+
+function renderScoreboard(data) {
+  const body = document.getElementById('modalBody');
+  const duration = Math.floor(data.gameDuration / 60) + 'm ' + (data.gameDuration % 60) + 's';
+  
+  let html = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">';
+  html += '<div><h2 style="margin:0;">Detalles de la Partida</h2><div style="color:#657099; font-size:0.8rem;">' + (data.gameMode || 'Normal') + ' • ' + duration + '</div></div>';
+  html += '</div>';
+
+  html += '<div class="modal-tabs">';
+  html += '<div class="modal-tab active" onclick="switchTab(event, \'tab-scoreboard\')">SCOREBOARD</div>';
+  html += '<div class="modal-tab" onclick="switchTab(event, \'tab-stats\')">DAÑO Y ORO</div>';
+  html += '</div>';
+
+  html += renderScoreboardContent(data);
+  body.innerHTML = html;
+}
+
+window.switchTab = function(e, tabId) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+};
+
+function renderScoreboardContent(data) {
+  const blueTeam = data.participants.filter(p => p.teamId === 100);
+  const redTeam = data.participants.filter(p => p.teamId === 200);
+  const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
+  
+  let html = '<div id="tab-scoreboard" class="tab-content active">';
+  html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
+  html += '<div style="height:15px;"></div>';
+  html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
+  html += '</div>';
+  html += '<div id="tab-stats" class="tab-content">' + renderStatsContent(data) + '</div>';
+  return html;
+}
+
+function renderStatsContent(data) {
+  let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">';
+  if (data.timeline) {
+    html += '<div><h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Ventaja de Oro</h3><div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px;"><canvas id="goldChart"></canvas></div></div>';
+  }
+  html += '<div><h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3><div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px; position:relative; overflow:hidden;"><canvas id="dmgChart"></canvas></div></div>';
+  html += '</div>';
+  setTimeout(() => initCharts(data), 100);
+  return html;
+}
+
+function initCharts(data) {
+  if (data.timeline && document.getElementById('goldChart')) {
+    const ctx = document.getElementById('goldChart').getContext('2d');
+    const labels = data.timeline.map((_, i) => i + 'm');
+    const goldData = data.timeline.map(f => f.goldDiff);
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Ventaja (Azul vs Rojo)',
+          data: goldData,
+          borderColor: (context) => {
+            const chart = context.chart;
+            const {ctx, chartArea, scales} = chart;
+            if (!chartArea || !scales.y) return '#00b4ff';
+            const zeroY = scales.y.getPixelForValue(0);
+            const diff = chartArea.bottom - chartArea.top;
+            let zeroPos = diff > 0 ? (zeroY - chartArea.top) / diff : 0.5;
+            if (!isFinite(zeroPos)) zeroPos = 0.5;
+            zeroPos = Math.min(Math.max(zeroPos, 0), 1);
+
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, '#00b4ff');
+            gradient.addColorStop(zeroPos, '#00b4ff');
+            gradient.addColorStop(zeroPos, '#ff4b4b');
+            gradient.addColorStop(1, '#ff4b4b');
+            return gradient;
+          },
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const {ctx, chartArea, scales} = chart;
+            if (!chartArea || !scales.y) return 'transparent';
+            const zeroY = scales.y.getPixelForValue(0);
+            const diff = chartArea.bottom - chartArea.top;
+            let zeroPos = diff > 0 ? (zeroY - chartArea.top) / diff : 0.5;
+            if (!isFinite(zeroPos)) zeroPos = 0.5;
+            zeroPos = Math.min(Math.max(zeroPos, 0), 1);
+
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(0, 180, 255, 0.4)');
+            gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(1, 'rgba(255, 75, 75, 0.4)');
+            return gradient;
+          },
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099' } },
+          x: { grid: { display: false }, ticks: { color: '#657099', font: { size: 9 } } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  if (document.getElementById('dmgChart')) {
+    const ctx = document.getElementById('dmgChart').getContext('2d');
+    const sorted = [...data.participants].sort((a,b) => a.teamId - b.teamId);
+    const labels = sorted.map(p => p.championName);
+    const dmgData = sorted.map(p => p.totalDamageDealtToChampions);
+    const colors = sorted.map(p => p.teamId === 100 ? 'rgba(0, 180, 255, 0.7)' : 'rgba(255, 75, 75, 0.7)');
+    const borders = sorted.map(p => p.teamId === 100 ? '#00b4ff' : '#ff4b4b');
+
+    const images = sorted.map(p => {
+      const img = new Image();
+      img.src = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + p.championName + '.png';
+      return img;
+    });
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: dmgData,
+          backgroundColor: colors,
+          borderColor: borders,
+          borderWidth: 2,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { bottom: 25 } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099', font: { size: 9 } } },
+          x: { display: false }
+        },
+        plugins: { legend: { display: false } }
+      },
+      plugins: [{
+        afterDraw: (chart) => {
+          const ctx = chart.ctx;
+          const meta = chart.getDatasetMeta(0);
+          const xAxis = chart.scales.x;
+          if (!xAxis || !meta.data.length) return;
+          const bottom = xAxis.bottom;
+          
+          images.forEach((img, i) => {
+            if (img.complete && img.naturalWidth > 0 && meta.data[i]) {
+              const x = meta.data[i].x;
+              const size = 18;
+              ctx.drawImage(img, x - size/2, bottom + 5, size, size);
+              ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(x - size/2, bottom + 5, size, size);
+            } else {
+              img.onload = () => chart.draw();
+            }
+          });
+        }
+      }]
+    });
+  }
+}
+
+const SPELL_MAP = {
+  1: 'SummonerBoost', 3: 'SummonerExhaust', 4: 'SummonerFlash', 6: 'SummonerHaste',
+  7: 'SummonerHeal', 11: 'SummonerSmite', 12: 'SummonerTeleport', 13: 'SummonerMana',
+  14: 'SummonerDot', 21: 'SummonerBarrier', 32: 'SummonerSnowball'
+};
+
+function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDuration) {
+  const result = players[0].win ? 'VICTORIA' : 'DERROTA';
+  const kills = players.reduce((sum, p) => sum + p.kills, 0);
+  const deaths = players.reduce((sum, p) => sum + p.deaths, 0);
+  const assists = players.reduce((sum, p) => sum + p.assists, 0);
+  const gold = (players.reduce((sum, p) => sum + p.goldEarned, 0) / 1000).toFixed(1);
+
+  let html = '<div class="team-header ' + teamClass + '">';
+  html += '<span>' + title + ' (' + result + ')</span>';
+  html += '<div style="margin-left:auto; display:flex; gap:15px; align-items:center;">';
+  html += '<span style="font-size:0.9rem;">' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
+  html += '<span style="font-size:0.8rem; opacity:0.7;">💰 ' + gold + 'k</span>';
+  if (teamData && teamData.objectives) {
+    html += '<span style="font-size:0.8rem; opacity:0.7;">🗼 ' + (teamData.objectives.tower?.kills || 0) + '</span>';
+    html += '<span style="font-size:0.8rem; opacity:0.7;">🐉 ' + (teamData.objectives.dragon?.kills || 0) + '</span>';
+  }
+  html += '</div></div>';
+
+  html += '<table class="scoreboard-table">';
+  html += '<thead><tr><th>Jugador</th><th>KDA</th><th>Daño</th><th>Visión</th><th>CS</th><th>Oro</th><th>Objetos</th></tr></thead>';
+  html += '<tbody>';
+
+  players.forEach(p => {
+    const kda = p.deaths === 0 ? 'Perfect' : ((p.kills + p.assists) / p.deaths).toFixed(2);
+    const dmgPct = (p.totalDamageDealtToChampions / maxDmg) * 100;
+    
+    html += '<tr>';
+    html += '<td><div class="player-cell">';
+    html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + p.championName + '.png" class="player-champ-icon">';
+    
+    html += '<div class="spells-runes">';
+    html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/spell/' + (SPELL_MAP[p.summoner1Id] || 'SummonerFlash') + '.png" class="spell-icon">';
+    html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/spell/' + (SPELL_MAP[p.summoner2Id] || 'SummonerDot') + '.png" class="spell-icon">';
+    html += '</div>';
+
+    html += '<div style="display:flex; flex-direction:column; margin-left:2px;"><span class="player-name-link">' + p.gameName + '</span><span style="font-size:0.65rem; color:#657099;">Nivel ' + p.champLevel + '</span></div>';
+    html += '</div></td>';
+    
+    html += '<td><span class="score-kda">' + p.kills + ' / ' + p.deaths + ' / ' + p.assists + '</span><span class="score-sub">' + kda + ' KDA</span></td>';
+    
+    html += '<td>';
+    html += '<div class="dmg-bar-container"><div class="dmg-bar-fill" style="width:' + dmgPct + '%"></div><div class="dmg-bar-text">' + p.totalDamageDealtToChampions.toLocaleString() + '</div></div>';
+    html += '</td>';
+
+    html += '<td><span class="score-kda">' + p.visionScore + '</span></td>';
+    html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + (p.totalMinionsKilled / (gameDuration/60)).toFixed(1) + '/m</span></td>';
+    html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
+    
+    html += '<td><div class="item-list">';
+    (p.items || [0,0,0,0,0,0,0]).forEach(itemId => {
+      if (itemId > 0) {
+        html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + itemId + '.png" class="item-icon">';
+      } else {
+        html += '<div class="empty-item"></div>';
+      }
+    });
+    html += '</div></td>';
+    
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  return html;
 }

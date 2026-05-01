@@ -163,7 +163,13 @@ async function fetchMatchHistory(puuid, onProgress) {
           goldDiff15: p.challenges?.goldDiffAt15 || 0,
           csDiff10: p.challenges?.maxCsAdvantageOnLaneOpponent || 0,
           consumables: p.consumablesPurchased || 0,
-          position: p.teamPosition || ''
+          position: p.teamPosition || '',
+          queueId: match.info.queueId,
+          timestamp: match.info.gameCreation,
+          items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6],
+          spells: [p.summoner1Id, p.summoner2Id],
+          runes: [p.perks.styles[0].selections[0].perk, p.perks.styles[1].style],
+          participants: match.info.participants.map(x => ({ champion: x.championName, win: x.win, puuid: x.puuid }))
         });
       } catch(e) {
         console.warn('Error fetching match detail:', e);
