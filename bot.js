@@ -697,8 +697,8 @@ async function notifyLiveGame(acc, gameData) {
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle('Ã¢Å¡â€Ã¯Â¸Â ¡PARTIDA EN VIVO!')
-    .setDescription(`**${acc.gameName}** acaba de entrar en una partida.\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
+    .setTitle('PARTIDA EN VIVO')
+    .setDescription('**' + acc.gameName + '** acaba de entrar en una partida.\n**Campeon:** ' + (gameData.championName || 'Desconocido'))
     .setColor(0x576bce)
     .setTimestamp();
 
