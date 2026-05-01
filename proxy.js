@@ -738,6 +738,17 @@ app.get('/player/:slug', async (req, res) => {
           margin: 0;
           overflow-x: hidden;
         }
+
+        /* Scrollbar Temático */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #070810; }
+        ::-webkit-scrollbar-thumb { 
+          background: linear-gradient(180deg, #181a28, var(--rank-color)); 
+          border: 2px solid #070810; 
+          border-radius: 10px; 
+        }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--rank-color), #fff); }
+        
         .admin-force-btn {
           position: fixed;
           top: 20px;
