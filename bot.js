@@ -454,7 +454,8 @@ function initBot(db) {
               found++;
               results.push(`✅ **${acc.gameName}**: En partida`);
             } else {
-              results.push(`💤 **${acc.gameName}**: No detectado (Status: ${res.status})`);
+              const pMask = acc.puuid ? `${acc.puuid.substring(0, 5)}...` : 'NULO';
+              results.push(`💤 **${acc.gameName}**: No detectado (Status: ${res.status}) [ID: ${pMask}]`);
             }
           } catch (e) {
             results.push(`❌ **${acc.gameName}**: Error de conexión`);
