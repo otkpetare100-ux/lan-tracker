@@ -78,29 +78,50 @@ async function connectDB() {
       }
     }, 60 * 1000);
 
-    // Escaneo de Partidas en Vivo cada 5 min
+    // Escaneo de Partidas en Vivo cada 1 min
     const liveCache = new Set();
     setInterval(async () => {
       try {
         const accounts = await db.collection('accounts').find({}).toArray();
+        if (accounts.length === 0) return;
+
+        // Cargar datos de campeones para el mapeo
+        const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
+        const champData = await champRes.json();
+        const champMap = {};
+        for (const c of Object.values(champData.data)) {
+          champMap[c.key] = c.name;
+        }
+
         for (const acc of accounts) {
           const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid}?api_key=${process.env.RIOT_API_KEY}`;
           const res = await fetch(url);
+          
           if (res.ok) {
+            const game = await res.json();
             if (!liveCache.has(acc.puuid)) {
               liveCache.add(acc.puuid);
-              notifyLiveGame(acc, { championName: '?' });
+              
+              // Buscar el campeón del jugador en la partida
+              const me = game.participants.find(p => p.puuid === acc.puuid);
+              const champName = me ? (champMap[me.championId] || 'Desconocido') : 'Desconocido';
+              
+              console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName}`);
+              notifyLiveGame(acc, { championName: champName });
             }
           } else {
-            // Si estaba en cache y ya no, es que terminó la partida
+            // Si estaba en cache y ya no (404), es que terminó la partida
             if (liveCache.has(acc.puuid)) {
+              console.log(`[Live] Partida finalizada para ${acc.gameName}`);
               liveCache.delete(acc.puuid);
               settleBets(acc); // Iniciar liquidación
             }
           }
         }
-      } catch(e) {}
-    }, 5 * 60 * 1000);
+      } catch(e) {
+        console.error('[Live Error] Error en el escaneo de partidas:', e.message);
+      }
+    }, 1 * 60 * 1000);
   } catch(e) {
     console.error('❌ Error conectando a MongoDB:', e);
     console.log('Reintentando en 5 segundos...');
