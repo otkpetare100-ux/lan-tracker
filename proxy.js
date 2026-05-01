@@ -882,6 +882,9 @@ app.get('/player/:slug', async (req, res) => {
         .mv2-expand-icon { display: flex; justify-content: center; align-items: center; color: #657099; font-size: 0.9rem; opacity: 0.5; }
         .text-win { color: #28ab66; }
         .text-loss { color: #e84057; }
+
+        .history-container { width: 100%; max-width: 1000px; margin: 30px auto 50px auto; padding: 0 20px; animation: fadeSide 0.6s ease forwards 0.4s; opacity: 0; }
+        .history-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #f2f4ff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
         
         /* Estilos del Modal */
         .modal-overlay {
