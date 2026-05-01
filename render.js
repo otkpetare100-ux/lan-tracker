@@ -184,18 +184,17 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
       '<div class="mv2-champ-block">' +
         '<img class="mv2-main-icon" src="' + champImg + '" />' +
       '</div>' +
-      '<div class="mv2-info-block">' +
-        '<div class="mv2-result ' + (isWin ? 'text-win' : 'text-loss') + '">' + (isWin ? 'VICTORIA' : 'DERROTA') + '</div>' +
-        '<div class="mv2-queue">' + queue + '</div>' +
+      '<div class="mv2-main-block">' +
+        '<div class="mv2-meta-top">' + queue + ' · ' + time + '</div>' +
+        '<div class="mv2-kda-line">' +
+          '<span class="mv2-kda-val">' + kda + '</span>' +
+          '<span class="mv2-cs-val">' + (m.cs || 0) + ' CS</span>' +
+        '</div>' +
       '</div>' +
-      '<div class="mv2-kda-block">' +
-        '<div class="mv2-kda-text">' + kda + '</div>' +
-        '<div class="mv2-stats">' + (m.cs || 0) + ' CS - ' + (m.kp || 0) + '% P. asesinat.</div>' +
+      '<div class="mv2-items-block">' +
+        '<div class="mv2-items-row">' + itemsHTML + '</div>' +
       '</div>' +
-      '<div class="mv2-items-grid">' + itemsHTML + extraItemsHTML + '</div>' +
-      participantsHTML +
-      '<div class="mv2-meta">' +
-        '<div class="mv2-meta-label">Partida</div>' +
+      '<div class="mv2-meta-block">' +
         '<div class="mv2-duration">' + dur + '</div>' +
       '</div>' +
       '<div class="mv2-expand-icon">📈</div>' +
