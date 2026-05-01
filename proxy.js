@@ -94,12 +94,12 @@ async function connectDB() {
         }
 
         for (const acc of accounts) {
-          const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}?api_key=${process.env.RIOT_API_KEY.trim()}`;
+          const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${acc.puuid.trim()}`;
           const res = await fetch(url, {
             headers: {
+              "X-Riot-Token": process.env.RIOT_API_KEY.trim(),
               "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-              "Accept-Language": "es-ES,es;q=0.9",
-              "Origin": "https://developer.riotgames.com"
+              "Accept-Language": "es-ES,es;q=0.9"
             }
           });
           
