@@ -1024,6 +1024,48 @@ async function backendGetMatchDetail(matchId) {
   return res.json();
 }
 
+let backendChampionDataCache = null;
+async function backendGetChampionData() {
+  if (backendChampionDataCache) return backendChampionDataCache;
+  try {
+    const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
+    const data = await res.json();
+    const map = {};
+    for (const champ of Object.values(data.data)) {
+      map[String(champ.key)] = { name: champ.name, image: champ.image.full };
+    }
+    backendChampionDataCache = map;
+    return map;
+  } catch(e) {
+    return {};
+  }
+}
+
+async function backendGetTopMastery(puuid) {
+  try {
+    const url = `https://la1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}?api_key=${API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const masteries = await res.json();
+    if (!Array.isArray(masteries)) return [];
+    
+    const top3 = masteries.slice(0, 3);
+    const champData = await backendGetChampionData();
+    return top3.map(m => {
+      const info = champData[String(m.championId)] || {};
+      return {
+        name: info.name || 'Unknown',
+        image: info.image || null,
+        points: m.championPoints || 0,
+        level: m.championLevel || 0
+      };
+    });
+  } catch(e) {
+    console.error('Error backend mastery:', e);
+    return [];
+  }
+}
+
 async function backendFetchMatchHistory(puuid) {
   try {
     const matchIds = await backendGetMatchIds(puuid);
@@ -1104,17 +1146,26 @@ app.post('/player/:puuid/force-update', async (req, res) => {
     const acc = await db.collection('accounts').findOne({ puuid });
     if (!acc) return res.status(404).json({ error: 'Cuenta no encontrada' });
 
-    const history = await backendFetchMatchHistory(puuid);
+    const [history, topChampions] = await Promise.all([
+      backendFetchMatchHistory(puuid),
+      backendGetTopMastery(puuid)
+    ]);
+
+    const updateFields = {};
     if (history.matches && history.matches.length > 0) {
-      await db.collection('accounts').updateOne({ puuid }, {
-        $set: {
-          matches: history.matches,
-          streak: history.streak,
-          mainPosition: history.mainPosition,
-          recentChampions: history.recentChampions
-        }
-      });
+      updateFields.matches = history.matches;
+      updateFields.streak = history.streak;
+      updateFields.mainPosition = history.mainPosition;
+      updateFields.recentChampions = history.recentChampions;
     }
+    if (topChampions && topChampions.length > 0) {
+      updateFields.topChampions = topChampions;
+    }
+
+    if (Object.keys(updateFields).length > 0) {
+      await db.collection('accounts').updateOne({ puuid }, { $set: updateFields });
+    }
+    
     res.json({ ok: true });
   } catch(e) {
     console.error('Error forzando actualización:', e);

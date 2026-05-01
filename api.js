@@ -75,8 +75,10 @@ async function getRankedEntriesByPuuid(puuid) {
 }
 
 async function getTopMasteryChampions(puuid) {
-  const url = `${ENDPOINTS.LAN}/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=3`;
-  return riotFetch(url);
+  const url = `${ENDPOINTS.LAN}/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
+  const res = await riotFetch(url);
+  if (Array.isArray(res)) return res.slice(0, 3);
+  return [];
 }
 
 async function getMatchIds(puuid) {
