@@ -758,5 +758,5 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
   channel.send({ embeds: [embed] });
 }
 
-module.exports = { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete };
+module.exports = { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete };
 
