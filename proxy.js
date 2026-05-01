@@ -1247,7 +1247,7 @@ app.get('/player/:slug', async (req, res) => {
           html += '<div>';
           html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3>';
           html += '<div style="height:250px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px 5px 15px; position:relative;"><canvas id="dmgChart"></canvas></div>';
-          html += '<div id="dmgIcons" style="display:grid; grid-template-columns: repeat(10, 1fr); margin-top:5px; padding:0 15px;"></div>';
+          html += '<div id="dmgIcons" style="display:grid; grid-template-columns: repeat(10, 1fr); margin-top:5px; position:relative;"></div>';
           html += '</div>';
 
           html += '</div>';
@@ -1272,20 +1272,36 @@ app.get('/player/:slug', async (req, res) => {
                 datasets: [{
                   label: 'Ventaja (Azul vs Rojo)',
                   data: goldData,
-                  borderColor: '#00b4ff',
+                  borderColor: (context) => {
+                    const chart = context.chart;
+                    const {ctx, chartArea, scales} = chart;
+                    if (!chartArea) return '#00b4ff';
+                    const zeroY = scales.y.getPixelForValue(0);
+                    const zeroPos = Math.min(Math.max((zeroY - chartArea.top) / (chartArea.bottom - chartArea.top), 0), 1);
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, '#00b4ff');
+                    gradient.addColorStop(zeroPos, '#00b4ff');
+                    gradient.addColorStop(zeroPos, '#ff4b4b');
+                    gradient.addColorStop(1, '#ff4b4b');
+                    return gradient;
+                  },
                   backgroundColor: (context) => {
                     const chart = context.chart;
-                    const {ctx, chartArea} = chart;
-                    if (!chartArea) return null;
+                    const {ctx, chartArea, scales} = chart;
+                    if (!chartArea) return 'transparent';
+                    const zeroY = scales.y.getPixelForValue(0);
+                    const zeroPos = Math.min(Math.max((zeroY - chartArea.top) / (chartArea.bottom - chartArea.top), 0), 1);
                     const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                    gradient.addColorStop(0, 'rgba(0, 180, 255, 0.3)');
-                    gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
-                    gradient.addColorStop(1, 'rgba(255, 75, 75, 0.3)');
+                    gradient.addColorStop(0, 'rgba(0, 180, 255, 0.4)');
+                    gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
+                    gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
+                    gradient.addColorStop(1, 'rgba(255, 75, 75, 0.4)');
                     return gradient;
                   },
                   fill: true,
                   tension: 0.4,
-                  pointRadius: 0
+                  pointRadius: 0,
+                  borderWidth: 3
                 }]
               },
               options: {
@@ -1293,7 +1309,7 @@ app.get('/player/:slug', async (req, res) => {
                 maintainAspectRatio: false,
                 scales: {
                   y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099' } },
-                  x: { grid: { display: false }, ticks: { color: '#657099' } }
+                  x: { grid: { display: false }, ticks: { color: '#657099', font: { size: 9 } } }
                 },
                 plugins: { legend: { display: false } }
               }
@@ -1336,12 +1352,17 @@ app.get('/player/:slug', async (req, res) => {
             // Renderizar iconos debajo alineados con las barras
             setTimeout(() => {
               const iconDiv = document.getElementById('dmgIcons');
-              const yAxisWidth = chart.scales.y.width;
-              iconDiv.style.marginLeft = yAxisWidth + 'px';
+              const chartArea = chart.chartArea;
+              const xAxis = chart.scales.x;
+              
+              // El margen izquierdo debe ser el left del chartArea + el padding del contenedor
+              iconDiv.style.marginLeft = (chartArea.left + 15) + 'px';
+              iconDiv.style.width = (chartArea.right - chartArea.left) + 'px';
+              
               iconDiv.innerHTML = sorted.map(p => 
                 '<div style="display:flex; justify-content:center;"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" style="width:20px; height:20px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);"></div>'
               ).join('');
-            }, 150);
+            }, 200);
           }
         }
 
