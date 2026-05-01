@@ -482,6 +482,14 @@ function initBot(db) {
         return msg.reply('✅ Resumen diario de prueba enviado.');
       }
 
+      if (command === 'admin_testbet') {
+        const testWinners = [
+          { discordId: msg.author.id, amount: 50, multiplier: 2.0, choice: 'gana', anonymous: false }
+        ];
+        await notifyBetResults('Jugador de Prueba', 'gana', testWinners);
+        return msg.reply('✅ Notificación de apuesta de prueba enviada.');
+      }
+
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
