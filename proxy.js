@@ -1246,8 +1246,10 @@ app.get('/player/:slug', async (req, res) => {
           // Gráfica de Daño
           html += '<div>';
           html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3>';
-          html += '<div style="height:250px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px 5px 15px; position:relative;"><canvas id="dmgChart"></canvas></div>';
-          html += '<div id="dmgIcons" style="position:relative; height:25px; margin-top:5px;"></div>';
+          html += '<div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px; position:relative; overflow:hidden;">';
+          html += '<canvas id="dmgChart" style="height:240px !important;"></canvas>';
+          html += '<div id="dmgIcons" style="position:absolute; bottom:10px; left:15px; right:15px; height:20px; pointer-events:none;"></div>';
+          html += '</div>';
           html += '</div>';
 
           html += '</div>';
@@ -1361,15 +1363,13 @@ app.get('/player/:slug', async (req, res) => {
             setTimeout(() => {
               const iconDiv = document.getElementById('dmgIcons');
               const xAxis = chart.scales.x;
-              
-              // Usamos posicionamiento absoluto basado en los píxeles reales de las barras
+              if (!xAxis) return;
+
               iconDiv.innerHTML = sorted.map((p, i) => {
                 const x = xAxis.getPixelForTick(i);
-                // Sumamos 15px que es el padding izquierdo del contenedor del canvas
-                const leftPos = x + 15; 
-                return '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" style="position:absolute; left:' + leftPos + 'px; transform:translateX(-50%); width:20px; height:20px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);">';
+                return '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" style="position:absolute; left:' + x + 'px; transform:translateX(-50%); width:20px; height:20px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);">';
               }).join('');
-            }, 200);
+            }, 300);
           }
         }
 
