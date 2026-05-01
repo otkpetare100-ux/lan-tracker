@@ -21,6 +21,10 @@ function isAdmin(userId) {
   return userId === process.env.ADMIN_DISCORD_ID;
 }
 
+// Cooldown para !help (5 minutos)
+const helpCooldowns = new Map();
+
+
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -56,6 +60,15 @@ function initBot(db) {
     const command = args.shift().toLowerCase();
 
     if (command === 'help' || command === 'ayuda') {
+      const now = Date.now();
+      const lastUsed = helpCooldowns.get(msg.author.id) || 0;
+      const cooldownAmount = 5 * 60 * 1000;
+
+      if (now - lastUsed < cooldownAmount) {
+        const timeLeft = Math.ceil((cooldownAmount - (now - lastUsed)) / 60000);
+        return msg.reply(`⌛ Por favor, espera **${timeLeft} minuto(s)** para volver a usar el comando de ayuda.`);
+      }
+
       const embed = new EmbedBuilder()
         .setTitle('🐾 Guía de Comandos - LAN Tracker')
         .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
@@ -66,6 +79,8 @@ function initBot(db) {
         )
         .setColor(0x576bce)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
+      
+      helpCooldowns.set(msg.author.id, now);
       return msg.reply({ embeds: [embed] });
     }
 
