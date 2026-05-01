@@ -703,7 +703,7 @@ async function notifyBetResults(targetName, result, winners) {
       }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
-  const emoji = result === 'gana' ? 'ðŸ†' : '💀';
+  const emoji = result === 'gana' ? '\uD83C\uDFC6' : '💀';
   const embedBet = new EmbedBuilder()
     .setTitle(`${emoji} Resultados de Apuestas: ${targetName}`)
     .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
