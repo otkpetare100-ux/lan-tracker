@@ -146,7 +146,10 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
     const matchIds = await getMatchIds(acc.puuid);
     const lastId = matchIds && matchIds.length > 0 ? matchIds[0] : null;
     
-    if (lastId && acc.lastGameId === lastId) {
+    // Permitir actualización si las partidas actuales no tienen items o participantes (migración de datos)
+    const needsRepair = acc.matches && acc.matches.length > 0 && (!acc.matches[0].items || !acc.matches[0].participants);
+    
+    if (lastId && acc.lastGameId === lastId && !needsRepair) {
       if (!silent) showToast('Sin partidas nuevas desde el último refresh', 'toast-neutral');
       if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
       return;
