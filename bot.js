@@ -226,7 +226,7 @@ function initBot(db) {
         return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');
       }
 
-      const targetAcc = await findAccountBySlug(targetSlug);
+      const targetAcc = await findAccountBySlug(targetSlug); if (!targetAcc) return msg.reply('❌ Ese jugador no esta registrado en el dashboard.'); const existingBet = await db.collection('bets').findOne({ discordId: msg.author.id, targetPuuid: targetAcc.puuid, status: 'open' }); if (existingBet) return msg.reply('⚠️ Ya tienes una apuesta activa por este jugador en esta partida.');
       if (!targetAcc) return msg.reply('Ã¢ÂÅ’ Ese jugador no está registrado en el dashboard.');
 
       // Calcular multiplicador dinámico basado en Winrate
