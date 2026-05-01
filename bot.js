@@ -450,12 +450,10 @@ function initBot(db) {
               }
             });
             if (res.ok) {
-              const game = await res.json();
               found++;
               results.push(`✅ **${acc.gameName}**: En partida`);
             } else {
-              const pMask = acc.puuid ? `${acc.puuid.substring(0, 5)}...` : 'NULO';
-              results.push(`💤 **${acc.gameName}**: No detectado (Status: ${res.status}) [ID: ${pMask}]`);
+              results.push(`💤 **${acc.gameName}**: No está en partida`);
             }
           } catch (e) {
             results.push(`❌ **${acc.gameName}**: Error de conexión`);
