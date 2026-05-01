@@ -76,7 +76,7 @@ function initBot(db) {
         .addFields(
           { name: 'Rango SoloQ', value: acc.soloQ ? `${acc.soloQ.tier} ${acc.soloQ.rank} (${acc.soloQ.leaguePoints} LP)` : 'Unranked', inline: true },
           { name: 'Winrate', value: acc.soloQ ? `${Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100)}%` : 'N/A', inline: true },
-          { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `Ã¢Ââ€žÃ¯Â¸Â ${Math.abs(acc.streak)} Loss` : 'â€”', inline: true }
+          { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `Ã¢Ââ€žÃ¯Â¸Â ${Math.abs(acc.streak)} Loss` : '—', inline: true }
         )
         .setFooter({ text: 'LAN Tracker Bot' });
 
@@ -156,7 +156,7 @@ function initBot(db) {
         { $inc: { coins: 100 }, $set: { lastDaily: now, discordTag: msg.author.tag } },
         { upsert: true }
       );
-      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Ãšsalas sabiamente.');
+      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.');
     }
 
     if (command === 'shame' || command === 'muro') {
@@ -527,12 +527,12 @@ function initBot(db) {
           { $group: { _id: null, total: { $sum: '$count' } } }
         ]).toArray();
         const embed = new EmbedBuilder()
-          .setTitle('📊 Estadísticas Globales â€” Admin')
+          .setTitle('📊 Estadísticas Globales — Admin')
           .addFields(
             { name: 'ðŸ‘¥ Usuarios registrados', value: `${totalUsers}`, inline: true },
             { name: '💰 Coins en circulación', value: `${allCoins[0]?.total || 0}`, inline: true },
             { name: '🎰 Items en inventarios', value: `${totalItems[0]?.total || 0}`, inline: true },
-            { name: 'Ã°Å¸Ââ€  Usuario más rico', value: richest[0] ? `${richest[0].discordTag} â€” ${richest[0].coins} coins` : 'N/A', inline: false }
+            { name: 'Ã°Å¸Ââ€  Usuario más rico', value: richest[0] ? `${richest[0].discordTag} — ${richest[0].coins} coins` : 'N/A', inline: false }
           )
           .setColor(0x576bce);
         return msg.reply({ embeds: [embed] });
