@@ -217,34 +217,47 @@ async function settleBets(acc) {
       }
     }
 
-    // --- Cálculo de Estadísticas Extras ---
+    // --- Cálculo de Estadísticas Extras con Reintentos ---
     const kda = `${p.kills}/${p.deaths}/${p.assists}`;
-    
-    // Obtener LP actuales para comparar
     let lpDisplay = null;
-    try {
-      const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-summoner/${p.summonerId}`;
-      const leagueRes = await fetch(leagueUrl, {
-        headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
-      });
-      const leagues = await leagueRes.json();
-      const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5');
-      
-      if (soloQ) {
-        const oldLp = acc.soloQ?.leaguePoints || 0;
-        const oldTier = acc.soloQ?.tier || 'UNRANKED';
-        const diff = soloQ.leaguePoints - oldLp;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-summoner/${p.summonerId}`;
+        const leagueRes = await fetch(leagueUrl, {
+          headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+        });
+        const leagues = await leagueRes.json();
+        const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5');
         
-        let prefix = diff >= 0 ? '+' : '';
-        lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [${prefix}${diff} LP]`;
-        
-        // Si cambió de Tier o Rank
-        if (oldTier !== soloQ.tier || acc.soloQ?.rank !== soloQ.rank) {
-          lpDisplay = `🚀 **${soloQ.tier} ${soloQ.rank}** (${prefix}${diff} LP)`;
+        if (soloQ) {
+          const oldLp = acc.soloQ?.leaguePoints || 0;
+          const oldTier = acc.soloQ?.tier || 'UNRANKED';
+          const oldRank = acc.soloQ?.rank || '';
+          
+          // Si el LP o el Rango ha cambiado, ya tenemos el dato nuevo
+          if (soloQ.leaguePoints !== oldLp || soloQ.tier !== oldTier || soloQ.rank !== oldRank) {
+            const diff = soloQ.leaguePoints - oldLp;
+            let prefix = diff >= 0 ? '+' : '';
+            lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [${prefix}${diff} LP]`;
+            
+            if (oldTier !== soloQ.tier || oldRank !== soloQ.rank) {
+              lpDisplay = `🚀 **${soloQ.tier} ${soloQ.rank}** (${prefix}${diff} LP)`;
+            }
+            break; // Salimos del bucle porque ya tenemos el dato
+          }
         }
+      } catch (e) {
+        console.error('[LP Retry Error]', e);
       }
-    } catch (e) {
-      console.error('[LP Calc Error]', e);
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        console.log(`[Bets] LP no actualizado para ${acc.gameName}. Reintento ${attempts}/\${maxAttempts-1} en 30s...`);
+        await new Promise(r => setTimeout(r, 30000)); // Esperar 30s para el siguiente intento
+      }
     }
 
     // 4. Notificar en Discord con toda la info
