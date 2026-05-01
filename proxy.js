@@ -1247,8 +1247,7 @@ app.get('/player/:slug', async (req, res) => {
           html += '<div>';
           html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3>';
           html += '<div style="height:280px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px; position:relative; overflow:hidden;">';
-          html += '<canvas id="dmgChart" style="height:240px !important;"></canvas>';
-          html += '<div id="dmgIcons" style="position:absolute; bottom:10px; left:15px; right:15px; height:20px; pointer-events:none;"></div>';
+          html += '<canvas id="dmgChart"></canvas>';
           html += '</div>';
           html += '</div>';
 
@@ -1336,7 +1335,7 @@ app.get('/player/:slug', async (req, res) => {
             const colors = sorted.map(p => p.teamId === 100 ? 'rgba(0, 180, 255, 0.7)' : 'rgba(255, 75, 75, 0.7)');
             const borders = sorted.map(p => p.teamId === 100 ? '#00b4ff' : '#ff4b4b');
 
-            const chart = new Chart(ctx, {
+            new Chart(ctx, {
               type: 'bar',
               data: {
                 labels: labels,
@@ -1351,25 +1350,40 @@ app.get('/player/:slug', async (req, res) => {
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: { padding: { bottom: 30 } },
                 scales: {
                   y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099', font: { size: 9 } } },
                   x: { display: false }
                 },
                 plugins: { legend: { display: false } }
-              }
+              },
+              plugins: [{
+                afterDraw: (chart) => {
+                  const ctx = chart.ctx;
+                  const xAxis = chart.scales.x;
+                  if (!xAxis) return;
+                  const bottom = xAxis.bottom;
+                  
+                  sorted.forEach((p, i) => {
+                    const x = xAxis.getPixelForTick(i);
+                    const img = new Image();
+                    img.src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/` + p.championName + '.png';
+                    if (img.complete) {
+                      const size = 20;
+                      const rx = x - size/2;
+                      const ry = bottom + 8;
+                      // Dibujar icono cuadrado con borde
+                      ctx.drawImage(img, rx, ry, size, size);
+                      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                      ctx.lineWidth = 1;
+                      ctx.strokeRect(rx, ry, size, size);
+                    } else {
+                      img.onload = () => chart.render();
+                    }
+                  });
+                }
+              }]
             });
-
-            // Renderizar iconos debajo alineados con las barras
-            setTimeout(() => {
-              const iconDiv = document.getElementById('dmgIcons');
-              const xAxis = chart.scales.x;
-              if (!xAxis) return;
-
-              iconDiv.innerHTML = sorted.map((p, i) => {
-                const x = xAxis.getPixelForTick(i);
-                return '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" style="position:absolute; left:' + x + 'px; transform:translateX(-50%); width:20px; height:20px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);">';
-              }).join('');
-            }, 300);
           }
         }
 
