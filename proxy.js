@@ -139,9 +139,9 @@ async function connectDB() {
 // Función para liquidar apuestas
 async function settleBets(acc) {
   try {
-    // 1. Esperar a que la API actualice el historial (60 seg)
+    // 1. Esperar a que la API actualice el historial (100 seg para asegurar LP)
     console.log(`[Bets] Procesando resultados para ${acc.gameName}...`);
-    await new Promise(r => setTimeout(r, 60000));
+    await new Promise(r => setTimeout(r, 100000));
 
     // 2. Obtener el resultado de la última partida
     const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;

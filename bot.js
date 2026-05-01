@@ -786,13 +786,15 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
     : 'No hubo ganadores esta vez.';
 
   const emoji = result === 'gana' ? '\uD83C\uDFC6' : '💀';
-  const lpDisplay = lpData ? `\n**Cambio de LP:** ${lpData}` : '';
+  const actionText = result === 'gana' ? 'GANADO' : 'PERDIDO';
+  
+  const lpDisplay = lpData ? `\n**Puntos:** ${lpData}` : '\n**Puntos:** *Actualizando...*';
   const kdaDisplay = kda ? `\n**KDA:** ${kda}` : '';
 
   const embedBet = new EmbedBuilder()
     .setAuthor({ name: targetName, iconURL: playerIcon })
     .setTitle(`${emoji} Resultados de Apuestas`)
-    .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.${kdaDisplay}${lpDisplay}\n\n${description}`)
+    .setDescription(`El jugador ha **${actionText}** la partida.${kdaDisplay}${lpDisplay}\n\n${description}`)
     .setThumbnail(champIcon)
     .setColor(winners.length > 0 ? 0xf1c40f : 0x95a5a6)
     .setTimestamp();
