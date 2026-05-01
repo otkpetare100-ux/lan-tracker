@@ -1151,6 +1151,7 @@ app.get('/player/:slug', async (req, res) => {
         </div>
       </div>
 
+      <script src="/chart.min.js"></script>
       <script>
         function toggleMatch(index) {
           const el = document.getElementById('match-detail-' + index);
@@ -1231,37 +1232,105 @@ app.get('/player/:slug', async (req, res) => {
         }
 
         function renderStatsContent(data) {
-          const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
-          const maxGold = Math.max(...data.participants.map(p => p.goldEarned));
+          let html = '<div style="display:grid; grid-template-columns: 1fr; gap:40px; margin-top:20px;">';
           
-          let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:20px;">';
-          
-          // Columna Daño
-          html += '<div><h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff;">Daño Infligido a Campeones</h3>';
-          data.participants.sort((a,b) => b.totalDamageDealtToChampions - a.totalDamageDealtToChampions).forEach(p => {
-            const pct = (p.totalDamageDealtToChampions / maxDmg) * 100;
-            const color = p.teamId === 100 ? '#00b4ff' : '#ff4b4b';
-            html += '<div style="margin-bottom:12px;">';
-            html += '<div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;"><span>' + p.gameName + ' (' + p.championName + ')</span><span style="font-weight:900;">' + p.totalDamageDealtToChampions.toLocaleString() + '</span></div>';
-            html += '<div style="width:100%; height:12px; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden;"><div style="width:'+pct+'%; height:100%; background:'+color+'; border-radius:6px;"></div></div>';
+          // Gráfica de Ventaja de Oro (si hay timeline)
+          if (data.timeline) {
+            html += '<div>';
+            html += '<h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff; text-align:center;">Ventaja de Oro del Equipo</h3>';
+            html += '<div style="height:300px; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px;"><canvas id="goldChart"></canvas></div>';
             html += '</div>';
-          });
-          html += '</div>';
+          }
 
-          // Columna Oro
-          html += '<div><h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff;">Oro Total Obtenido</h3>';
-          data.participants.sort((a,b) => b.goldEarned - a.goldEarned).forEach(p => {
-            const pct = (p.goldEarned / maxGold) * 100;
-            const color = '#f4c874';
-            html += '<div style="margin-bottom:12px;">';
-            html += '<div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;"><span>' + p.gameName + '</span><span style="font-weight:900;">' + (p.goldEarned/1000).toFixed(1) + 'k</span></div>';
-            html += '<div style="width:100%; height:12px; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden;"><div style="width:'+pct+'%; height:100%; background:'+color+'; border-radius:6px;"></div></div>';
-            html += '</div>';
-          });
+          // Gráfica de Daño
+          html += '<div>';
+          html += '<h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff; text-align:center;">Daño Infligido a Campeones</h3>';
+          html += '<div style="height:350px; background:rgba(0,0,0,0.2); border-radius:12px; padding:15px;"><canvas id="dmgChart"></canvas></div>';
           html += '</div>';
 
           html += '</div>';
+          
+          // Ejecutamos la creación de gráficas después de un pequeño delay para que el DOM esté listo
+          setTimeout(() => initCharts(data), 100);
+
           return html;
+        }
+
+        function initCharts(data) {
+          // Gráfica de Oro (Line Chart)
+          if (data.timeline && document.getElementById('goldChart')) {
+            const ctx = document.getElementById('goldChart').getContext('2d');
+            const labels = data.timeline.map((_, i) => i + 'm');
+            const goldData = data.timeline.map(f => f.goldDiff);
+
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: 'Ventaja (Azul vs Rojo)',
+                  data: goldData,
+                  borderColor: '#00b4ff',
+                  backgroundColor: (context) => {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    if (!chartArea) return null;
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(0, 180, 255, 0.3)');
+                    gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
+                    gradient.addColorStop(1, 'rgba(255, 75, 75, 0.3)');
+                    return gradient;
+                  },
+                  fill: true,
+                  tension: 0.4,
+                  pointRadius: 0
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099' } },
+                  x: { grid: { display: false }, ticks: { color: '#657099' } }
+                },
+                plugins: { legend: { display: false } }
+              }
+            });
+          }
+
+          // Gráfica de Daño (Bar Chart)
+          if (document.getElementById('dmgChart')) {
+            const ctx = document.getElementById('dmgChart').getContext('2d');
+            // Ordenar por equipo
+            const sorted = [...data.participants].sort((a,b) => a.teamId - b.teamId);
+            const labels = sorted.map(p => p.championName);
+            const dmgData = sorted.map(p => p.totalDamageDealtToChampions);
+            const colors = sorted.map(p => p.teamId === 100 ? 'rgba(0, 180, 255, 0.7)' : 'rgba(255, 75, 75, 0.7)');
+            const borders = sorted.map(p => p.teamId === 100 ? '#00b4ff' : '#ff4b4b');
+
+            new Chart(ctx, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [{
+                  data: dmgData,
+                  backgroundColor: colors,
+                  borderColor: borders,
+                  borderWidth: 2,
+                  borderRadius: 4
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099' } },
+                  x: { grid: { display: false }, ticks: { color: '#f2f4ff', font: { size: 10 } } }
+                },
+                plugins: { legend: { display: false } }
+              }
+            });
+          }
         }
 
         const SPELL_MAP = {
@@ -1554,12 +1623,35 @@ app.get('/api/match/:matchId', async (req, res) => {
       200: data.info.teams.find(t => t.teamId === 200)
     };
 
+    // Obtener Timeline para la gráfica de ventaja de oro
+    let timeline = null;
+    try {
+      const tUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchId}/timeline?api_key=${API_KEY}`;
+      const tRes = await fetch(tUrl);
+      if (tRes.ok) {
+        const tData = await tRes.json();
+        // Solo enviamos los datos necesarios para reducir el tamaño
+        timeline = tData.info.frames.map(f => {
+          let blueGold = 0;
+          let redGold = 0;
+          Object.values(f.participantFrames).forEach(pf => {
+            if (pf.participantId <= 5) blueGold += pf.totalGold;
+            else redGold += pf.totalGold;
+          });
+          return { timestamp: f.timestamp, goldDiff: blueGold - redGold };
+        });
+      }
+    } catch (e) {
+      console.error('Error obteniendo timeline:', e);
+    }
+
     res.json({
       gameDuration: data.info.gameDuration,
       gameMode: data.info.gameMode,
       gameCreation: data.info.gameCreation,
       participants,
-      teams
+      teams,
+      timeline
     });
   } catch (e) {
     console.error('Error al obtener partida:', e);
