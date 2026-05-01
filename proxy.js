@@ -1367,13 +1367,14 @@ app.get('/player/:slug', async (req, res) => {
               plugins: [{
                 afterDraw: (chart) => {
                   const ctx = chart.ctx;
+                  const meta = chart.getDatasetMeta(0);
                   const xAxis = chart.scales.x;
-                  if (!xAxis) return;
+                  if (!xAxis || !meta.data.length) return;
                   const bottom = xAxis.bottom;
                   
                   images.forEach((img, i) => {
-                    if (img.complete && img.naturalWidth > 0) {
-                      const x = xAxis.getPixelForTick(i);
+                    if (img.complete && img.naturalWidth > 0 && meta.data[i]) {
+                      const x = meta.data[i].x;
                       const size = 18;
                       ctx.drawImage(img, x - size/2, bottom + 5, size, size);
                       ctx.strokeStyle = 'rgba(255,255,255,0.15)';
