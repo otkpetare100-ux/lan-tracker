@@ -4,7 +4,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete } = require('./bot.js');
+const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete } = require('./bot.js');
 
 // ---- Configuración y Variables Globales ----
 let DDRAGON_VERSION = '15.8.1'; 
