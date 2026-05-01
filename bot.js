@@ -470,6 +470,13 @@ function initBot(db) {
         return msg.reply(`🔑 **Debug Key:**\n- Máscara: \`${masked}\`\n- Longitud: \`${key.length}\`\n- Variable ENV: \`${process.env.RIOT_API_KEY ? 'Detectada ✅' : 'No detectada ❌'}\``);
       }
 
+      if (command === 'admin_testnotif') {
+        const testAcc = { gameName: 'Jugador de Prueba' };
+        const testData = { championName: 'Naafiri' };
+        await notifyLiveGame(testAcc, testData);
+        return msg.reply('✅ Notificación de prueba enviada al canal de anuncios.');
+      }
+
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
