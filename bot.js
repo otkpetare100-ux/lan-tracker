@@ -72,10 +72,10 @@ function initBot(db) {
       const embed = new EmbedBuilder()
         .setTitle('🐾 Guía de Comandos - LAN Tracker')
         .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
-        .addFields(
-          { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
+                .addFields(
+          { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
           { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
-                    { name: '🎮 Diversión y Apuestas', value: '!apostar [cant] [gana/pierde] [Nombre#TAG] - Apuesta en una partida en vivo.\n!gacha - Gasta 10 coins para conseguir un campeón.\n!mochila - Mira tu colección de campeones.\n!desencantar - Recicla tus repetidos por coins.\n!reroll [rareza] - Fusiona 3 repetidos para obtener uno nuevo (¡con chance de upgrade!).\n!shame - El muro de la vergüenza.' }
+          { name: '🎮 Diversión y Apuestas', value: '`!apostar [cant] [gana/pierde] [Nombre#TAG]` - Apuesta en una partida en vivo.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!desencantar` - Recicla repetidos.\n`!reroll [rareza]` - Fusiona 3 repetidos.\n`!shame` - El muro de la vergüenza.' }
         )
         .setColor(0x576bce)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
