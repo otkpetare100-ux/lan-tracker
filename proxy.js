@@ -1275,9 +1275,13 @@ app.get('/player/:slug', async (req, res) => {
                   borderColor: (context) => {
                     const chart = context.chart;
                     const {ctx, chartArea, scales} = chart;
-                    if (!chartArea) return '#00b4ff';
+                    if (!chartArea || !scales.y) return '#00b4ff';
                     const zeroY = scales.y.getPixelForValue(0);
-                    const zeroPos = Math.min(Math.max((zeroY - chartArea.top) / (chartArea.bottom - chartArea.top), 0), 1);
+                    const diff = chartArea.bottom - chartArea.top;
+                    let zeroPos = diff > 0 ? (zeroY - chartArea.top) / diff : 0.5;
+                    if (!isFinite(zeroPos)) zeroPos = 0.5;
+                    zeroPos = Math.min(Math.max(zeroPos, 0), 1);
+
                     const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
                     gradient.addColorStop(0, '#00b4ff');
                     gradient.addColorStop(zeroPos, '#00b4ff');
@@ -1288,9 +1292,13 @@ app.get('/player/:slug', async (req, res) => {
                   backgroundColor: (context) => {
                     const chart = context.chart;
                     const {ctx, chartArea, scales} = chart;
-                    if (!chartArea) return 'transparent';
+                    if (!chartArea || !scales.y) return 'transparent';
                     const zeroY = scales.y.getPixelForValue(0);
-                    const zeroPos = Math.min(Math.max((zeroY - chartArea.top) / (chartArea.bottom - chartArea.top), 0), 1);
+                    const diff = chartArea.bottom - chartArea.top;
+                    let zeroPos = diff > 0 ? (zeroY - chartArea.top) / diff : 0.5;
+                    if (!isFinite(zeroPos)) zeroPos = 0.5;
+                    zeroPos = Math.min(Math.max(zeroPos, 0), 1);
+
                     const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
                     gradient.addColorStop(0, 'rgba(0, 180, 255, 0.4)');
                     gradient.addColorStop(zeroPos, 'rgba(0, 0, 0, 0)');
