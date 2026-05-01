@@ -1246,8 +1246,8 @@ app.get('/player/:slug', async (req, res) => {
           // Gráfica de Daño
           html += '<div>';
           html += '<h3 style="font-size:0.9rem; margin-bottom:10px; color:#f2f4ff; text-align:center;">Daño Infligido</h3>';
-          html += '<div style="height:250px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px 0 15px;"><canvas id="dmgChart"></canvas></div>';
-          html += '<div id="dmgIcons" style="display:flex; justify-content:space-between; padding:5px 22px 0 38px;"></div>';
+          html += '<div style="height:250px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 15px 5px 15px; position:relative;"><canvas id="dmgChart"></canvas></div>';
+          html += '<div id="dmgIcons" style="display:grid; grid-template-columns: repeat(10, 1fr); margin-top:5px; padding:0 15px;"></div>';
           html += '</div>';
 
           html += '</div>';
@@ -1310,13 +1310,7 @@ app.get('/player/:slug', async (req, res) => {
             const colors = sorted.map(p => p.teamId === 100 ? 'rgba(0, 180, 255, 0.7)' : 'rgba(255, 75, 75, 0.7)');
             const borders = sorted.map(p => p.teamId === 100 ? '#00b4ff' : '#ff4b4b');
 
-            // Renderizar iconos debajo
-            const iconDiv = document.getElementById('dmgIcons');
-            iconDiv.innerHTML = sorted.map(p => 
-              '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" style="width:18px; height:18px; border-radius:50%; border:1px solid rgba(255,255,255,0.2);">'
-            ).join('');
-
-            new Chart(ctx, {
+            const chart = new Chart(ctx, {
               type: 'bar',
               data: {
                 labels: labels,
@@ -1338,6 +1332,16 @@ app.get('/player/:slug', async (req, res) => {
                 plugins: { legend: { display: false } }
               }
             });
+
+            // Renderizar iconos debajo alineados con las barras
+            setTimeout(() => {
+              const iconDiv = document.getElementById('dmgIcons');
+              const yAxisWidth = chart.scales.y.width;
+              iconDiv.style.marginLeft = yAxisWidth + 'px';
+              iconDiv.innerHTML = sorted.map(p => 
+                '<div style="display:flex; justify-content:center;"><img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" style="width:20px; height:20px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);"></div>'
+              ).join('');
+            }, 150);
           }
         }
 
