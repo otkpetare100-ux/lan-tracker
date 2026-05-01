@@ -190,7 +190,6 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
         '<span class="mv2-queue-flat">' + shortQueue + '</span>' +
         '<span class="mv2-kda-flat">' + kda + '</span>' +
         '<span class="mv2-cs-flat">' + (m.cs || 0) + ' CS</span>' +
-        '<div class="mv2-items-row">' + itemsHTML + '</div>' +
         '<span class="mv2-duration-flat">' + dur + '</span>' +
         '<span class="mv2-time-flat">' + time + '</span>' +
       '</div>' +
@@ -1823,7 +1822,7 @@ function initCharts(data) {
 
     const images = sorted.map(p => {
       const img = new Image();
-      img.src = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + p.championName + '.png';
+      img.src = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.championName);
       return img;
     });
 
@@ -1909,7 +1908,7 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     html += '<tr>';
     html += '<td><div class="player-cell">';
-    html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + p.championName + '.png" class="player-champ-icon">';
+    html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.championName) + '" class="player-champ-icon">';
     
     html += '<div class="spells-runes">';
     html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/spell/' + (SPELL_MAP[p.summoner1Id] || 'SummonerFlash') + '.png" class="spell-icon">';
