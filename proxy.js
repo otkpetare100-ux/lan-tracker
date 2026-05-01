@@ -1182,9 +1182,9 @@ app.get('/player/:slug', async (req, res) => {
           
           const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
 
-          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg);
+          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
           html += '<div style="height:30px;"></div>';
-          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg);
+          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
 
           body.innerHTML = html;
         }
@@ -1195,7 +1195,7 @@ app.get('/player/:slug', async (req, res) => {
           14: 'SummonerDot', 21: 'SummonerBarrier', 32: 'SummonerSnowball'
         };
 
-        function renderTeamTable(title, players, teamClass, teamData, maxDmg) {
+        function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDuration) {
           const result = players[0].win ? 'VICTORIA' : 'DERROTA';
           const kills = players.reduce((sum, p) => sum + p.kills, 0);
           const deaths = players.reduce((sum, p) => sum + p.deaths, 0);
@@ -1241,7 +1241,7 @@ app.get('/player/:slug', async (req, res) => {
             html += '</td>';
 
             html += '<td><span class="score-kda">' + p.visionScore + '</span></td>';
-            html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + (p.totalMinionsKilled / (data.gameDuration/60)).toFixed(1) + '/m</span></td>';
+            html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + (p.totalMinionsKilled / (gameDuration/60)).toFixed(1) + '/m</span></td>';
             html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
             
             // Items
