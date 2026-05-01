@@ -106,7 +106,8 @@ async function connectDB() {
           
           if (res.ok) {
             const game = await res.json();
-            if (!liveCache.has(acc.puuid)) {
+            // Evitar notificar si ya estamos en cache o si es el mismo GameID que el último procesado
+            if (!liveCache.has(acc.puuid) && acc.lastLiveGameId !== game.gameId) {
               liveCache.add(acc.puuid);
               
               // Buscar el campeón del jugador en la partida
@@ -115,9 +116,12 @@ async function connectDB() {
               const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
               const champName = champKey ? champData.data[champKey].name : 'Desconocido';
               
-              console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName}`);
+              console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName} (ID: ${game.gameId})`);
               const now = new Date();
-              await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { liveGameStartedAt: now } });
+              await db.collection('accounts').updateOne(
+                { puuid: acc.puuid }, 
+                { $set: { liveGameStartedAt: now, lastLiveGameId: game.gameId } }
+              );
               notifyLiveGame(acc, { championName: champName, championId: champKey });
             }
           } else {
