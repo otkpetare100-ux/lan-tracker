@@ -835,7 +835,7 @@ async function notifyLiveGame(acc, gameData) {
   const champIcon = gameData.championId ? `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${gameData.championId}.png` : null;
 
   const embed = new EmbedBuilder()
-    .setAuthor({ name: acc.gameName, iconURL: playerIcon })
+    .setAuthor({ name: `${acc.gameName}#${acc.tagLine}`, iconURL: playerIcon })
     .setTitle('PARTIDA EN VIVO')
     .setDescription(`¡Acaba de entrar en una partida!\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
     .setThumbnail(champIcon)
