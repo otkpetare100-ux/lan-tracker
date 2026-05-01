@@ -211,8 +211,38 @@ async function settleBets(acc) {
       }
     }
 
-    // 4. Notificar en Discord
-    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName);
+    // --- Cálculo de Estadísticas Extras ---
+    const kda = `${p.kills}/${p.deaths}/${p.assists}`;
+    
+    // Obtener LP actuales para comparar
+    let lpDisplay = null;
+    try {
+      const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-summoner/${p.summonerId}`;
+      const leagueRes = await fetch(leagueUrl, {
+        headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+      });
+      const leagues = await leagueRes.json();
+      const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5');
+      
+      if (soloQ) {
+        const oldLp = acc.soloQ?.leaguePoints || 0;
+        const oldTier = acc.soloQ?.tier || 'UNRANKED';
+        const diff = soloQ.leaguePoints - oldLp;
+        
+        let prefix = diff >= 0 ? '+' : '';
+        lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [${prefix}${diff} LP]`;
+        
+        // Si cambió de Tier o Rank
+        if (oldTier !== soloQ.tier || acc.soloQ?.rank !== soloQ.rank) {
+          lpDisplay = `🚀 **${soloQ.tier} ${soloQ.rank}** (${prefix}${diff} LP)`;
+        }
+      }
+    } catch (e) {
+      console.error('[LP Calc Error]', e);
+    }
+
+    // 4. Notificar en Discord con toda la info
+    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDisplay, kda);
 
     // --- NUEVO: Motor de Retos Automáticos ---
     await checkChallenges(acc, match);

@@ -424,17 +424,35 @@ function initBot(db) {
       }
 
       // !admin_setcoins @usuario cantidad
-      if (command === 'admin_setcoins') {
-        const target = msg.mentions.users.first();
+            if (command === 'admin_setcoins') {
+        const role = msg.mentions.roles.first();
+        const targetUser = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
-        if (!target || isNaN(amount) || amount < 0)
-          return msg.reply('Uso: `!admin_setcoins @usuario cantidad`');
-        await db.collection('economy').updateOne(
-          { discordId: target.id },
-          { $set: { coins: amount, discordTag: target.tag } },
-          { upsert: true }
-        );
-        return msg.reply(`✅ Coins de ${target.username} fijados a **${amount}**.`);
+        
+        if (isNaN(amount)) return msg.reply('Uso: `!admin_setcoins [@usuario o @rol] cantidad`');
+
+        if (role) {
+          const members = await msg.guild.members.fetch();
+          const roleMembers = members.filter(m => m.roles.cache.has(role.id));
+          
+          for (const [id, member] of roleMembers) {
+            await db.collection('economy').updateOne(
+              { discordId: id },
+              { $set: { coins: amount, discordTag: member.user.tag } },
+              { upsert: true }
+            );
+          }
+          return msg.reply(`✅ **${amount} coins** asignadas a los **${roleMembers.size}** miembros del rol **${role.name}**.`);
+        } else if (targetUser) {
+          await db.collection('economy').updateOne(
+            { discordId: targetUser.id },
+            { $set: { coins: amount, discordTag: targetUser.tag } },
+            { upsert: true }
+          );
+          return msg.reply(`✅ Saldo de **${targetUser.username}** establecido en **${amount} coins**.`);
+        } else {
+          return msg.reply('Uso: `!admin_setcoins [@usuario o @rol] cantidad`');
+        }
       }
 
       // !admin_resetdiario @usuario
@@ -751,7 +769,7 @@ async function sendDailySummary(db) {
 }
 
 // Notificación de resultados de apuestas
-async function notifyBetResults(targetName, result, winners, profileIconId, championId) {
+async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
@@ -768,10 +786,13 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
     : 'No hubo ganadores esta vez.';
 
   const emoji = result === 'gana' ? '\uD83C\uDFC6' : '💀';
+  const lpDisplay = lpData ? `\n**Cambio de LP:** ${lpData}` : '';
+  const kdaDisplay = kda ? `\n**KDA:** ${kda}` : '';
+
   const embedBet = new EmbedBuilder()
     .setAuthor({ name: targetName, iconURL: playerIcon })
     .setTitle(`${emoji} Resultados de Apuestas`)
-    .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.\n\n${description}`)
+    .setDescription(`El jugador ha **${result.toUpperCase()}DO** la partida.${kdaDisplay}${lpDisplay}\n\n${description}`)
     .setThumbnail(champIcon)
     .setColor(winners.length > 0 ? 0xf1c40f : 0x95a5a6)
     .setTimestamp();
