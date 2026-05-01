@@ -860,9 +860,9 @@ app.get('/player/:slug', async (req, res) => {
 
         /* --- Historial de Partidas V2 --- */
         .match-v2-card {
-            display: grid; grid-template-columns: 70px 110px 180px 110px 1fr 50px;
+            display: grid; grid-template-columns: 70px 110px 175px 115px 60px 50px;
             align-items: center; background: rgba(16, 20, 34, 0.7); border-radius: 8px;
-            overflow: hidden; height: 75px; transition: all 0.2s ease; cursor: pointer;
+            overflow: hidden; min-height: 75px; transition: all 0.2s ease; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.03); position: relative; margin-bottom: 8px;
             text-align: left;
         }
@@ -878,8 +878,13 @@ app.get('/player/:slug', async (req, res) => {
         .mv2-kda-text { font-weight: 900; font-size: 1.2rem; color: #f2f4ff; letter-spacing: -0.5px; line-height: 1; }
         .mv2-stats { font-size: 0.72rem; color: #657099; margin-top: 2px; }
         .mv2-items-grid { display: grid; grid-template-columns: repeat(4, 24px); grid-template-rows: repeat(2, 24px); gap: 2px; }
-        .mv2-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+        .mv2-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); object-fit: cover; display: block; }
         .mv2-item.empty { background: rgba(255,255,255,0.03); }
+        .mv2-participants { display: flex; gap: 3px; align-items: center; justify-content: center; padding: 0 4px; }
+        .mv2-p-col { display: flex; flex-direction: column; gap: 2px; }
+        .mv2-p-icon { width: 22px; height: 22px; }
+        .mv2-p-icon img { width: 22px; height: 22px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.08); object-fit: cover; display: block; }
+        .mv2-p-icon.me img { border-color: #f4c874; box-shadow: 0 0 5px rgba(244,200,116,0.7); }
         .mv2-meta { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #657099; font-size: 0.72rem; }
         .mv2-meta-label { opacity: 0.6; margin-bottom: 2px; }
         .mv2-duration { font-weight: 700; color: #8c96bc; }
