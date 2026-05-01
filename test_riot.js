@@ -10,7 +10,7 @@ async function test() {
 
     // PRUEBA 1: Datos de cuenta (Usa americas)
     // Usamos una cuenta famosa de LAN para probar si la key sirve para algo
-    const urlAccount = `https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Seiya/LAN`;
+    const urlAccount = `https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/SagStuck/LAN`;
     
     try {
         console.log('📡 Prueba 1: Obteniendo PUUID real de Seiya#LAN...');
@@ -21,8 +21,8 @@ async function test() {
             const realPuuid = dataAcc.puuid;
             console.log(`✅ PUUID obtenido: ${realPuuid}`);
 
-            console.log('📡 Prueba 2: Consultando Spectator (LAN) con PUUID real...');
-            const urlSpec = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-puuid/${realPuuid}`;
+            console.log('📡 Prueba 2: Consultando Spectator (LAN) con endpoint /by-summoner/...');
+            const urlSpec = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${realPuuid}`;
             const resSpec = await fetch(urlSpec, { headers: { "X-Riot-Token": KEY } });
             
             console.log(`📊 Status Spectator: ${resSpec.status}`);
