@@ -270,7 +270,7 @@ function initBot(db) {
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! Ã°Å¸Â¤Â`);
+      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! \uD83E\uDD21`);
     }
 
     // --- SISTEMA DE GACHAPON ---
