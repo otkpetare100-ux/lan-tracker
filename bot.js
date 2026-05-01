@@ -831,13 +831,15 @@ async function notifyLiveGame(acc, gameData) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
+  const version = gameData.version || '15.8.1';
+  const iconId = gameData.profileIconId || acc.profileIconId || 0;
+  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${iconId}.png`;
+  const champIcon = gameData.championId ? `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${gameData.championId}.png` : null;
+
   const tier = acc.soloQ?.tier || 'UNRANKED';
   const rank = acc.soloQ?.rank || '';
   const lp = acc.soloQ?.leaguePoints || 0;
   const rankDisplay = tier === 'UNRANKED' ? 'Unranked' : `${tier} ${rank} (${lp} LP)`;
-
-  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png`;
-  const champIcon = gameData.championId ? `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${gameData.championId}.png` : null;
 
   const embed = new EmbedBuilder()
     .setAuthor({ name: `${acc.gameName}#${acc.tagLine}`, iconURL: playerIcon })
@@ -891,13 +893,14 @@ async function sendDailySummary(db) {
 }
 
 // Notificación de resultados de apuestas
-async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda) {
+async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
-  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${profileIconId || 0}.png`;
-  const champIcon = championId ? `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${championId}.png` : null;
+  const v = version || '15.8.1';
+  const playerIcon = `https://ddragon.leagueoflegends.com/cdn/${v}/img/profileicon/${profileIconId || 0}.png`;
+  const champIcon = championId ? `https://ddragon.leagueoflegends.com/cdn/${v}/img/champion/${championId}.png` : null;
 
   const description = winners.length > 0 
     ? `**Ganadores:**\n${winners.map(w => {

@@ -122,7 +122,12 @@ async function connectDB() {
                 { puuid: acc.puuid }, 
                 { $set: { liveGameStartedAt: now, lastLiveGameId: game.gameId } }
               );
-              notifyLiveGame(acc, { championName: champName, championId: champKey });
+              notifyLiveGame(acc, { 
+                championName: champName, 
+                championId: champKey, 
+                profileIconId: me.profileIconId,
+                version: DDRAGON_VERSION 
+              });
             }
           } else {
             // Si estaba en cache y ya no (404), es que terminó la partida
@@ -272,7 +277,7 @@ async function settleBets(acc) {
     }
 
     // 4. Notificar en Discord con toda la info
-    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDisplay, kda);
+    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDisplay, kda, DDRAGON_VERSION);
     
     // IMPORTANTE: Limpiar cache para permitir nueva partida
     clearCache();
