@@ -886,20 +886,29 @@ app.get('/player/:slug', async (req, res) => {
         .scoreboard-table th { text-align: left; padding: 10px; color: #657099; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .scoreboard-table td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
         
-        .team-header { font-weight: 900; font-size: 1.1rem; padding: 15px 10px; display: flex; align-items: center; gap: 10px; }
-        .blue-team { color: #00b4ff; background: rgba(0, 180, 255, 0.05); }
-        .red-team { color: #ff4b4b; background: rgba(255, 75, 75, 0.05); }
+        .team-header { font-weight: 900; font-size: 1.1rem; padding: 15px 10px; display: flex; align-items: center; gap: 10px; border-radius: 8px 8px 0 0; }
+        .blue-team { color: #00b4ff; background: rgba(0, 180, 255, 0.1); border-bottom: 2px solid #00b4ff; }
+        .red-team { color: #ff4b4b; background: rgba(255, 75, 75, 0.1); border-bottom: 2px solid #ff4b4b; }
         
-        .player-cell { display: flex; align-items: center; gap: 10px; }
-        .player-champ-icon { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
-        .player-name-link { font-weight: 700; color: #f2f4ff; text-decoration: none; }
+        .player-cell { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+        .player-champ-icon { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+        .spells-runes { display: flex; flex-direction: column; gap: 2px; }
+        .spell-icon, .rune-icon { width: 16px; height: 16px; border-radius: 2px; }
+        .player-name-link { font-weight: 700; color: #f2f4ff; text-decoration: none; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
         
-        .item-list { display: flex; gap: 4px; }
-        .item-icon { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.5); }
-        .empty-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(255,255,255,0.02); }
+        .item-list { display: flex; gap: 3px; }
+        .item-icon { width: 26px; height: 26px; border-radius: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        .empty-item { width: 26px; height: 26px; border-radius: 4px; background: rgba(255,255,255,0.02); }
         
-        .score-kda { font-weight: 800; font-size: 0.9rem; }
-        .score-sub { font-size: 0.75rem; color: #657099; display: block; }
+        .score-kda { font-weight: 800; font-size: 0.9rem; display: block; }
+        .score-sub { font-size: 0.7rem; color: #657099; display: block; }
+        
+        .dmg-bar-container { width: 80px; height: 14px; background: rgba(255,255,255,0.05); border-radius: 2px; position: relative; overflow: hidden; }
+        .dmg-bar-fill { height: 100%; background: #ff4b4b; opacity: 0.7; }
+        .dmg-bar-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; font-size: 0.65rem; font-weight: 800; text-align: center; line-height: 14px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+        .team-stats-summary { display: flex; gap: 20px; margin-top: 10px; font-size: 0.75rem; color: #9aa3c7; font-weight: 700; }
+        .t-stat { display: flex; align-items: center; gap: 5px; }
         
         .loading-modal { text-align: center; padding: 50px; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #f4c874; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
@@ -1163,47 +1172,76 @@ app.get('/player/:slug', async (req, res) => {
           const body = document.getElementById('modalBody');
           const duration = Math.floor(data.gameDuration / 60) + 'm ' + (data.gameDuration % 60) + 's';
           
-          let html = '<h2 style="margin-bottom:5px;">Detalles de la Partida</h2>';
-          html += '<div style="color:#657099; font-size:0.8rem; margin-bottom:20px;">' + data.gameMode + ' • ' + duration + '</div>';
+          let html = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">';
+          html += '<div><h2 style="margin:0;">Detalles de la Partida</h2><div style="color:#657099; font-size:0.8rem;">' + data.gameMode + ' • ' + duration + '</div></div>';
+          html += '</div>';
 
           // Grupos por equipos
           const blueTeam = data.participants.filter(p => p.teamId === 100);
           const redTeam = data.participants.filter(p => p.teamId === 200);
+          
+          const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
 
-          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100]);
+          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg);
           html += '<div style="height:30px;"></div>';
-          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200]);
+          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg);
 
           body.innerHTML = html;
         }
 
-        function renderTeamTable(title, players, teamClass, teamData) {
+        const SPELL_MAP = {
+          1: 'SummonerBoost', 3: 'SummonerExhaust', 4: 'SummonerFlash', 6: 'SummonerHaste',
+          7: 'SummonerHeal', 11: 'SummonerSmite', 12: 'SummonerTeleport', 13: 'SummonerMana',
+          14: 'SummonerDot', 21: 'SummonerBarrier', 32: 'SummonerSnowball'
+        };
+
+        function renderTeamTable(title, players, teamClass, teamData, maxDmg) {
           const result = players[0].win ? 'VICTORIA' : 'DERROTA';
           const kills = players.reduce((sum, p) => sum + p.kills, 0);
           const deaths = players.reduce((sum, p) => sum + p.deaths, 0);
           const assists = players.reduce((sum, p) => sum + p.assists, 0);
+          const gold = (players.reduce((sum, p) => sum + p.goldEarned, 0) / 1000).toFixed(1);
 
           let html = '<div class="team-header ' + teamClass + '">';
           html += '<span>' + title + ' (' + result + ')</span>';
-          html += '<span style="margin-left:auto; font-size:0.9rem; opacity:0.8;">' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
-          html += '</div>';
+          html += '<div style="margin-left:auto; display:flex; gap:15px; align-items:center;">';
+          html += '<span style="font-size:0.9rem;">' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
+          html += '<span style="font-size:0.8rem; opacity:0.7;">💰 ' + gold + 'k</span>';
+          if (teamData && teamData.objectives) {
+            html += '<span style="font-size:0.8rem; opacity:0.7;">🗼 ' + (teamData.objectives.tower?.kills || 0) + '</span>';
+            html += '<span style="font-size:0.8rem; opacity:0.7;">🐉 ' + (teamData.objectives.dragon?.kills || 0) + '</span>';
+          }
+          html += '</div></div>';
 
           html += '<table class="scoreboard-table">';
-          html += '<thead><tr><th>Campeón</th><th>KDA</th><th>Daño</th><th>Visión</th><th>CS</th><th>Oro</th><th>Objetos</th></tr></thead>';
+          html += '<thead><tr><th>Jugador</th><th>KDA</th><th>Daño</th><th>Visión</th><th>CS</th><th>Oro</th><th>Objetos</th></tr></thead>';
           html += '<tbody>';
 
           players.forEach(p => {
             const kda = p.deaths === 0 ? 'Perfect' : ((p.kills + p.assists) / p.deaths).toFixed(2);
+            const dmgPct = (p.totalDamageDealtToChampions / maxDmg) * 100;
+            
             html += '<tr>';
             html += '<td><div class="player-cell">';
             html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png" class="player-champ-icon">';
-            html += '<div style="display:flex; flex-direction:column;"><span class="player-name-link">' + p.gameName + '</span><span style="font-size:0.7rem; color:#657099;">Nvl ' + p.champLevel + '</span></div>';
+            
+            // Hechizos y Runas
+            html += '<div class="spells-runes">';
+            html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/spell/' + (SPELL_MAP[p.summoner1Id] || 'SummonerFlash') + '.png" class="spell-icon">';
+            html += '<img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/spell/' + (SPELL_MAP[p.summoner2Id] || 'SummonerDot') + '.png" class="spell-icon">';
+            html += '</div>';
+
+            html += '<div style="display:flex; flex-direction:column; margin-left:2px;"><span class="player-name-link">' + p.gameName + '</span><span style="font-size:0.65rem; color:#657099;">Nivel ' + p.champLevel + '</span></div>';
             html += '</div></td>';
             
             html += '<td><span class="score-kda">' + p.kills + ' / ' + p.deaths + ' / ' + p.assists + '</span><span class="score-sub">' + kda + ' KDA</span></td>';
-            html += '<td><span class="score-kda">' + p.totalDamageDealtToChampions.toLocaleString() + '</span></td>';
+            
+            html += '<td>';
+            html += '<div class="dmg-bar-container"><div class="dmg-bar-fill" style="width:' + dmgPct + '%"></div><div class="dmg-bar-text">' + p.totalDamageDealtToChampions.toLocaleString() + '</div></div>';
+            html += '</td>';
+
             html += '<td><span class="score-kda">' + p.visionScore + '</span></td>';
-            html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span></td>';
+            html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + (p.totalMinionsKilled / (data.gameDuration/60)).toFixed(1) + '/m</span></td>';
             html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
             
             // Items
