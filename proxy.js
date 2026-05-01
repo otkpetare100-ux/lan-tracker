@@ -844,6 +844,28 @@ app.get('/player/:slug', async (req, res) => {
 
         .watermark { display: none; }
         .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); opacity: 0.35; letter-spacing: 5px; font-weight: 900; font-size: 0.72rem; text-align: center; }
+
+        /* Estilos del Historial de Partidas */
+        .history-container { width: 100%; max-width: 800px; margin: 0 auto 50px auto; display: flex; flex-direction: column; gap: 10px; padding: 0 20px; animation: fadeSide 0.6s ease forwards 0.4s; opacity: 0; }
+        .history-title { font-family: 'Cinzel', serif; font-size: 1.4rem; color: #f2f4ff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
+        .match-card { background: rgba(13, 17, 28, 0.6); backdrop-filter: blur(10px); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; }
+        .match-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+        .match-header { display: flex; align-items: center; padding: 12px 20px; gap: 20px; }
+        .match-champ-img { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+        .match-info-main { flex: 1; display: flex; flex-direction: column; }
+        .match-result { font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .match-kda { font-size: 1.1rem; font-weight: 700; color: #f2f4ff; margin-top: 2px; }
+        .kda-ratio { font-size: 0.8rem; color: #9aa3c7; font-weight: 400; }
+        .match-info-sub { display: flex; flex-direction: column; align-items: flex-end; color: #9aa3c7; font-size: 0.8rem; font-weight: 600; gap: 2px; }
+        
+        .match-details { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); }
+        .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px 20px; }
+        .detail-item { display: flex; flex-direction: column; }
+        .d-label { font-size: 0.65rem; color: #657099; text-transform: uppercase; font-weight: 800; }
+        .d-val { font-size: 0.95rem; color: #f2f4ff; font-weight: 700; }
+        
+        /* Contenedor principal de layout vertical */
+        .page-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
       </style>
     </head>
     <body>
@@ -879,8 +901,9 @@ app.get('/player/:slug', async (req, res) => {
       </script>
       ` : ''}
 
-      <div class="layout-wrapper">
-        <!-- PANEL IZQUIERDO -->
+      <div class="page-container">
+        <div class="layout-wrapper">
+          <!-- PANEL IZQUIERDO -->
         <div class="side-panel panel-left">
           <div class="panel-title">Campeones</div>
           <div class="panel-subtitle">Top Maestría</div>
@@ -998,7 +1021,64 @@ app.get('/player/:slug', async (req, res) => {
             <span class="s-val">${kpAvg}%</span>
           </div>
         </div>
+      </div> <!-- fin layout-wrapper -->
+
+      <!-- HISTORIAL DE PARTIDAS -->
+      ${acc.matches && acc.matches.length > 0 ? `
+      <div class="history-container">
+        <h2 class="history-title">Últimas Partidas</h2>
+        ${acc.matches.map((m, i) => {
+          const isWin = m.win;
+          const cardColor = isWin ? 'rgba(0, 255, 136, 0.05)' : 'rgba(255, 68, 68, 0.05)';
+          const borderColor = isWin ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 68, 68, 0.3)';
+          const resultText = isWin ? 'VICTORIA' : 'DERROTA';
+          const resultColor = isWin ? '#00ff88' : '#ff4444';
+          const kda = m.deaths === 0 ? 'Perfecto' : ((m.kills + m.assists) / m.deaths).toFixed(2);
+          
+          return `
+          <div class="match-card" style="background: ${cardColor}; border-left: 4px solid ${borderColor};" onclick="toggleMatch(${i})">
+            <div class="match-header">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}" class="match-champ-img">
+              <div class="match-info-main">
+                <span class="match-result" style="color: ${resultColor}">${resultText}</span>
+                <span class="match-kda">${m.kills} / ${m.deaths} / ${m.assists} <span class="kda-ratio">(${kda} KDA)</span></span>
+              </div>
+              <div class="match-info-sub">
+                <span>${m.cs} CS</span>
+                <span>${Math.floor(m.gameDuration / 60)}m ${m.gameDuration % 60}s</span>
+                <span style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px;">VER MÁS ▼</span>
+              </div>
+            </div>
+            <div class="match-details" id="match-detail-${i}">
+              <div class="detail-grid">
+                <div class="detail-item"><span class="d-label">Daño a Campeones</span><span class="d-val">${m.damage.toLocaleString()}</span></div>
+                <div class="detail-item"><span class="d-label">Daño a Objetivos</span><span class="d-val">${m.dmgObj.toLocaleString()}</span></div>
+                <div class="detail-item"><span class="d-label">Oro</span><span class="d-val">${m.gold.toLocaleString()}</span></div>
+                <div class="detail-item"><span class="d-label">Puntuación Visión</span><span class="d-val">${m.vision}</span></div>
+                <div class="detail-item"><span class="d-label">Participación Kills</span><span class="d-val">${m.kp}%</span></div>
+                <div class="detail-item"><span class="d-label">Posición</span><span class="d-val">${m.position || '—'}</span></div>
+              </div>
+            </div>
+          </div>
+          `;
+        }).join('')}
       </div>
+      ` : ''}
+      </div> <!-- fin page-container -->
+
+      <script>
+        function toggleMatch(index) {
+          const el = document.getElementById('match-detail-' + index);
+          if (el.style.maxHeight && el.style.maxHeight !== '0px') {
+            el.style.maxHeight = '0px';
+            el.style.paddingTop = '0px';
+            el.style.opacity = '0';
+          } else {
+            el.style.maxHeight = '200px';
+            el.style.opacity = '1';
+          }
+        }
+      </script>
     </body>
     </html>
     `;
