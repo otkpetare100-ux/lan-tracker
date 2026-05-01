@@ -75,7 +75,7 @@ function initBot(db) {
                 .addFields(
           { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
           { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
-          { name: '🎮 Diversión y Apuestas', value: '`!apostar [cant] [gana/pierde] [Nombre#TAG]` - Apuesta en una partida en vivo.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!desencantar` - Recicla repetidos.\n`!reroll [rareza]` - Fusiona 3 repetidos.\n`!shame` - El muro de la vergüenza.' }
+          { name: '🎮 Diversión y Apuestas', value: '`!apostar [cant] [gana/pierde] [Nombre#TAG]` - Apuesta en una partida en vivo.\n`!ludopata [@usuario]` - Mira estadísticas de apuestas.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!desencantar` - Recicla repetidos.\n`!reroll [rareza]` - Fusiona 3 repetidos.\n`!shame` - El muro de la vergüenza.' }
         )
         .setColor(0x576bce)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
@@ -247,6 +247,41 @@ function initBot(db) {
         .setTitle('💰 Los Más Ricos de la Perrera')
         .setDescription(list || 'Nadie tiene monedas aún.')
         .setColor(0xf1c40f);
+
+      msg.reply({ embeds: [embed] });
+    }
+
+    if (command === 'ludopata' || command === 'bets') {
+      const targetUser = msg.mentions.users.first() || msg.author;
+      const bets = await db.collection('bets').find({ discordId: targetUser.id }).toArray();
+
+      if (bets.length === 0) {
+        return msg.reply(`${targetUser.id === msg.author.id ? 'No has' : 'Este usuario no ha'} realizado ninguna apuesta todavía. 🎰`);
+      }
+
+      const wins = bets.filter(b => b.status === 'won').length;
+      const losses = bets.filter(b => b.status === 'lost').length;
+      const total = wins + losses;
+      const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
+      
+      // Calcular balance neto
+      let netProfit = 0;
+      bets.forEach(b => {
+        if (b.status === 'won') netProfit += Math.floor(b.amount * (b.multiplier || 2)) - b.amount;
+        if (b.status === 'lost') netProfit -= b.amount;
+      });
+
+      const embed = new EmbedBuilder()
+        .setTitle(`🎰 Perfil de Ludópata: ${targetUser.username}`)
+        .setThumbnail(targetUser.displayAvatarURL())
+        .addFields(
+          { name: '🏆 Ganadas', value: `${wins}`, inline: true },
+          { name: '💀 Perdidas', value: `${losses}`, inline: true },
+          { name: '📊 Win Rate', value: `${winRate}%`, inline: true },
+          { name: '💰 Balance Neto', value: `${netProfit > 0 ? '+' : ''}${netProfit} 💰`, inline: false }
+        )
+        .setColor(netProfit >= 0 ? 0x2ecc71 : 0xe74c3c)
+        .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
 
       msg.reply({ embeds: [embed] });
     }
