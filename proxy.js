@@ -123,6 +123,7 @@ async function connectDB() {
           } else {
             // Si estaba en cache y ya no (404), es que terminó la partida
             if (liveCache.has(acc.puuid)) {
+              liveCache.delete(acc.puuid); // Borrar inmediatamente para evitar duplicados en escaneos paralelos
               console.log(`[Live] Partida finalizada para ${acc.gameName}`);
               await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "" } });
               settleBets(acc); // Iniciar liquidación
@@ -141,11 +142,10 @@ async function connectDB() {
 }
 // Función para liquidar apuestas
 async function settleBets(acc) {
-  const clearCache = () => liveCache.delete(acc.puuid);
   try {
-    // 1. Esperar a que la API actualice el historial (100 seg para asegurar LP)
+    // 1. Esperar a que la API actualice el historial (120 seg para asegurar LP)
     console.log(`[Bets] Procesando resultados para ${acc.gameName}...`);
-    await new Promise(r => setTimeout(r, 100000));
+    await new Promise(r => setTimeout(r, 120000));
 
     // 2. Obtener el resultado de la última partida
     const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
@@ -167,10 +167,7 @@ async function settleBets(acc) {
     const match = await detailRes.json();
     
     const p = match.info.participants.find(x => x.puuid === acc.puuid);
-    if (!p) {
-      clearCache();
-      return;
-    }
+    if (!p) return;
 
     // --- Funcionalidad: Seguro contra Remake (< 3.5 min) ---
     const isRemake = match.info.gameDuration < 210;
@@ -236,20 +233,27 @@ async function settleBets(acc) {
         const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5');
         
         if (soloQ) {
+          // ACTUALIZACIÓN: Guardar el nuevo rango en la DB
+          await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $set: { soloQ: soloQ } });
+
           const oldLp = acc.soloQ?.leaguePoints || 0;
           const oldTier = acc.soloQ?.tier || 'UNRANKED';
           const oldRank = acc.soloQ?.rank || '';
           
-          // Si el LP o el Rango ha cambiado, ya tenemos el dato nuevo
+          const diff = soloQ.leaguePoints - oldLp;
+          let prefix = diff >= 0 ? '+' : '';
+          
+          // Si el LP o el Rango ha cambiado
           if (soloQ.leaguePoints !== oldLp || soloQ.tier !== oldTier || soloQ.rank !== oldRank) {
-            const diff = soloQ.leaguePoints - oldLp;
-            let prefix = diff >= 0 ? '+' : '';
             lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [${prefix}${diff} LP]`;
             
             if (oldTier !== soloQ.tier || oldRank !== soloQ.rank) {
               lpDisplay = `🚀 **${soloQ.tier} ${soloQ.rank}** (${prefix}${diff} LP)`;
             }
-            break; // Salimos del bucle porque ya tenemos el dato
+            break; 
+          } else if (attempts === maxAttempts - 1) {
+            // Si es el último intento y no varió, mostrar el actual en lugar de "Actualizando..."
+            lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [+0 LP]`;
           }
         }
       } catch (e) {
@@ -258,8 +262,8 @@ async function settleBets(acc) {
 
       attempts++;
       if (attempts < maxAttempts) {
-        console.log(`[Bets] LP no actualizado para ${acc.gameName}. Reintento ${attempts}/\${maxAttempts-1} en 30s...`);
-        await new Promise(r => setTimeout(r, 30000)); // Esperar 30s para el siguiente intento
+        console.log(`[Bets] LP no actualizado para ${acc.gameName}. Reintento ${attempts}/${maxAttempts} en 45s...`);
+        await new Promise(r => setTimeout(r, 45000));
       }
     }
 
