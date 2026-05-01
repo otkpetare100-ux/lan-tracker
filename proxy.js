@@ -1117,10 +1117,24 @@ app.get('/player/:slug', async (req, res) => {
           const dur = Math.floor(m.gameDuration / 60) + 'm ' + (m.gameDuration % 60) + 's';
           const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
-          const itemsHTML = (m.items || [0,0,0,0,0,0,0,0]).map(id => {
+          // Items - Asegurar 8 slots
+          let itmArr = m.items || [];
+          const itemsHTML = (itmArr.length >= 7 ? itmArr : [0,0,0,0,0,0,0,0]).slice(0, 8).map(id => {
             if (!id || id === 0) return '<div class="mv2-item empty"></div>';
             return `<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png">`;
           }).join('');
+          const emptySlots = 8 - (itmArr.length >= 7 ? Math.min(itmArr.length, 8) : 0);
+          const extraItemsHTML = Array(Math.max(0, emptySlots)).fill('<div class="mv2-item empty"></div>').join('');
+
+          // Participants
+          const parts = m.participants || [];
+          const team1 = parts.slice(0, 5);
+          const team2 = parts.slice(5, 10);
+          const renderPart = (p) => {
+            const pImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: p.champion})}`;
+            return `<div class="mv2-p-icon"><img src="${pImg}" title="${p.champion}"></div>`;
+          };
+          const participantsHTML = `<div class="mv2-participants"><div class="mv2-p-col">${team1.map(renderPart).join('')}</div><div class="mv2-p-col">${team2.map(renderPart).join('')}</div></div>`;
 
           return `
           <div class="match-v2-card ${cls}" onclick="openMatchModal('${m.matchId}')">
@@ -1135,7 +1149,8 @@ app.get('/player/:slug', async (req, res) => {
               <div class="mv2-kda-text">${kda}</div>
               <div class="mv2-stats">${m.cs || 0} CS - ${m.kp || 0}% P. asesinat.</div>
             </div>
-            <div class="mv2-items-grid">${itemsHTML}</div>
+            <div class="mv2-items-grid">${itemsHTML}${itmArr.length < 8 ? extraItemsHTML : ''}</div>
+            ${participantsHTML}
             <div class="mv2-meta">
               <div class="mv2-meta-label">Partida</div>
               <div class="mv2-duration">${dur}</div>
