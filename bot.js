@@ -55,6 +55,20 @@ function initBot(db) {
     const args = msg.content.slice(1).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
+    if (command === 'help' || command === 'ayuda') {
+      const embed = new EmbedBuilder()
+        .setTitle('🐾 Guía de Comandos - LAN Tracker')
+        .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
+        .addFields(
+          { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
+          { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
+          { name: '🎮 Diversión y Apuestas', value: '`!apostar [cant] [gana/pierde] [Nombre#TAG]` - Apuesta en una partida en vivo.\n`!gacha` - Gasta 10 coins para conseguir un campeón.\n`!mochila` - Mira tu colección de campeones.\n`!shame` - El muro de la vergüenza (peores Winrates).' }
+        )
+        .setColor(0x576bce)
+        .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
+      return msg.reply({ embeds: [embed] });
+    }
+
     if (command === 'perfil') {
       let slug = args.join(' '); // Soporta nombres con espacios
       let acc = null;
