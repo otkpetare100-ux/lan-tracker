@@ -1888,44 +1888,48 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
   const gold = (players.reduce((sum, p) => sum + p.goldEarned, 0) / 1000).toFixed(1);
 
   let html = '<div class="team-header ' + teamClass + '">';
-  html += '<span>' + title + ' (' + result + ')</span>';
-  html += '<div style="margin-left:auto; display:flex; gap:15px; align-items:center;">';
-  html += '<span style="font-size:0.9rem;">' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
-  html += '<span style="font-size:0.8rem; opacity:0.7;">💰 ' + gold + 'k</span>';
+  html += '<span class="team-title">' + title + ' (' + result + ')</span>';
+  html += '<div class="team-summary-stats">';
+  html += '<span>' + kills + ' / ' + deaths + ' / ' + assists + '</span>';
+  html += '<span class="team-summary-gold">💰 ' + gold + 'k</span>';
   if (teamData && teamData.objectives) {
-    html += '<span style="font-size:0.8rem; opacity:0.7;">🗼 ' + (teamData.objectives.tower?.kills || 0) + '</span>';
-    html += '<span style="font-size:0.8rem; opacity:0.7;">🐉 ' + (teamData.objectives.dragon?.kills || 0) + '</span>';
+    html += '<span>🗼 ' + (teamData.objectives.tower?.kills || 0) + '</span>';
+    html += '<span>🐉 ' + (teamData.objectives.dragon?.kills || 0) + '</span>';
   }
   html += '</div></div>';
 
-  html += '<table class="scoreboard-table">';
+  html += '<div class="table-container"><table class="scoreboard-table">';
   html += '<thead><tr><th>Jugador</th><th>KDA</th><th>Daño</th><th>Visión</th><th>CS</th><th>Oro</th><th>Objetos</th></tr></thead>';
   html += '<tbody>';
 
   players.forEach(p => {
-    const kda = p.deaths === 0 ? 'Perfect' : ((p.kills + p.assists) / p.deaths).toFixed(2);
+    const kdaRatio = p.deaths === 0 ? (p.kills + p.assists) : ((p.kills + p.assists) / p.deaths).toFixed(2);
     const dmgPct = (p.totalDamageDealtToChampions / maxDmg) * 100;
+    const durationMin = gameDuration / 60 || 1;
+    const csPerMin = (p.totalMinionsKilled / durationMin).toFixed(1);
     
     html += '<tr>';
     html += '<td><div class="player-cell">';
+    html += '<div class="champ-icon-wrapper">';
     html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.championName) + '" class="player-champ-icon">';
+    html += '</div>';
     
     html += '<div class="spells-runes">';
     html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/spell/' + (SPELL_MAP[p.summoner1Id] || 'SummonerFlash') + '.png" class="spell-icon">';
     html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/spell/' + (SPELL_MAP[p.summoner2Id] || 'SummonerDot') + '.png" class="spell-icon">';
     html += '</div>';
 
-    html += '<div style="display:flex; flex-direction:column; margin-left:2px;"><span class="player-name-link">' + p.gameName + '</span><span style="font-size:0.65rem; color:#657099;">Nivel ' + p.champLevel + '</span></div>';
+    html += '<div class="player-info-meta"><span class="player-name-link">' + p.gameName + '</span><span class="player-level-text">Nivel ' + p.champLevel + '</span></div>';
     html += '</div></td>';
     
-    html += '<td><span class="score-kda">' + p.kills + ' / ' + p.deaths + ' / ' + p.assists + '</span><span class="score-sub">' + kda + ' KDA</span></td>';
+    html += '<td><div class="kda-block"><span class="score-kda">' + p.kills + ' / ' + p.deaths + ' / ' + p.assists + '</span><span class="score-sub">' + kdaRatio + ' KDA</span></div></td>';
     
     html += '<td>';
     html += '<div class="dmg-bar-container"><div class="dmg-bar-fill" style="width:' + dmgPct + '%"></div><div class="dmg-bar-text">' + p.totalDamageDealtToChampions.toLocaleString() + '</div></div>';
     html += '</td>';
 
     html += '<td><span class="score-kda">' + p.visionScore + '</span></td>';
-    html += '<td><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + (p.totalMinionsKilled / (gameDuration/60)).toFixed(1) + '/m</span></td>';
+    html += '<td><div class="cs-block"><span class="score-kda">' + p.totalMinionsKilled + '</span><span class="score-sub">' + csPerMin + '/m</span></div></td>';
     html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
     
     html += '<td><div class="item-list">';
