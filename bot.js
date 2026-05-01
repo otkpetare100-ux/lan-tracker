@@ -40,7 +40,7 @@ function getRankScore(acc) {
 
 function initBot(db) {
   if (!process.env.DISCORD_TOKEN) {
-    console.warn('Ã¢Å¡Â Ã¯Â¸Â No se detectó DISCORD_TOKEN. El bot no iniciará.');
+    console.warn('⚠️ No se detectó DISCORD_TOKEN. El bot no iniciará.');
     return;
   }
 
@@ -128,7 +128,7 @@ function initBot(db) {
       if (!slug) {
         // Intentar buscar vinculación automática
         acc = await db.collection('accounts').findOne({ discordId: msg.author.id });
-        if (!acc) return msg.reply('Ã¢ÂÅ’ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.');
+        if (!acc) return msg.reply('❌ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.');
       } else {
         acc = await findAccountBySlug(slug);
       }
@@ -142,7 +142,7 @@ function initBot(db) {
         .addFields(
           { name: 'Rango SoloQ', value: acc.soloQ ? `${acc.soloQ.tier} ${acc.soloQ.rank} (${acc.soloQ.leaguePoints} LP)` : 'Unranked', inline: true },
           { name: 'Winrate', value: acc.soloQ ? `${Math.round((acc.soloQ.wins / (acc.soloQ.wins + acc.soloQ.losses)) * 100)}%` : 'N/A', inline: true },
-          { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `Ã¢Ââ€žÃ¯Â¸Â ${Math.abs(acc.streak)} Loss` : '—', inline: true }
+          { name: 'Racha', value: acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)} Loss` : '—', inline: true }
         )
         .setFooter({ text: 'LAN Tracker Bot' });
 
@@ -156,7 +156,7 @@ function initBot(db) {
       const list = sorted.map((a, i) => `${i+1}. **${a.gameName}** - ${a.soloQ?.tier || 'Unranked'} ${a.soloQ?.rank || ''}`).join('\n');
       
       const embed = new EmbedBuilder()
-        .setTitle('Ã°Å¸Ââ€  Top 10 de La Perrera')
+        .setTitle('🏆 Top 10 de La Perrera')
         .setDescription(list || 'No hay jugadores registrados.')
         .setColor(0xf4c874);
 
@@ -182,7 +182,7 @@ function initBot(db) {
       const slug = args.join(' '); // Soporta nombres con espacios
       if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
       const acc = await findAccountBySlug(slug);
-      if (!acc) return msg.reply('âŒ No encontré esa cuenta en el dashboard.');
+      if (!acc) return msg.reply('❌ No encontré esa cuenta en el dashboard.');
 
       const res = await db.collection('accounts').updateOne(
         { puuid: acc.puuid },
@@ -192,7 +192,7 @@ function initBot(db) {
       if (res.modifiedCount > 0) {
         msg.reply(`✅ ¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
       } else {
-        msg.reply('Ã¢ÂÅ’ No encontré esa cuenta en el dashboard.');
+        msg.reply('❌ No encontré esa cuenta en el dashboard.');
       }
     }
 
@@ -213,7 +213,7 @@ function initBot(db) {
           const remaining = waitTime - diff;
           const hours = Math.floor(remaining / (1000 * 60 * 60));
           const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-          return msg.reply(`Ã¢ÂÂ³ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
+          return msg.reply(`⌛ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
         }
       }
 
@@ -252,7 +252,7 @@ function initBot(db) {
     }
 
     if (command === 'apostar') {
-      const isAnonymous = true;
+      const isAnonymous = args.some(arg => arg.toLowerCase() === 'anonimo');
       const filteredArgs = args.filter(arg => arg.toLowerCase() !== 'anonimo');
       
       const amount = parseInt(filteredArgs[0]);
@@ -260,30 +260,60 @@ function initBot(db) {
       const targetSlug = filteredArgs.slice(2).join(' ');
 
       if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
-        return msg.reply('Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');
+        return msg.reply('❌ Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');
       }
 
-      const targetAcc = await findAccountBySlug(targetSlug); if (!targetAcc) return msg.reply('❌ Ese jugador no esta registrado en el dashboard.'); const existingBet = await db.collection('bets').findOne({ discordId: msg.author.id, targetPuuid: targetAcc.puuid, status: 'open' }); if (existingBet) return msg.reply('⚠️ Ya tienes una apuesta activa por este jugador en esta partida.');
-      if (!targetAcc) return msg.reply('Ã¢ÂÅ’ Ese jugador no está registrado en el dashboard.');
+      const targetAcc = await findAccountBySlug(targetSlug);
+      if (!targetAcc) return msg.reply('❌ Ese jugador no está registrado en el dashboard.');
+
+      // 1. Calcular multiplicador dinámico basado en Winrate
+      let multiplier = 2.0;
+      if (targetAcc.soloQ && (targetAcc.soloQ.wins + targetAcc.soloQ.losses) > 0) {
+        const totalGames = targetAcc.soloQ.wins + targetAcc.soloQ.losses;
+        const wr = (targetAcc.soloQ.wins / totalGames) * 100;
+        if (wr > 60) multiplier = 1.5; // Favorito
+        else if (wr < 45) multiplier = 3.0; // Underdog
+      }
+
+      // 2. Validación de tiempo de apuesta (5 min desde el aviso en Discord)
+      if (targetAcc.liveGameStartedAt) {
+        const now = new Date();
+        const startedAt = new Date(targetAcc.liveGameStartedAt);
+        const diffMs = now - startedAt;
+        const diffMins = Math.floor(diffMs / 60000);
+
+        if (diffMins >= 5) {
+          return msg.reply(`❌ **Demasiado tarde.** El aviso de partida de **${targetAcc.gameName}** salió hace ${diffMins} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
+        }
+      } else {
+        return msg.reply(`❌ No detecto que **${targetAcc.gameName}** esté en una partida activa ahora mismo.`);
+      }
+
+      const existingBet = await db.collection('bets').findOne({ discordId: msg.author.id, targetPuuid: targetAcc.puuid, status: 'open' });
+      if (existingBet) return msg.reply('⚠️ Ya tienes una apuesta activa por este jugador en esta partida.');
 
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
-      if (!user || user.coins < amount) return msg.reply('Ã¢ÂÅ’ No tienes suficientes Naafiri Coins.');
+      if (!user || user.coins < amount) return msg.reply('❌ No tienes suficientes Naafiri Coins.');
 
       // Guardar apuesta
-      msg.delete().catch(() => {}); await db.collection('bets').insertOne({
+      if (isAnonymous) msg.delete().catch(() => {});
+      
+      await db.collection('bets').insertOne({
         discordId: msg.author.id,
         amount,
         choice,
         targetPuuid: targetAcc.puuid,
         targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
         status: 'open',
-        anonymous: true,
+        anonymous: isAnonymous,
         multiplier: multiplier,
         date: new Date()
       });
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ¡La elección se revelará al final! \uD83E\uDD21`);
+      
+      const revealMsg = isAnonymous ? '¡La elección se revelará al final!' : `has apostado a que **${choice}**`;
+      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ${revealMsg} 🤡`);
     }
 
     // --- SISTEMA DE GACHAPON ---
@@ -308,7 +338,7 @@ function initBot(db) {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
       if (!userEco || userEco.coins < COST) {
-        return msg.reply(`Ã¢ÂÅ’ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
+        return msg.reply(`❌ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
       }
 
       // Sistema de Pesos para Probabilidades
@@ -388,7 +418,7 @@ function initBot(db) {
       }
 
       const items = Object.values(grouped).map(item => {
-        const icon = item.rarity === 'Legendario' ? 'Ã¢Â­Â' : item.rarity === 'Épico' ? '💜' : item.rarity === 'Raro' ? '🔹' : '⚪';
+        const icon = item.rarity === 'Legendario' ? '⭐' : item.rarity === 'Épico' ? '💜' : item.rarity === 'Raro' ? '🔹' : '⚪';
         const qty = item.count > 1 ? ` **x${item.count}**` : '';
         return `${icon} **${item.name}**${qty} (${item.rarity})`;
       }).join('\n');
@@ -632,7 +662,7 @@ function initBot(db) {
         const message = args.join(' ');
         if (!message) return msg.reply('Uso: `!admin_anuncio [mensaje]`');
         const embed = new EmbedBuilder()
-          .setTitle('ðŸ“¢ ANUNCIO OFICIAL')
+          .setTitle('📢 ANUNCIO OFICIAL')
           .setDescription(message)
           .setColor(0xf4c874)
           .setTimestamp()
@@ -655,10 +685,10 @@ function initBot(db) {
         const embed = new EmbedBuilder()
           .setTitle('📊 Estadísticas Globales — Admin')
           .addFields(
-            { name: 'ðŸ‘¥ Usuarios registrados', value: `${totalUsers}`, inline: true },
+            { name: '👥 Usuarios registrados', value: `${totalUsers}`, inline: true },
             { name: '💰 Coins en circulación', value: `${allCoins[0]?.total || 0}`, inline: true },
             { name: '🎰 Items en inventarios', value: `${totalItems[0]?.total || 0}`, inline: true },
-            { name: 'Ã°Å¸Ââ€  Usuario más rico', value: richest[0] ? `${richest[0].discordTag} — ${richest[0].coins} coins` : 'N/A', inline: false }
+            { name: '🏆 Usuario más rico', value: richest[0] ? `${richest[0].discordTag} — ${richest[0].coins} coins` : 'N/A', inline: false }
           )
           .setColor(0x576bce);
         return msg.reply({ embeds: [embed] });
@@ -673,7 +703,7 @@ function initBot(db) {
           gameName: { $regex: new RegExp(`^${name}$`, 'i') },
           tagLine:  { $regex: new RegExp(`^${tag}$`, 'i') }
         });
-        if (!acc) return msg.reply('Ã¢ÂÅ’ Jugador no encontrado en el dashboard.');
+        if (!acc) return msg.reply('❌ Jugador no encontrado en el dashboard.');
         const openBets = await db.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
         if (!openBets.length) return msg.reply('No hay apuestas abiertas para ese jugador.');
         for (const bet of openBets) {
@@ -692,7 +722,7 @@ function initBot(db) {
       // !admin_resetAll CONFIRMAR
       if (command === 'admin_resetall') {
         if (args[0] !== 'CONFIRMAR') {
-          return msg.reply('Ã¢Å¡Â Ã¯Â¸Â Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR`');
+          return msg.reply('⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR`');
         }
         const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
         return msg.reply(`✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
@@ -787,8 +817,8 @@ async function sendDailyMotivation(db) {
   if (!channel) return;
 
   const embed = new EmbedBuilder()
-    .setTitle('Ã¢Ëœâ‚¬Ã¯Â¸Â ¡Buenos días, Perrera!')
-    .setDescription('¿Quién se va a sacar la primera victoria hoy? Ã¢Å¡â€Ã¯Â¸Â\nUsen `!diario` para sus monedas.')
+    .setTitle('☀️ ¡Buenos días, Perrera!')
+    .setDescription('¿Quién se va a sacar la primera victoria hoy? ⚔️\nUsen `!diario` para sus monedas.')
     .setColor(0xf4c874);
 
   channel.send({ embeds: [embed] });
@@ -837,7 +867,7 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
       }).join('\n')}`
     : 'No hubo ganadores esta vez.';
 
-  const emoji = result === 'gana' ? '\uD83C\uDFC6' : '💀';
+  const emoji = result === 'gana' ? '🏆' : '💀';
   const actionText = result === 'gana' ? 'GANADO' : 'PERDIDO';
   
   const lpDisplay = lpData ? `\n**Puntos:** ${lpData}` : '\n**Puntos:** *Actualizando...*';
@@ -877,13 +907,12 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
 
   const embed = new EmbedBuilder()
     .setTitle('✨ ¡RETO COMPLETADO! ✨')
-    .setDescription(`¡Increíble! **${targetName}** ha superado los siguientes retos en su última partida:\n\n${challenges.map(c => `Ã°Å¸â€Â¹ ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** 💰`)
+    .setDescription(`¡Increíble! **${targetName}** ha superado los siguientes retos en su última partida:\n\n${challenges.map(c => `🔹 ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** 💰`)
     .setColor(0xf4c874)
-    .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png') // Icono de Master para darle prestigio
+    .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png')
     .setTimestamp();
 
   channel.send({ embeds: [embed] });
 }
 
 module.exports = { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete };
-

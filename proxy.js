@@ -124,6 +124,7 @@ async function connectDB() {
             // Si estaba en cache y ya no (404), es que terminó la partida
             if (liveCache.has(acc.puuid)) {
               console.log(`[Live] Partida finalizada para ${acc.gameName}`);
+              await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "" } });
               settleBets(acc); // Iniciar liquidación
             }
           }
