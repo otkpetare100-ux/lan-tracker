@@ -1,3 +1,4 @@
+const liveCache = new Set();
 const express    = require('express');
 const fetch      = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 const path       = require('path');
@@ -79,7 +80,7 @@ async function connectDB() {
     }, 60 * 1000);
 
     // Escaneo de Partidas en Vivo cada 1 min
-    const liveCache = new Set();
+    
     setInterval(async () => {
       try {
         const accounts = await db.collection('accounts').find({}).toArray();
@@ -121,7 +122,6 @@ async function connectDB() {
             // Si estaba en cache y ya no (404), es que terminó la partida
             if (liveCache.has(acc.puuid)) {
               console.log(`[Live] Partida finalizada para ${acc.gameName}`);
-              liveCache.delete(acc.puuid);
               settleBets(acc); // Iniciar liquidación
             }
           }
@@ -138,6 +138,7 @@ async function connectDB() {
 }
 // Función para liquidar apuestas
 async function settleBets(acc) {
+  const clearCache = () => liveCache.delete(acc.puuid);
   try {
     // 1. Esperar a que la API actualice el historial (100 seg para asegurar LP)
     console.log(`[Bets] Procesando resultados para ${acc.gameName}...`);
