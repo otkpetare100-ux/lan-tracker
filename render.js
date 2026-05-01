@@ -193,7 +193,6 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
         '<span class="mv2-duration-flat">' + dur + '</span>' +
         '<span class="mv2-time-flat">' + time + '</span>' +
       '</div>' +
-      '<div class="mv2-expand-icon">📈</div>' +
     '</div>';
   }).join('') + '</div>';
 }
