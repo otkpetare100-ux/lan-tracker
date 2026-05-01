@@ -858,28 +858,30 @@ app.get('/player/:slug', async (req, res) => {
 
         /* --- Historial de Partidas V2 --- */
         .match-v2-card {
-            display: grid; grid-template-columns: 4px 60px 120px 150px 100px 1fr 120px 40px;
+            display: grid; grid-template-columns: 4px 64px 100px 180px 110px 1fr 40px;
             align-items: center; background: rgba(16, 20, 34, 0.7); border-radius: 8px;
-            overflow: hidden; height: 70px; transition: all 0.2s ease; cursor: pointer;
+            overflow: hidden; height: 75px; transition: all 0.2s ease; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.03); position: relative; margin-bottom: 8px;
             text-align: left;
         }
         .match-v2-card:hover { background: rgba(23, 28, 48, 0.9); transform: translateX(4px); border-color: rgba(255,255,255,0.1); }
         .mv2-win { border-left: 4px solid #28ab66; }
         .mv2-loss { border-left: 4px solid #e84057; }
-        .mv2-champ-block { display: flex; justify-content: center; align-items: center; padding: 0 10px; }
-        .mv2-main-icon { width: 44px; height: 44px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-        .mv2-game-info { display: flex; flex-direction: column; gap: 2px; }
-        .mv2-result { font-weight: 800; font-size: 0.85rem; text-transform: uppercase; }
-        .mv2-queue { font-size: 0.75rem; color: #657099; }
-        .mv2-kda-block { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .mv2-kda-text { font-weight: 700; font-size: 1rem; color: #f2f4ff; }
-        .mv2-stats { font-size: 0.7rem; color: #657099; }
+        .mv2-champ-block { display: flex; justify-content: center; align-items: center; }
+        .mv2-main-icon { width: 48px; height: 48px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .mv2-info-block { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+        .mv2-result { font-weight: 900; font-size: 0.85rem; letter-spacing: 0.5px; }
+        .mv2-queue { font-size: 0.72rem; color: #657099; }
+        .mv2-kda-block { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding-left: 10px; }
+        .mv2-kda-text { font-weight: 900; font-size: 1.15rem; color: #f2f4ff; letter-spacing: -0.5px; }
+        .mv2-stats { font-size: 0.72rem; color: #657099; }
         .mv2-items-grid { display: grid; grid-template-columns: repeat(4, 24px); grid-template-rows: repeat(2, 24px); gap: 2px; }
         .mv2-item { width: 24px; height: 24px; border-radius: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
         .mv2-item.empty { background: rgba(255,255,255,0.03); }
-        .mv2-meta { text-align: right; font-size: 0.7rem; color: #657099; display: flex; flex-direction: column; gap: 2px; padding-right: 10px; }
-        .mv2-expand-icon { display: flex; justify-content: center; align-items: center; color: #657099; font-size: 0.9rem; opacity: 0.5; }
+        .mv2-meta { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #657099; font-size: 0.72rem; }
+        .mv2-meta-label { opacity: 0.6; }
+        .mv2-duration { font-weight: 600; }
+        .mv2-expand-icon { display: flex; justify-content: center; align-items: center; color: #657099; font-size: 1rem; opacity: 0.5; padding-right: 10px; }
         .text-win { color: #28ab66; }
         .text-loss { color: #e84057; }
 
@@ -1115,7 +1117,7 @@ app.get('/player/:slug', async (req, res) => {
           const dur = Math.floor(m.gameDuration / 60) + 'm ' + (m.gameDuration % 60) + 's';
           const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
-          const itemsHTML = (m.items || [0,0,0,0,0,0,0]).map(id => {
+          const itemsHTML = (m.items || [0,0,0,0,0,0,0,0]).map(id => {
             if (!id || id === 0) return '<div class="mv2-item empty"></div>';
             return `<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png">`;
           }).join('');
@@ -1125,8 +1127,8 @@ app.get('/player/:slug', async (req, res) => {
             <div class="mv2-champ-block">
               <img class="mv2-main-icon" src="${champImg}">
             </div>
-            <div class="mv2-game-info">
-              <div class="mv2-result ${isWin ? 'text-win' : 'text-loss'}">${isWin ? 'Victoria' : 'Derrota'}</div>
+            <div class="mv2-info-block">
+              <div class="mv2-result ${isWin ? 'text-win' : 'text-loss'}">${isWin ? 'VICTORIA' : 'DERROTA'}</div>
               <div class="mv2-queue">SoloQ</div>
             </div>
             <div class="mv2-kda-block">
@@ -1135,8 +1137,8 @@ app.get('/player/:slug', async (req, res) => {
             </div>
             <div class="mv2-items-grid">${itemsHTML}</div>
             <div class="mv2-meta">
-              <div>Partida</div>
-              <div>${dur}</div>
+              <div class="mv2-meta-label">Partida</div>
+              <div class="mv2-duration">${dur}</div>
             </div>
             <div class="mv2-expand-icon">📈</div>
           </div>

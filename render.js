@@ -145,36 +145,19 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
     // Items
-    const itemsHTML = (m.items || [0,0,0,0,0,0,0]).map(id => {
+    const itemsHTML = (m.items || [0,0,0,0,0,0,0,0]).map(id => {
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
       return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
     }).join('');
 
-    // Participants (2 columns of 5)
-    const parts = m.participants || [];
-    const team1 = parts.slice(0, 5);
-    const team2 = parts.slice(5, 10);
-    
-    const renderPart = (p) => {
-        const isMe = p.puuid === playerPuuid;
-        const pImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.champion);
-        return '<div class="mv2-p-icon ' + (isMe ? 'me' : '') + '">' +
-          '<img src="' + pImg + '" title="' + escapeHTML(p.champion) + '" />' +
-        '</div>';
-    };
 
-    const participantsHTML = '<div class="mv2-participants">' +
-      '<div class="mv2-p-col">' + team1.map(renderPart).join('') + '</div>' +
-      '<div class="mv2-p-col">' + team2.map(renderPart).join('') + '</div>' +
-    '</div>';
 
     return '<div class="match-v2-card ' + cls + '" onclick="event.stopPropagation(); openMatchModal(\'' + m.matchId + '\')">' +
-      '<div class="mv2-side-bar"></div>' +
       '<div class="mv2-champ-block">' +
         '<img class="mv2-main-icon" src="' + champImg + '" />' +
       '</div>' +
-      '<div class="mv2-game-info">' +
-        '<div class="mv2-result ' + (isWin ? 'text-win' : 'text-loss') + '">' + (isWin ? 'Victoria' : 'Derrota') + '</div>' +
+      '<div class="mv2-info-block">' +
+        '<div class="mv2-result ' + (isWin ? 'text-win' : 'text-loss') + '">' + (isWin ? 'VICTORIA' : 'DERROTA') + '</div>' +
         '<div class="mv2-queue">' + queue + '</div>' +
       '</div>' +
       '<div class="mv2-kda-block">' +
@@ -182,10 +165,9 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
         '<div class="mv2-stats">' + (m.cs || 0) + ' CS - ' + (m.kp || 0) + '% P. asesinat.</div>' +
       '</div>' +
       '<div class="mv2-items-grid">' + itemsHTML + '</div>' +
-      participantsHTML +
       '<div class="mv2-meta">' +
-        '<div>' + time + '</div>' +
-        '<div>' + dur + '</div>' +
+        '<div class="mv2-meta-label">Partida</div>' +
+        '<div class="mv2-duration">' + dur + '</div>' +
       '</div>' +
       '<div class="mv2-expand-icon">📈</div>' +
     '</div>';
