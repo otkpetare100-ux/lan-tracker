@@ -1335,6 +1335,13 @@ app.get('/player/:slug', async (req, res) => {
             const colors = sorted.map(p => p.teamId === 100 ? 'rgba(0, 180, 255, 0.7)' : 'rgba(255, 75, 75, 0.7)');
             const borders = sorted.map(p => p.teamId === 100 ? '#00b4ff' : '#ff4b4b');
 
+            // Pre-cargar imágenes
+            const images = sorted.map(p => {
+              const img = new Image();
+              img.src = 'https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png';
+              return img;
+            });
+
             new Chart(ctx, {
               type: 'bar',
               data: {
@@ -1350,7 +1357,7 @@ app.get('/player/:slug', async (req, res) => {
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: { padding: { bottom: 30 } },
+                layout: { padding: { bottom: 25 } },
                 scales: {
                   y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#657099', font: { size: 9 } } },
                   x: { display: false }
@@ -1364,21 +1371,16 @@ app.get('/player/:slug', async (req, res) => {
                   if (!xAxis) return;
                   const bottom = xAxis.bottom;
                   
-                  sorted.forEach((p, i) => {
-                    const x = xAxis.getPixelForTick(i);
-                    const img = new Image();
-                    img.src = 'https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png';
-                    if (img.complete) {
-                      const size = 20;
-                      const rx = x - size/2;
-                      const ry = bottom + 8;
-                      // Dibujar icono cuadrado con borde
-                      ctx.drawImage(img, rx, ry, size, size);
-                      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                  images.forEach((img, i) => {
+                    if (img.complete && img.naturalWidth > 0) {
+                      const x = xAxis.getPixelForTick(i);
+                      const size = 18;
+                      ctx.drawImage(img, x - size/2, bottom + 5, size, size);
+                      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
                       ctx.lineWidth = 1;
-                      ctx.strokeRect(rx, ry, size, size);
+                      ctx.strokeRect(x - size/2, bottom + 5, size, size);
                     } else {
-                      img.onload = () => chart.render();
+                      img.onload = () => chart.draw();
                     }
                   });
                 }
