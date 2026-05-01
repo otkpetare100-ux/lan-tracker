@@ -106,13 +106,10 @@ async function connectDB() {
           
           if (res.ok) {
             const game = await res.json();
-            // Evitar notificar si ya estamos en cache o si es el mismo GameID que el último procesado
             if (!liveCache.has(acc.puuid) && acc.lastLiveGameId !== game.gameId) {
               liveCache.add(acc.puuid);
               
-              // Buscar el campeón del jugador en la partida
               const me = game.participants.find(p => p.puuid === acc.puuid);
-              // Necesitamos el ID interno para el icono (ej: 'Naafiri')
               const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
               const champName = champKey ? champData.data[champKey].name : 'Desconocido';
               
@@ -129,14 +126,18 @@ async function connectDB() {
                 version: DDRAGON_VERSION 
               });
             }
-          } else {
-            // Si estaba en cache y ya no (404), es que terminó la partida
+          } else if (res.status === 404) {
+            // SÓLO si es 404 (Not Found) significa que la partida terminó
             if (liveCache.has(acc.puuid)) {
-              liveCache.delete(acc.puuid); // Borrar inmediatamente para evitar duplicados en escaneos paralelos
+              liveCache.delete(acc.puuid); 
               console.log(`[Live] Partida finalizada para ${acc.gameName}`);
               await db.collection('accounts').updateOne({ puuid: acc.puuid }, { $unset: { liveGameStartedAt: "" } });
-              settleBets(acc); // Iniciar liquidación
+              settleBets(acc);
             }
+          } else if (res.status === 429) {
+            console.warn(`[Live RateLimit] Riot nos está limitando (429). Saltando escaneo para ${acc.gameName}`);
+          } else {
+            console.error(`[Live API Error] Código ${res.status} para ${acc.gameName}. Ignorando.`);
           }
         }
       } catch(e) {
