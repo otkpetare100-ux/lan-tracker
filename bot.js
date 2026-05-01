@@ -504,6 +504,33 @@ function initBot(db) {
         return msg.reply('✅ Notificación de apuesta de prueba enviada.');
       }
 
+      if (command === 'admin_check') {
+        const slug = args.join(' ');
+        if (!slug) return msg.reply('Uso: `!admin_check Nombre#TAG`');
+        
+        const acc = await findAccountBySlug(slug);
+        if (!acc) return msg.reply('❌ Jugador no encontrado en el dashboard.');
+
+        const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
+        const res = await fetch(url, {
+          headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+        });
+
+        if (res.ok) {
+          const game = await res.json();
+          // Obtener nombre del campeón
+          const champRes = await fetch('https://ddragon.leagueoflegends.com/cdn/15.8.1/data/es_MX/champion.json');
+          const champData = await champRes.json();
+          const me = game.participants.find(p => p.puuid === acc.puuid);
+          const champName = me ? (Object.values(champData.data).find(c => c.key == me.championId)?.name || 'Desconocido') : 'Desconocido';
+
+          await notifyLiveGame(acc, { championName: champName });
+          return msg.reply(`✅ **${acc.gameName}** está en partida. Notificación enviada.`);
+        } else {
+          return msg.reply(`💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
+        }
+      }
+
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
