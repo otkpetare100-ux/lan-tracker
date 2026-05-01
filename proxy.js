@@ -1367,7 +1367,7 @@ app.get('/player/:slug', async (req, res) => {
                   sorted.forEach((p, i) => {
                     const x = xAxis.getPixelForTick(i);
                     const img = new Image();
-                    img.src = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/` + p.championName + '.png';
+                    img.src = 'https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/' + p.championName + '.png';
                     if (img.complete) {
                       const size = 20;
                       const rx = x - size/2;
