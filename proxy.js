@@ -691,10 +691,28 @@ app.get('/player/:slug', async (req, res) => {
     }
 
     const getChampImg = (c) => {
-      if (typeof c.image === 'string') return c.image;
-      if (c.image && c.image.full) return c.image.full;
-      if (!c.name) return 'Unknown.png';
-      return c.name.replace(/ /g,'').replace(/'/g,'').replace(/\./g,'') + '.png';
+      let img = '';
+      if (typeof c.image === 'string') img = c.image;
+      else if (c.image && c.image.full) img = c.image.full;
+      else if (c.name) img = c.name.replace(/ /g,'').replace(/'/g,'').replace(/\./g,'');
+      else return 'Unknown.png';
+      
+      if (!img.endsWith('.png')) img += '.png';
+      
+      // Casos especiales de nombres en Data Dragon
+      const specialCases = {
+        'Wukong.png': 'MonkeyKing.png',
+        'RenataGlasc.png': 'Renata.png',
+        'BelVeth.png': 'Belveth.png',
+        'KhaZix.png': 'Khazix.png',
+        'ChoGath.png': 'Chogath.png',
+        'KaiSa.png': 'Kaisa.png',
+        'LeBlanc.png': 'Leblanc.png',
+        'VelKoz.png': 'Velkoz.png',
+        'Nunu&Willump.png': 'Nunu.png'
+      };
+      
+      return specialCases[img] || img;
     };
 
     const html = `
@@ -719,6 +737,27 @@ app.get('/player/:slug', async (req, res) => {
           min-height: 100vh; 
           margin: 0;
           overflow-x: hidden;
+        }
+        .admin-force-btn {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: rgba(0,0,0,0.6);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.5);
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 0.7rem;
+          font-weight: 800;
+          letter-spacing: 1px;
+          cursor: pointer;
+          transition: 0.3s;
+          z-index: 1000;
+        }
+        .admin-force-btn:hover {
+          background: rgba(255,255,255,0.1);
+          color: #fff;
+          border-color: rgba(255,255,255,0.3);
         }
         .layout-wrapper { display: flex; align-items: flex-start; justify-content: center; gap: 30px; width: 100%; max-width: 1200px; padding: 40px 20px; }
         .side-panel { background: rgba(13, 17, 28, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 25px; width: 260px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); opacity: 0; animation: fadeSide 0.6s ease forwards 0.2s; }
@@ -810,6 +849,16 @@ app.get('/player/:slug', async (req, res) => {
     <body>
       <div class="bg-glow"></div>
       
+      <button class="admin-force-btn" onclick="forceUpdate()">⚙️ FORZAR ACTUALIZACIÓN</button>
+      <script>
+        function forceUpdate() {
+          const key = prompt('Introduce la clave de Administrador para forzar la actualización:');
+          if (key) {
+            window.open('/?force_update=${acc.puuid}&admin_key=' + encodeURIComponent(key), '_blank');
+          }
+        }
+      </script>
+
       <div class="layout-wrapper">
         <!-- PANEL IZQUIERDO -->
         <div class="side-panel panel-left">

@@ -120,11 +120,11 @@ function championsFromMatches(matches) {
 }
 
 /* ---- Refresh ---- */
-async function handleRefresh(puuid, silent = false) {
+async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  if (!silent) {
+  if (!silent && !bypassCooldown) {
     const lastRefresh = refreshCooldowns[puuid] || 0;
     const elapsed = Date.now() - lastRefresh;
     if (elapsed < REFRESH_COOLDOWN) {
@@ -339,6 +339,18 @@ accountsGrid.addEventListener('click', async (e) => {
 searchBtn.addEventListener('click', handleSearch);
 searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') handleSearch();
+});
+
+// Forzar actualización desde link público
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const forcePuuid = params.get('force_update');
+  if (forcePuuid) {
+    setTimeout(() => {
+      showToast('⚙️ Forzando actualización...', 'toast-neutral');
+      handleRefresh(forcePuuid, false, true);
+    }, 2500);
+  }
 });
 
 /* ---- Búsqueda y Filtro en Cliente ---- */
