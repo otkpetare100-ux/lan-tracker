@@ -831,13 +831,18 @@ async function notifyLiveGame(acc, gameData) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
+  const tier = acc.soloQ?.tier || 'UNRANKED';
+  const rank = acc.soloQ?.rank || '';
+  const lp = acc.soloQ?.leaguePoints || 0;
+  const rankDisplay = tier === 'UNRANKED' ? 'Unranked' : `${tier} ${rank} (${lp} LP)`;
+
   const playerIcon = `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png`;
   const champIcon = gameData.championId ? `https://ddragon.leagueoflegends.com/cdn/15.8.1/img/champion/${gameData.championId}.png` : null;
 
   const embed = new EmbedBuilder()
     .setAuthor({ name: `${acc.gameName}#${acc.tagLine}`, iconURL: playerIcon })
     .setTitle('PARTIDA EN VIVO')
-    .setDescription(`¡Acaba de entrar en una partida!\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
+    .setDescription(`¡Acaba de entrar en una partida!\n**Rango:** ${rankDisplay}\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
     .setThumbnail(champIcon)
     .setColor(0x576bce)
     .setTimestamp();
