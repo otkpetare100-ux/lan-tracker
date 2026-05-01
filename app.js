@@ -170,12 +170,12 @@ async function handleRefresh(puuid, silent = false) {
       updated.streak       = history.streak;
       updated.mainPosition = history.mainPosition;
       const champs = championsFromMatches(history.matches);
-      if (champs) updated.topChampions = champs;
+      if (champs) updated.recentChampions = champs;
     } else {
       updated.matches      = acc.matches || [];
       updated.streak       = acc.streak  || 0;
       updated.mainPosition = acc.mainPosition || '—';
-      updated.topChampions = acc.topChampions || [];
+      updated.recentChampions = acc.recentChampions || [];
     }
 
     await updateAccount(updated);
@@ -258,7 +258,7 @@ async function handleHistoryToggle(puuid) {
       acc.streak       = history.streak;
       acc.mainPosition = history.mainPosition;
       const champs = championsFromMatches(history.matches);
-      if (champs) acc.topChampions = champs;
+      if (champs) acc.recentChampions = champs;
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
       updateGlobalRef();
       await updateAccount(acc);

@@ -659,10 +659,13 @@ app.get('/player/:slug', async (req, res) => {
     let goldMin = 0;
     let dmgAvg = 0;
     let recentWR = 0;
+    let visionAvg = 0;
+    let csAvg = 0;
+    let objDmgAvg = 0;
     
     if (acc.matches && acc.matches.length > 0) {
       const mCount = acc.matches.length;
-      let k = 0, d = 0, a = 0, kp = 0, gold = 0, dur = 0, dmg = 0, w = 0;
+      let k = 0, d = 0, a = 0, kp = 0, gold = 0, dur = 0, dmg = 0, w = 0, vis = 0, cs = 0, objDmg = 0;
       acc.matches.forEach(m => {
         k += m.kills || 0;
         d += m.deaths || 0;
@@ -671,6 +674,9 @@ app.get('/player/:slug', async (req, res) => {
         gold += m.gold || 0;
         dur += m.gameDuration || 0;
         dmg += m.damage || 0;
+        vis += m.vision || 0;
+        cs += m.cs || 0;
+        objDmg += m.dmgObj || 0;
         if (m.win) w++;
       });
       const dSafe = d === 0 ? 1 : d;
@@ -679,6 +685,9 @@ app.get('/player/:slug', async (req, res) => {
       goldMin = dur > 0 ? Math.round(gold / (dur / 60)) : 0;
       dmgAvg = Math.round(dmg / mCount);
       recentWR = Math.round((w / mCount) * 100);
+      visionAvg = Math.round(vis / mCount);
+      csAvg = dur > 0 ? (cs / (dur / 60)).toFixed(1) : 0;
+      objDmgAvg = Math.round(objDmg / mCount);
     }
 
     const getChampImg = (c) => {
@@ -718,6 +727,7 @@ app.get('/player/:slug', async (req, res) => {
         .panel-right { order: 3; }
         @keyframes fadeSide { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(20px); } }
         .panel-title { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--rank-color); font-weight: 900; margin-bottom: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .panel-subtitle { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: #657099; font-weight: 800; margin: 15px 0 10px 0; text-align: left; }
         .champ-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .champ-row img { width: 45px; height: 45px; border-radius: 12px; border: 1px solid var(--rank-color); object-fit: cover; }
         .c-name { display: block; font-weight: 800; font-size: 0.95rem; }
@@ -803,16 +813,28 @@ app.get('/player/:slug', async (req, res) => {
       <div class="layout-wrapper">
         <!-- PANEL IZQUIERDO -->
         <div class="side-panel panel-left">
-          <div class="panel-title">Top Campeones</div>
+          <div class="panel-title">Campeones</div>
+          <div class="panel-subtitle">Top Maestría</div>
           ${acc.topChampions && acc.topChampions.length > 0 ? acc.topChampions.map(c => `
             <div class="champ-row">
               <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg(c)}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'">
               <div>
                 <span class="c-name">${c.name}</span>
-                <span class="c-pts">${(c.points || 0).toLocaleString()} pts</span>
+                <span class="c-pts">${(c.points || 0).toLocaleString()} pts <span style="color:#f4c874;font-size:0.65rem;">(Lvl ${c.level || 0})</span></span>
               </div>
             </div>
           `).join('') : '<div style="text-align:center; color:#657099; font-size:0.8rem;">Sin datos de maestría</div>'}
+
+          <div class="panel-subtitle" style="margin-top: 25px;">Más Jugados (Recientes)</div>
+          ${acc.recentChampions && acc.recentChampions.length > 0 ? acc.recentChampions.map(c => `
+            <div class="champ-row">
+              <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg(c)}" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png'">
+              <div>
+                <span class="c-name">${c.name}</span>
+                <span class="c-pts" style="color:#00ff88;">En últimas 20 partidas</span>
+              </div>
+            </div>
+          `).join('') : '<div style="text-align:center; color:#657099; font-size:0.8rem; margin-bottom:10px;">Juega partidas para ver esto</div>'}
         </div>
 
         <!-- TARJETA CENTRAL -->
@@ -823,10 +845,17 @@ app.get('/player/:slug', async (req, res) => {
         </div>
         
         <h1>${acc.gameName}<span class="tag">#${acc.tagLine}</span></h1>
+        <div style="font-size:0.85rem; color:#f4c874; margin-top: -5px; font-weight:800; letter-spacing:1px; margin-bottom: 10px;">${acc.mainPosition ? acc.mainPosition : '—'}</div>
         
         <img src="${rankImg}" class="rank-emblem">
         <div class="rank-name">${rankDisplay}</div>
-        <div class="lp">${acc.soloQ?.leaguePoints || 0} LP</div>
+        <div class="lp">${acc.soloQ?.leaguePoints || 0} LP <span style="font-size:0.7rem; color:#9aa3c7;">(SoloQ)</span></div>
+        
+        ${acc.flex ? `
+        <div style="margin-top: 10px; font-size:0.75rem; color:#657099; font-weight:800; background:rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; display:inline-block; border: 1px solid rgba(255,255,255,0.05);">
+          FLEX: <span style="color:#f2f4ff;">${['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'].includes(acc.flex.tier) ? acc.flex.tier : `${acc.flex.tier} ${acc.flex.rank}`} - ${acc.flex.leaguePoints} LP</span>
+        </div>
+        ` : ''}
 
         <div class="stats-grid">
           <div class="stat-card">
@@ -876,15 +905,27 @@ app.get('/player/:slug', async (req, res) => {
             <span class="s-val">${kdaStr}</span>
           </div>
           <div class="side-stat">
-            <span class="s-label">Daño / Partida</span>
+            <span class="s-label">CS / Min</span>
+            <span class="s-val">${csAvg}</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">Visión / Partida</span>
+            <span class="s-val">${visionAvg}</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">Daño a Campeones</span>
             <span class="s-val">${dmgAvg.toLocaleString()}</span>
+          </div>
+          <div class="side-stat">
+            <span class="s-label">Daño Objetivos</span>
+            <span class="s-val">${objDmgAvg.toLocaleString()}</span>
           </div>
           <div class="side-stat">
             <span class="s-label">Oro / Minuto</span>
             <span class="s-val">${goldMin}</span>
           </div>
           <div class="side-stat">
-            <span class="s-label">Part. Kills</span>
+            <span class="s-label">Participación Kills</span>
             <span class="s-val">${kpAvg}%</span>
           </div>
         </div>
