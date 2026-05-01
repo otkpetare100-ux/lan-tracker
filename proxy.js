@@ -851,10 +851,28 @@ app.get('/player/:slug', async (req, res) => {
       
       <button class="admin-force-btn" onclick="forceUpdate()">⚙️ FORZAR ACTUALIZACIÓN</button>
       <script>
-        function forceUpdate() {
+        async function forceUpdate() {
           const key = prompt('Introduce la clave de Administrador para forzar la actualización:');
           if (key) {
-            window.open('/?force_update=${acc.puuid}&admin_key=' + encodeURIComponent(key), '_blank');
+            const btn = document.querySelector('.admin-force-btn');
+            btn.textContent = '⏳ ACTUALIZANDO...';
+            try {
+              const res = await fetch('/player/${acc.puuid}/force-update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key })
+              });
+              const data = await res.json();
+              if (res.ok) {
+                location.reload();
+              } else {
+                alert('Error: ' + data.error);
+                btn.textContent = '⚙️ FORZAR ACTUALIZACIÓN';
+              }
+            } catch(e) {
+              alert('Error de red');
+              btn.textContent = '⚙️ FORZAR ACTUALIZACIÓN';
+            }
           }
         }
       </script>
@@ -988,6 +1006,120 @@ app.get('/player/:slug', async (req, res) => {
     res.status(500).send('Error interno');
   }
 });
+
+// ---- Lógica de Actualización en el Backend (Opción C) ----
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function backendGetMatchIds(puuid) {
+  const url = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?queue=420&start=0&count=20&api_key=${API_KEY}`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function backendGetMatchDetail(matchId) {
+  const url = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${API_KEY}`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function backendFetchMatchHistory(puuid) {
+  try {
+    const matchIds = await backendGetMatchIds(puuid);
+    if (!matchIds || matchIds.length === 0) return { matches: [], streak: 0, mainPosition: '—', recentChampions: [] };
+    
+    const details = [];
+    for (let i = 0; i < matchIds.length; i++) {
+      await sleep(150); // Ratelimit protection
+      try {
+        const match = await backendGetMatchDetail(matchIds[i]);
+        if (!match || !match.info) continue;
+        const p = match.info.participants.find(x => x.puuid === puuid);
+        if (!p) continue;
+        details.push({
+          champion: p.championName,
+          win: p.win,
+          kills: p.kills,
+          deaths: p.deaths,
+          assists: p.assists,
+          gameDuration: match.info.gameDuration,
+          cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+          damage: p.totalDamageDealtToChampions || 0,
+          vision: p.visionScore || 0,
+          gold: p.goldEarned || 0,
+          kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0,
+          dmgObj: p.totalDamageDealtToObjectives || 0,
+          position: p.teamPosition || ''
+        });
+      } catch(e) {
+        console.error('Error fetching match detail backend:', e);
+      }
+    }
+
+    let streak = 0;
+    if (details.length > 0) {
+      const first = details[0].win;
+      for (const m of details) {
+        if (m.win === first) streak++;
+        else break;
+      }
+      streak = first ? streak : -streak;
+    }
+
+    const POSITION_LABELS = { TOP: 'Top', JUNGLE: 'Jungla', MIDDLE: 'Mid', BOTTOM: 'ADC', UTILITY: 'Support', '': '—' };
+    const posCount = {};
+    for (const m of details) {
+      if (m.position) posCount[m.position] = (posCount[m.position] || 0) + 1;
+    }
+    const mainPos = Object.entries(posCount).sort((a,b) => b[1]-a[1])[0];
+    const mainPosition = mainPos ? (POSITION_LABELS[mainPos[0]] || mainPos[0]) : '—';
+    
+    const champCount = {};
+    for (const m of details) {
+      if (!champCount[m.champion]) champCount[m.champion] = 0;
+      champCount[m.champion]++;
+    }
+    const recentChampions = Object.entries(champCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name]) => ({ name, image: name }));
+
+    return { matches: details, streak, mainPosition, recentChampions };
+  } catch(e) {
+    console.error('Backend match history error:', e);
+    throw e;
+  }
+}
+
+app.post('/player/:puuid/force-update', async (req, res) => {
+  const { key } = req.body;
+  const { puuid } = req.params;
+  
+  if (key !== process.env.ADMIN_WEB_KEY) {
+    return res.status(401).json({ error: 'Clave de administrador incorrecta' });
+  }
+
+  try {
+    const acc = await db.collection('accounts').findOne({ puuid });
+    if (!acc) return res.status(404).json({ error: 'Cuenta no encontrada' });
+
+    const history = await backendFetchMatchHistory(puuid);
+    if (history.matches && history.matches.length > 0) {
+      await db.collection('accounts').updateOne({ puuid }, {
+        $set: {
+          matches: history.matches,
+          streak: history.streak,
+          mainPosition: history.mainPosition,
+          recentChampions: history.recentChampions
+        }
+      });
+    }
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('Error forzando actualización:', e);
+    res.status(500).json({ error: 'Error del servidor al buscar en Riot' });
+  }
+});
+// -----------------------------------------------------------
 
 app.delete('/splits/last', async (req, res) => {
   const { key } = req.body;
