@@ -914,6 +914,15 @@ app.get('/player/:slug', async (req, res) => {
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #f4c874; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Pestañas del Modal */
+        .modal-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .modal-tab { padding: 8px 16px; color: #657099; cursor: pointer; font-weight: 700; font-size: 0.85rem; border-radius: 6px; transition: 0.3s; }
+        .modal-tab:hover { background: rgba(255,255,255,0.05); color: #f2f4ff; }
+        .modal-tab.active { background: #f4c874; color: #000; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
         /* Contenedor principal de layout vertical */
         .page-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
       </style>
@@ -1168,25 +1177,80 @@ app.get('/player/:slug', async (req, res) => {
           }
         }
 
+        let lastMatchData = null;
+
         function renderScoreboard(data) {
+          lastMatchData = data;
           const body = document.getElementById('modalBody');
           const duration = Math.floor(data.gameDuration / 60) + 'm ' + (data.gameDuration % 60) + 's';
           
-          let html = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">';
+          let html = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">';
           html += '<div><h2 style="margin:0;">Detalles de la Partida</h2><div style="color:#657099; font-size:0.8rem;">' + data.gameMode + ' • ' + duration + '</div></div>';
           html += '</div>';
 
-          // Grupos por equipos
-          const blueTeam = data.participants.filter(p => p.teamId === 100);
-          const redTeam = data.participants.filter(p => p.teamId === 200);
-          
-          const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
+          // Pestañas
+          html += '<div class="modal-tabs">';
+          html += '<div class="modal-tab active" onclick="switchTab(event, \'tab-scoreboard\')">SCOREBOARD</div>';
+          html += '<div class="modal-tab" onclick="switchTab(event, \'tab-stats\')">DAÑO Y ORO</div>';
+          html += '</div>';
 
-          html += renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
-          html += '<div style="height:30px;"></div>';
-          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
+          // Contenido de Pestañas
+          html += '<div id="tab-scoreboard" class="tab-content active">' + renderScoreboardContent(data) + '</div>';
+          html += '<div id="tab-stats" class="tab-content">' + renderStatsContent(data) + '</div>';
 
           body.innerHTML = html;
+        }
+
+        function switchTab(e, tabId) {
+          document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          e.target.classList.add('active');
+          document.getElementById(tabId).classList.add('active');
+        }
+
+        function renderScoreboardContent(data) {
+          const blueTeam = data.participants.filter(p => p.teamId === 100);
+          const redTeam = data.participants.filter(p => p.teamId === 200);
+          const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
+          
+          let html = renderTeamTable('Equipo Azul', blueTeam, 'blue-team', data.teams[100], maxDmg, data.gameDuration);
+          html += '<div style="height:30px;"></div>';
+          html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
+          return html;
+        }
+
+        function renderStatsContent(data) {
+          const maxDmg = Math.max(...data.participants.map(p => p.totalDamageDealtToChampions));
+          const maxGold = Math.max(...data.participants.map(p => p.goldEarned));
+          
+          let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px; margin-top:20px;">';
+          
+          // Columna Daño
+          html += '<div><h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff;">Daño Infligido a Campeones</h3>';
+          data.participants.sort((a,b) => b.totalDamageDealtToChampions - a.totalDamageDealtToChampions).forEach(p => {
+            const pct = (p.totalDamageDealtToChampions / maxDmg) * 100;
+            const color = p.teamId === 100 ? '#00b4ff' : '#ff4b4b';
+            html += '<div style="margin-bottom:12px;">';
+            html += '<div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;"><span>' + p.gameName + ' (' + p.championName + ')</span><span style="font-weight:900;">' + p.totalDamageDealtToChampions.toLocaleString() + '</span></div>';
+            html += '<div style="width:100%; height:12px; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden;"><div style="width:'+pct+'%; height:100%; background:'+color+'; border-radius:6px;"></div></div>';
+            html += '</div>';
+          });
+          html += '</div>';
+
+          // Columna Oro
+          html += '<div><h3 style="font-size:1rem; margin-bottom:15px; color:#f2f4ff;">Oro Total Obtenido</h3>';
+          data.participants.sort((a,b) => b.goldEarned - a.goldEarned).forEach(p => {
+            const pct = (p.goldEarned / maxGold) * 100;
+            const color = '#f4c874';
+            html += '<div style="margin-bottom:12px;">';
+            html += '<div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;"><span>' + p.gameName + '</span><span style="font-weight:900;">' + (p.goldEarned/1000).toFixed(1) + 'k</span></div>';
+            html += '<div style="width:100%; height:12px; background:rgba(255,255,255,0.05); border-radius:6px; overflow:hidden;"><div style="width:'+pct+'%; height:100%; background:'+color+'; border-radius:6px;"></div></div>';
+            html += '</div>';
+          });
+          html += '</div>';
+
+          html += '</div>';
+          return html;
         }
 
         const SPELL_MAP = {
