@@ -294,7 +294,7 @@ function initBot(db) {
       if (!user || user.coins < amount) return msg.reply('Ã¢ÂÅ’ No tienes suficientes Naafiri Coins.');
 
       // Guardar apuesta
-      await db.collection('bets').insertOne({
+      msg.delete().catch(() => {}); await db.collection('bets').insertOne({
         discordId: msg.author.id,
         amount,
         choice,
