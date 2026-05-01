@@ -699,16 +699,18 @@ app.get('/player/:slug', async (req, res) => {
       
       if (!img.endsWith('.png')) img += '.png';
       
-      // Casos especiales de nombres en Data Dragon
       const specialCases = {
         'Wukong.png': 'MonkeyKing.png',
         'RenataGlasc.png': 'Renata.png',
         'BelVeth.png': 'Belveth.png',
-        'KhaZix.png': 'Khazix.png',
         'ChoGath.png': 'Chogath.png',
+        'KhaZix.png': 'Khazix.png',
         'KaiSa.png': 'Kaisa.png',
         'LeBlanc.png': 'Leblanc.png',
         'VelKoz.png': 'Velkoz.png',
+        'FiddleSticks.png': 'Fiddlesticks.png',
+        'Nunu.png': 'Nunu.png',
+        'JarvanIV.png': 'JarvanIV.png',
         'Nunu&Willump.png': 'Nunu.png'
       };
       

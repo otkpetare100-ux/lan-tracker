@@ -96,11 +96,40 @@ function formatDuration(seconds) {
   return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
+const CHAMP_NAME_FIX = {
+  'Wukong': 'MonkeyKing',
+  'RenataGlasc': 'Renata',
+  'BelVeth': 'Belveth',
+  'ChoGath': 'Chogath',
+  'KhaZix': 'Khazix',
+  'KaiSa': 'Kaisa',
+  'LeBlanc': 'Leblanc',
+  'VelKoz': 'Velkoz',
+  'FiddleSticks': 'Fiddlesticks',
+  'Nunu': 'Nunu',
+  'JarvanIV': 'JarvanIV'
+};
+
 function getChampImageName(name) {
   if (!name) return 'Unknown.png';
-  var base  = name.replace(/\.png$/i, '');
+  var base = name.replace(/\.png$/i, '');
   var clean = base.replace(/[^a-zA-Z0-9]/g, '');
   return (CHAMP_NAME_FIX[clean] || CHAMP_NAME_FIX[base] || clean) + '.png';
+}
+
+function timeAgo(date) {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " años";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " meses";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " días";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " horas";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " min";
+    return Math.floor(seconds) + " seg";
 }
 
 function buildStreakHTML(streak) {
