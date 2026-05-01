@@ -142,14 +142,18 @@ async function settleBets(acc) {
     await new Promise(r => setTimeout(r, 60000));
 
     // 2. Obtener el resultado de la última partida
-    const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid}/ids?count=1&api_key=${API_KEY}`;
-    const matchIdsRes = await fetch(matchUrl);
+    const matchUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${acc.puuid.trim()}/ids?count=1`;
+    const matchIdsRes = await fetch(matchUrl, {
+      headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+    });
     const matchIds = await matchIdsRes.json();
     
     if (!matchIds || matchIds.length === 0) return;
 
-    const detailUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}?api_key=${API_KEY}`;
-    const detailRes = await fetch(detailUrl);
+    const detailUrl = `https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[0]}`;
+    const detailRes = await fetch(detailUrl, {
+      headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
+    });
     const match = await detailRes.json();
     
     const p = match.info.participants.find(x => x.puuid === acc.puuid);
