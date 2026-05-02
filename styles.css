@@ -507,7 +507,7 @@ body::before {
     var(--ghost-splash, none) center 15% / cover no-repeat;
   backdrop-filter: blur(20px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  padding: 1.25rem 1.5rem 0;
+  padding: 0.9rem 1.25rem 0;
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
   animation: slideIn 0.28s ease both;
   cursor: pointer;
@@ -537,27 +537,27 @@ body::before {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
 }
 
 .card-left {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 14px;
 }
 
 .summoner-info-wrap {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .main-pool-container {
   display: flex;
   background: rgba(15, 18, 32, 0.4);
   backdrop-filter: blur(8px);
-  border-radius: 12px;
-  padding: 4px 10px;
+  border-radius: 8px;
+  padding: 3px 8px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   width: fit-content;
 }
@@ -566,7 +566,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 30px;
+  gap: 18px;
 }
 
 /* Avatar Glows */
@@ -588,18 +588,19 @@ body::before {
 
 .icon-wrap {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 72px;
+  height: 72px;
   justify-self: start;
   overflow: visible;
+  flex-shrink: 0;
 }
 
 .icon-wrap .profile-main-icon {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 62px;
-  height: 62px;
+  width: 46px;
+  height: 46px;
   transform: translate(-50%, -50%);
   z-index: 1;
   border-radius: 50%;
@@ -701,9 +702,9 @@ body::before {
 
 .summoner-name {
   font-family: 'Cinzel', serif;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: #fff7fb;
   white-space: nowrap;
   display: flex;
@@ -841,11 +842,11 @@ body::before {
 }
 
 .rank-icon {
-  width: 82px;
-  height: 82px;
+  width: 58px;
+  height: 58px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   animation: float 4s ease-in-out infinite;
 }
