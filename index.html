@@ -4,22 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LAN Tracker - Las Perras de Naafiri</title>
+  <meta name="description" content="Tracker de League of Legends para la comunidad Las Perras de Naafiri. Sigue el ranking, historial y estadísticas en tiempo real." />
   <link rel="icon" type="image/png" href="pic/estetica/logo.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=1.1.1" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2.0.0" />
   <link rel="stylesheet" href="compare.css?v=1.0.4" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
-  <div class="bg-overlay"></div>
 
-  <div class="beta-banner">
-    <span>⚠️ <b>ESTADO: BETA</b> - El tracker está en desarrollo y puede contener errores.</span>
+  <!-- Fondo atmosférico -->
+  <div class="bg-overlay"></div>
+  <div class="particle-field">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
   </div>
-  
+
+  <!-- Sidebar de Actividad (preservado) -->
   <aside class="activity-sidebar collapsed" id="activity-sidebar">
     <button class="activity-toggle" id="activity-toggle" title="Alternar Actividad">«</button>
     <button class="activity-pin" id="activity-pin" title="Fijar abierto">📌</button>
@@ -31,42 +35,64 @@
     </div>
   </aside>
 
-
-
-  <div class="tracker-wrap">
-    <header class="header">
-      <div class="header-brand">
-        <img src="pic/estetica/logo.png" class="header-logo" alt="Escudo Naafiri">
-        <div class="header-titles">
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  NAVBAR STICKY                                          -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <nav class="topnav" id="topnav">
+    <div class="topnav-inner">
+      <div class="topnav-brand">
+        <img src="pic/estetica/logo.png" class="topnav-logo" alt="Escudo Naafiri">
+        <div class="topnav-title-wrap">
           <h1 class="sr-only">Las Perras de Naafiri</h1>
-          <img src="pic/estetica/texto.png" class="header-title-img" alt="Las Perras de Naafiri">
-          <p>League of Legends · Latin America North</p>
+          <img src="pic/estetica/texto.png" class="topnav-title-img" alt="Las Perras de Naafiri">
+          <span class="topnav-sub">League of Legends · LAN</span>
         </div>
       </div>
-    </header>
-
-    <section class="search-section">
-      <div class="search-bar">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Nombre#TAG"
-          autocomplete="off"
-        />
-        <button id="search-btn">Buscar</button>
-        <button id="records-btn" onclick="openLeaderboard()" title="Ver récords de la perrera">🏆 Récords</button>
+      <div class="topnav-actions">
+        <button id="records-btn" onclick="openLeaderboard()" title="Ver récords">🏆 Récords</button>
         <button id="hof-btn" onclick="window.location.href='hall-of-fame.html'" title="Salón de la Fama">👑 Hall of Fame</button>
-        <!-- <button id="tournament-btn" onclick="openTournamentModal()" title="Gestión de Torneos">🏆 Torneo</button> -->
       </div>
-      <div id="error-msg" class="error-msg" style="display:none;"></div>
-      
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  CONTENIDO PRINCIPAL                                    -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="tracker-wrap">
+
+    <!-- Beta Banner -->
+    <div class="beta-banner">
+      <span>⚠️ <b>ESTADO: BETA</b> - El tracker está en desarrollo y puede contener errores.</span>
+    </div>
+
+    <!-- Hero Search -->
+    <section class="search-section">
+      <div class="search-hero">
+        <p class="search-hint">Busca a un invocador o añade una cuenta a tu lista</p>
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <span class="search-icon">⚔</span>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Nombre#TAG"
+              autocomplete="off"
+            />
+          </div>
+          <button id="search-btn">Buscar</button>
+        </div>
+        <div id="error-msg" class="error-msg" style="display:none;"></div>
+      </div>
       <div class="filter-controls">
-        <input type="text" id="filter-input" placeholder="Filtrar por nombre..." autocomplete="off">
+        <input type="text" id="filter-input" placeholder="🔍  Filtrar por nombre..." autocomplete="off">
       </div>
     </section>
 
+    <!-- Cuentas -->
     <section class="accounts-section">
-      <div class="section-title">Cuentas rastreadas</div>
+      <div class="section-title">
+        <span class="section-title-text">Cuentas rastreadas</span>
+      </div>
       <div class="accounts-grid" id="accounts-grid">
         <div class="empty-state">
           <span class="empty-icon">🗡</span>
@@ -75,35 +101,42 @@
         </div>
       </div>
     </section>
+
   </div>
+
+  <!-- Scripts -->
   <script src="chart.min.js?v=1.0.5"></script>
-  <script src="render.js?v=1.0.5"></script>
+  <script src="render.js?v=2.0.0"></script>
   <script src="storage.js?v=1.0.5"></script>
   <script src="api.js?v=1.0.5"></script>
   <script src="app.js?v=1.0.5"></script>
   <script src="compare.js?v=1.0.5"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js?v=1.0.5')
-        .then(reg => {
-          console.log('SW registrado');
-          // Si hay una actualización esperando, forzamos el reload
-          reg.onupdatefound = () => {
-            const installingWorker = reg.installing;
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('Nueva versión detectada, recargando...');
-                window.location.reload();
-              }
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js?v=1.0.5')
+          .then(reg => {
+            reg.onupdatefound = () => {
+              const installingWorker = reg.installing;
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              };
             };
-          };
-        })
-        .catch(err => console.log('SW error', err));
+          })
+          .catch(err => console.log('SW error', err));
+      });
+    }
+
+    // Efecto scroll en navbar
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('topnav');
+      if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
     });
-  }
-</script>
-  <!-- MODAL DE DETALLES DE PARTIDA -->
+  </script>
+
+  <!-- Modal de Detalles de Partida (preservado) -->
   <div id="matchModal" class="modal-overlay" onclick="closeMatchModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <span class="modal-close" onclick="closeMatchModal(event)">×</span>
@@ -115,5 +148,6 @@
       </div>
     </div>
   </div>
+
 </body>
 </html>
