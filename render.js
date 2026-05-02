@@ -337,8 +337,8 @@ function buildCardHTML(acc, position) {
     ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />'
     : '❓';
 
-  const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
-    '<span class="history-btn-text">Ver historial</span><span class="history-arrow">▾</span>' +
+  const historyBtn = '<button class="history-toggle-btn open" data-puuid="' + acc.puuid + '">' +
+    '<span class="history-btn-text">Ocultar historial</span><span class="history-arrow">▴</span>' +
   '</button>';
 
     const POSITION_ICONS = {
@@ -429,7 +429,7 @@ function buildCardHTML(acc, position) {
       (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
     '</div>' +
-    '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
+    '<div class="history-content" id="history-' + acc.puuid + '" style="display:block;">' +
       buildMatchHistoryHTML(acc.matches, acc.puuid) +
     '</div>' +
   '</div>';
