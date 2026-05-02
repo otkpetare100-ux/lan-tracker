@@ -10,11 +10,11 @@ async function test() {
 
     // PRUEBA 1: Datos de cuenta (Usa americas)
     // Usamos una cuenta famosa de LAN para probar si la key sirve para algo
-    const urlAccount = `https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/SagStuck/LAN`;
+    const urlAccount = `https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Grey/W8TM`;
     
     try {
-        console.log('📡 Prueba 1: Obteniendo PUUID real de Seiya#LAN...');
-        const resAcc = await fetch(`https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Seiya/LAN`, { headers: { "X-Riot-Token": KEY } });
+        console.log('📡 Prueba 1: Obteniendo PUUID real de Grey#W8TM...');
+        const resAcc = await fetch(`https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Grey/W8TM`, { headers: { "X-Riot-Token": KEY } });
         
         if (resAcc.status === 200) {
             const dataAcc = await resAcc.json();
