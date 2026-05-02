@@ -3219,11 +3219,11 @@ body::before {
 
 .mv2-win { 
     border-color: rgba(40, 171, 102, 0.5);
-    box-shadow: 0 0 15px rgba(40, 171, 102, 0.25), inset 0 0 15px rgba(40, 171, 102, 0.1);
+    box-shadow: 0 0 15px rgba(40, 171, 102, 0.25), inset 0 0 35px rgba(40, 171, 102, 0.15);
 }
 .mv2-loss { 
     border-color: rgba(232, 64, 87, 0.5);
-    box-shadow: 0 0 15px rgba(232, 64, 87, 0.25), inset 0 0 15px rgba(232, 64, 87, 0.1);
+    box-shadow: 0 0 15px rgba(232, 64, 87, 0.25), inset 0 0 35px rgba(232, 64, 87, 0.15);
 }
 
 .mv2-champ-block {
@@ -3254,9 +3254,15 @@ body::before {
 
 .mv2-kda-flat {
     font-weight: 900;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #fff;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.05em;
+}
+
+.kda-slash {
+    color: rgba(255, 255, 255, 0.25);
+    margin: 0 3px;
+    font-weight: 600;
 }
 
 .mv2-expand-icon {

@@ -150,7 +150,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
   return '<div class="match-history-v2">' + matches.map(function(m) {
     const isWin = m.win;
     const cls = isWin ? 'mv2-win' : 'mv2-loss';
-    const kda = m.kills + ' / ' + m.deaths + ' / ' + m.assists;
+    const kda = m.kills + '<span class="kda-slash">/</span>' + m.deaths + '<span class="kda-slash">/</span>' + m.assists;
     const dur = Math.floor(m.gameDuration / 60) + 'min ' + (m.gameDuration % 60) + 's';
     const time = timeAgo(m.timestamp);
     const queue = QUEUE_TYPES[m.queueId] || 'Partida';
