@@ -462,7 +462,10 @@ body::before {
 .accounts-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .empty-state {
