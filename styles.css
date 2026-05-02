@@ -393,7 +393,7 @@ body::before {
 
 .card-main-grid {
   display: grid;
-  grid-template-columns: 320px 1fr 420px;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 20px;
 }
@@ -404,11 +404,20 @@ body::before {
   gap: 25px;
 }
 
-.card-center {
+.summoner-info-wrap {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.main-pool-container {
+  display: flex;
+  background: rgba(15, 18, 32, 0.4);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  width: fit-content;
 }
 
 .card-right {
@@ -840,13 +849,19 @@ body::before {
 }
 
 .card-actions {
-  grid-column: 7;
-  width: 36px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  flex-direction: row;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.account-card:hover .card-actions {
+  opacity: 1;
 }
 
 .refresh-btn,
@@ -2897,11 +2912,9 @@ body::before {
 .card-reactions {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  justify-content: center;
+  gap: 6px;
+  margin-left: 12px;
+  align-items: center;
 }
 
 .reaction-btn {

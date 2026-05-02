@@ -363,26 +363,25 @@ function buildCardHTML(acc, position) {
           '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
           '<span class="icon-level">' + acc.summonerLevel + '</span>' +
         '</div>' +
-        '<div class="summoner-info" title="Ver perfil detallado">' +
-          '<div class="summoner-name">' + 
-            '<span>' + escapeHTML(acc.gameName) + '</span>' +
-            '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
+        '<div class="summoner-info-wrap">' +
+          '<div class="summoner-info" title="Ver perfil detallado">' +
+            '<div class="summoner-name">' + 
+              '<span>' + escapeHTML(acc.gameName) + '</span>' +
+              '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
+            '</div>' +
+            '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + ' ' + streakIcon + ' ' + recentDots + '</div>' +
+            specialistHTML +
+            '<div class="summoner-meta">' +
+              '<span class="summoner-region">LAN</span>' +
+              '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
+            '</div>' +
+            (acc.economy ? '<div class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:6px; width:fit-content;">' +
+              '<span style="color:#f4c874">💰 ' + (acc.economy.coins || 0) + '</span>' +
+              '<span style="color:#9d6cff">🎒 ' + (acc.economy.inventory?.length || 0) + '</span>' +
+            '</div>' : '') +
           '</div>' +
-          '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + ' ' + streakIcon + ' ' + recentDots + '</div>' +
-          specialistHTML +
-          '<div class="summoner-meta">' +
-            '<span class="summoner-region">LAN</span>' +
-            '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
-          '</div>' +
-          (acc.economy ? '<div class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:6px; width:fit-content;">' +
-            '<span style="color:#f4c874">💰 ' + (acc.economy.coins || 0) + '</span>' +
-            '<span style="color:#9d6cff">🎒 ' + (acc.economy.inventory?.length || 0) + '</span>' +
-          '</div>' : '') +
+          '<div class="main-pool-container">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
         '</div>' +
-      '</div>' +
-      
-      '<div class="card-center">' +
-        '<div class="top-champs-block">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
       '</div>' +
       
       '<div class="card-right">' +
@@ -396,21 +395,20 @@ function buildCardHTML(acc, position) {
           '</div>' +
         '</div>' +
         '<div class="winrate-block ' + (wr >= 55 ? 'wr-glow-good' : (wr < 48 ? 'wr-glow-bad' : '')) + '">' + wrHTML + '</div>' +
-        buildReactionsHTML(acc.reactions, acc.puuid) +
-        '<div class="card-actions">' +
-          '<button class="note-btn ' + (acc.notes ? 'has-note' : '') + '" data-puuid="' + acc.puuid + '" title="Notas de cuenta">📝</button>' +
-          '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
-          '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
-        '</div>' +
+      '</div>' +
+      
+      '<div class="card-actions">' +
+        '<button class="note-btn ' + (acc.notes ? 'has-note' : '') + '" data-puuid="' + acc.puuid + '" title="Notas de cuenta">📝</button>' +
+        '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
+        '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
       '</div>' +
     '</div>' +
-    '</div>' +
-  '</div>' +
   '<div class="history-section">' +
     '<div class="card-bottom-actions">' +
       '<div class="card-bottom-left">' +
         historyBtn +
         '<button class="share-btn" data-puuid="' + acc.puuid + '" title="Compartir">🔗 Compartir</button>' +
+        buildReactionsHTML(acc.reactions, acc.puuid) +
       '</div>' +
       (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
       '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
