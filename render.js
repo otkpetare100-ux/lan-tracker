@@ -464,7 +464,9 @@ function renderAccounts(accounts) {
     div.id = 'card-' + acc.puuid;
     div.setAttribute('onclick', "openPlayerModal('" + acc.puuid + "', event)");
     var r = getRankInfo(acc);
-    div.style.borderLeft = '3px solid ' + (RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED);
+    const rankColor = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+    div.style.borderLeft = '4px solid ' + rankColor;
+    div.style.setProperty('--rank-glow', rankColor);
     
     // Ghost Splash Logic
     if (acc.topChampions && acc.topChampions.length > 0 && acc.topChampions[0].name) {
