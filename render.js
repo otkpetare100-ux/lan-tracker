@@ -439,6 +439,14 @@ function renderAccounts(accounts) {
     div.setAttribute('onclick', "openPlayerModal('" + acc.puuid + "', event)");
     var r = getRankInfo(acc);
     div.style.borderLeft = '3px solid ' + (RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED);
+    
+    // Ghost Splash Logic
+    if (acc.topChampions && acc.topChampions.length > 0 && acc.topChampions[0].name) {
+      const cName = getChampImageName(acc.topChampions[0].name).replace('.png', '');
+      const splashUrl = 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + cName + '_0.jpg';
+      div.style.setProperty('--ghost-splash', 'url(' + splashUrl + ')');
+    }
+
     div.innerHTML = buildCardHTML(acc, idx);
     return div.outerHTML;
   }).join('');
