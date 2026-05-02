@@ -451,6 +451,13 @@ body::before {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #141628;
+  transition: all 0.3s ease;
+}
+
+.account-card:hover .profile-main-icon {
+  box-shadow: 0 0 20px rgba(217, 184, 95, 0.6);
+  border-color: rgba(217, 184, 95, 0.8);
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 .icon-wrap .rank-frame {
@@ -673,6 +680,12 @@ body::before {
   line-height: 0;
 }
 
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+}
+
 .rank-icon {
   width: 82px;
   height: 82px;
@@ -680,10 +693,12 @@ body::before {
   display: block;
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: float 4s ease-in-out infinite;
 }
 
 .rank-icon:hover {
-  transform: scale(1.15) rotate(5deg);
+  transform: scale(1.15) rotate(5deg) translateY(-2px);
+  animation-play-state: paused;
 }
 
 /* Glows por Rango */
