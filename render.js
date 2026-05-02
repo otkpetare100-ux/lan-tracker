@@ -182,16 +182,28 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
 
     const shortQueue = queue.replace('Clasificatoria ', '').replace('Normal (Recluta)', 'Draft').replace('Normal (Oculta)', 'Blind');
 
-    return '<div class="match-v2-card ' + cls + '" onclick="event.stopPropagation(); openMatchModal(\'' + m.matchId + '\')">' +
-      '<div class="mv2-champ-block">' +
-        '<img class="mv2-main-icon" src="' + champImg + '" />' +
+    const resultLabel = isWin ? 'Victoria' : 'Derrota';
+
+    return '<div class="match-v2-row ' + cls + '" onclick="event.stopPropagation(); openMatchModal(\'' + m.matchId + '\')">' +
+      '<div class="m-row-meta">' +
+        '<div class="m-queue">' + shortQueue + '</div>' +
+        '<div class="m-time">' + time + '</div>' +
+        '<div class="m-divider"></div>' +
+        '<div class="m-result">' + resultLabel + '</div>' +
+        '<div class="m-duration">' + dur + '</div>' +
       '</div>' +
-      '<div class="mv2-flat-info">' +
-        '<span class="mv2-queue-flat">' + shortQueue + '</span>' +
-        '<span class="mv2-kda-flat">' + kda + '</span>' +
-        '<span class="mv2-cs-flat">' + (m.cs || 0) + ' CS</span>' +
-        '<span class="mv2-duration-flat">' + dur + '</span>' +
-        '<span class="mv2-time-flat">' + time + '</span>' +
+      '<div class="m-row-champ">' +
+        '<img class="m-champ-icon" src="' + champImg + '" />' +
+      '</div>' +
+      '<div class="m-row-kda">' +
+        '<div class="m-kda">' + kda + '</div>' +
+        '<div class="m-cs">' + (m.cs || 0) + ' CS</div>' +
+      '</div>' +
+      '<div class="m-row-items">' +
+        itemsHTML + extraItemsHTML +
+      '</div>' +
+      '<div class="m-row-participants">' +
+        participantsHTML +
       '</div>' +
     '</div>';
   }).join('') + '</div>';

@@ -3182,100 +3182,117 @@ body::before {
 /* --- Historial de Partidas V2 (Estilo Premium) --- */
 .match-history-v2 {
     display: flex;
-    flex-direction: row;
-    gap: 12px;
+    flex-direction: column;
+    gap: 8px;
     padding: 15px 5px;
-    overflow-x: auto;
-    scrollbar-width: none; /* Ocultar scrollbar para máxima limpieza */
+    overflow-y: auto;
+    max-height: 400px;
+    scrollbar-width: thin;
 }
 
 .match-history-v2::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+}
+.match-history-v2::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
 }
 
-.match-v2-card {
-    flex: 0 0 100px;
-    height: 100px;
+.match-v2-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: rgba(15, 18, 32, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    border-left: 6px solid transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+    height: 96px;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.match-v2-row.mv2-win {
+    border-left-color: #28ab66;
+    background: linear-gradient(90deg, rgba(40, 171, 102, 0.15), rgba(15, 18, 32, 0.4) 40%);
+}
+
+.match-v2-row.mv2-loss {
+    border-left-color: #e84057;
+    background: linear-gradient(90deg, rgba(232, 64, 87, 0.15), rgba(15, 18, 32, 0.4) 40%);
+}
+
+.match-v2-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.m-row-meta {
+    width: 110px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 18, 32, 0.35);
-    backdrop-filter: blur(20px);
-    border-radius: 18px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    position: relative;
-    padding: 10px;
-    gap: 8px;
+    align-items: flex-start;
+    padding-left: 15px;
+    gap: 2px;
 }
+.m-queue { font-weight: 700; font-size: 0.8rem; color: #fff; }
+.m-time { font-size: 0.7rem; color: #7a84aa; }
+.m-divider { width: 40px; height: 1px; background: rgba(255, 255, 255, 0.1); margin: 4px 0; }
+.m-result { font-weight: 800; font-size: 0.85rem; }
+.mv2-win .m-result { color: #28ab66; }
+.mv2-loss .m-result { color: #e84057; }
+.m-duration { font-size: 0.7rem; color: #7a84aa; }
 
-.match-v2-card:hover {
-    transform: translateY(-8px) scale(1.05);
-    background: rgba(25, 30, 55, 0.8);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+.m-row-champ {
+    margin: 0 15px;
 }
-
-.mv2-win { 
-    border-color: rgba(40, 171, 102, 0.5);
-    box-shadow: 0 0 15px rgba(40, 171, 102, 0.25), inset 0 0 35px rgba(40, 171, 102, 0.15);
-}
-.mv2-loss { 
-    border-color: rgba(232, 64, 87, 0.5);
-    box-shadow: 0 0 15px rgba(232, 64, 87, 0.25), inset 0 0 35px rgba(232, 64, 87, 0.15);
-}
-
-.mv2-champ-block {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.mv2-main-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
+.m-champ-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.1);
     object-fit: cover;
 }
 
-.mv2-flat-info {
+.m-row-kda {
+    width: 130px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
+    justify-content: center;
+}
+.m-kda { font-weight: 800; font-size: 1.05rem; color: #fff; letter-spacing: 0.02em; }
+.m-cs { font-size: 0.75rem; color: #7a84aa; margin-top: 4px; }
+
+.m-row-items {
+    display: grid;
+    grid-template-columns: repeat(4, 24px);
+    grid-template-rows: repeat(2, 24px);
     gap: 2px;
+    margin: 0 20px;
+}
+.mv2-item {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    object-fit: cover;
 }
 
-.mv2-queue-flat, .mv2-cs-flat, .mv2-duration-flat, .mv2-time-flat {
-    display: none !important; /* Ocultamos todo lo extra para el look cuadrado */
+.m-row-participants {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+    padding-right: 15px;
 }
-
-.mv2-kda-flat {
-    font-weight: 900;
-    font-size: 0.8rem;
-    color: #fff;
-    letter-spacing: 0.05em;
-}
-
-.kda-slash {
-    color: rgba(255, 255, 255, 0.25);
-    margin: 0 3px;
-    font-weight: 600;
-}
-
-.mv2-expand-icon {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    font-size: 0.6rem;
-    opacity: 0.2;
-}
-
-.match-v2-card:hover .mv2-expand-icon {
-    opacity: 0.8;
-}
+.mv2-participants { display: flex; gap: 8px; }
+.mv2-p-col { display: flex; flex-direction: column; gap: 2px; }
+.mv2-p-icon { width: 16px; height: 16px; border-radius: 2px; overflow: hidden; opacity: 0.7; transition: opacity 0.2s;}
+.mv2-p-icon:hover { opacity: 1; }
+.mv2-p-icon.me { border: 1px solid #d9b85f; opacity: 1; border-radius: 50%; width: 18px; height: 18px; margin-left:-1px;}
+.mv2-p-icon img { width: 100%; height: 100%; object-fit: cover; }
 
 .text-win { color: #28ab66; }
 .text-loss { color: #e84057; }
