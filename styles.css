@@ -779,27 +779,53 @@ body::before {
 
 .winrate-block {
   grid-column: 5;
-  min-width: 100px;
+  min-width: 120px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.wr-ring {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.wr-ring-inner {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(18, 22, 38, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wr-info {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  text-align: right;
+  gap: 2px;
 }
 
 .wr-number {
-  font-size: 1.42rem;
+  font-size: 0.9rem;
   font-weight: 800;
   line-height: 1;
   transition: text-shadow 0.3s ease;
 }
 
-.wr-glow-good .wr-number {
-  text-shadow: 0 0 12px rgba(115, 211, 138, 0.7);
+.wr-glow-good .wr-ring {
+  box-shadow: 0 0 12px rgba(115, 211, 138, 0.4);
 }
 
-.wr-glow-bad .wr-number {
-  text-shadow: 0 0 12px rgba(224, 100, 116, 0.7);
+.wr-glow-bad .wr-ring {
+  box-shadow: 0 0 12px rgba(224, 100, 116, 0.4);
 }
 
 .wr-number.good {

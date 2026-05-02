@@ -301,9 +301,25 @@ function buildCardHTML(acc, position) {
     ? '<div class="rank-watermark"><img src="' + RANK_ICONS[r.tier] + '" alt="" /></div>'
     : '';
 
+  let ringColor = 'rgba(255, 255, 255, 0.1)';
+  if (wr !== null) {
+      if (wr >= 55) ringColor = '#73d38a';
+      else if (wr >= 48) ringColor = '#d9b85f';
+      else ringColor = '#e06474';
+  }
+  
   const wrHTML = wr !== null
-    ? '<div class="wr-number ' + wrCls + '">' + wr + '%</div><div class="wr-label">Winrate</div><div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>'
-    : '<div class="wr-number empty">—</div><div class="wr-label">Sin partidas</div>';
+    ? '<div class="wr-ring" style="background: conic-gradient(' + ringColor + ' ' + wr + '%, rgba(255, 255, 255, 0.05) 0);">' +
+        '<div class="wr-ring-inner">' +
+          '<div class="wr-number ' + wrCls + '">' + wr + '%</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="wr-info">' +
+        '<div class="wr-label">Winrate</div>' +
+        '<div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>' +
+      '</div>'
+    : '<div class="wr-ring" style="background: rgba(255, 255, 255, 0.05);"><div class="wr-ring-inner"><div class="wr-number empty">—</div></div></div>' +
+      '<div class="wr-info"><div class="wr-label">Sin partidas</div></div>';
 
   let streakIcon = '';
   if (acc.streak >= 3) {
