@@ -443,7 +443,7 @@ function renderAccounts(accounts) {
     // Ghost Splash Logic
     if (acc.topChampions && acc.topChampions.length > 0 && acc.topChampions[0].name) {
       const cName = getChampImageName(acc.topChampions[0].name).replace('.png', '');
-      const splashUrl = 'https://ddragon.leagueoflegends.com/cdn/img/champion/centered/' + cName + '_0.jpg';
+      const splashUrl = 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + cName + '_0.jpg';
       div.style.setProperty('--ghost-splash', 'url(' + splashUrl + ')');
     }
 
@@ -912,9 +912,15 @@ function buildPlayerModalHTML(acc) {
   }
   // ----------------------------------------------------
 
+  let centeredSplashUrl = '';
+  if (acc.topChampions && acc.topChampions.length > 0 && acc.topChampions[0].name) {
+    const cName = getChampImageName(acc.topChampions[0].name).replace('.png', '');
+    centeredSplashUrl = 'https://ddragon.leagueoflegends.com/cdn/img/champion/centered/' + cName + '_0.jpg';
+  }
+
   return `
     <div class="player-modal__box">
-      <div class="player-modal__header">
+      <div class="player-modal__header" ${centeredSplashUrl ? `style="--modal-splash: url(${centeredSplashUrl})"` : ''}>
         <div class="player-modal__profile">
           <img class="player-modal__avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
           <div class="names-wrap">
