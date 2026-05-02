@@ -340,7 +340,7 @@ body::before {
   border: 1px solid var(--border);
   background:
     linear-gradient(180deg, rgba(26, 31, 52, 0.92), rgba(13, 16, 28, 0.95)),
-    var(--ghost-splash, none) center 15% / cover no-repeat;
+    var(--ghost-splash, none) center / cover no-repeat;
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
   padding: 1.3rem 1.5rem 1.2rem;
@@ -364,7 +364,7 @@ body::before {
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 15px rgba(217, 184, 95, 0.1);
   background: 
     linear-gradient(180deg, rgba(30, 36, 60, 0.94), rgba(16, 20, 35, 0.96)),
-    var(--ghost-splash, none) center 15% / cover no-repeat;
+    var(--ghost-splash, none) center / cover no-repeat;
 }
 
 .account-card:active {
