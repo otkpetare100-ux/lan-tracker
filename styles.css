@@ -33,12 +33,12 @@
   --card: rgba(16, 20, 34, 0.82);
   --card-2: rgba(23, 28, 48, 0.92);
   --border: rgba(255, 255, 255, 0.08);
-  --border-2: rgba(214, 125, 170, 0.18);
+  --border-2: rgba(217, 184, 95, 0.15);
   --text: #f2f4ff;
   --muted: #9aa3c7;
   --dim: #657099;
-  --pink: #d77aa8;
-  --pink-2: #f1b6cf;
+  --accent: #d9b85f;
+  --accent-2: #f4c874;
   --purple: #9d6cff;
   --gold: #d9b85f;
   --good: #73d38a;
@@ -59,7 +59,7 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background:
     radial-gradient(circle at top, rgba(140, 90, 255, 0.12), transparent 40%),
-    radial-gradient(circle at 20% 10%, rgba(215, 122, 168, 0.10), transparent 28%),
+    radial-gradient(circle at 20% 10%, rgba(217, 184, 95, 0.10), transparent 28%),
     linear-gradient(180deg, #05060b 0%, #0a0d18 45%, #05060b 100%);
   position: relative;
 }
@@ -84,7 +84,7 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(circle at 15% 20%, rgba(215, 122, 168, 0.12), transparent 22%),
+    radial-gradient(circle at 15% 20%, rgba(217, 184, 95, 0.12), transparent 22%),
     radial-gradient(circle at 80% 15%, rgba(157, 108, 255, 0.10), transparent 24%),
     radial-gradient(circle at 70% 80%, rgba(217, 184, 95, 0.08), transparent 26%),
     linear-gradient(180deg, rgba(8, 10, 18, 0.15), rgba(8, 10, 18, 0.75));
@@ -202,18 +202,18 @@ body::before {
 }
 
 .search-bar input:focus {
-  border-color: rgba(215, 122, 168, 0.5);
-  box-shadow: 0 0 0 4px rgba(215, 122, 168, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-color: rgba(217, 184, 95, 0.5);
+  box-shadow: 0 0 0 4px rgba(217, 184, 95, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .search-bar button {
   height: 48px;
   padding: 0 20px;
-  border: 1px solid rgba(215, 122, 168, 0.28);
+  border: 1px solid rgba(217, 184, 95, 0.28);
   border-radius: 14px;
   cursor: pointer;
-  color: #fff3f8;
-  background: linear-gradient(135deg, rgba(133, 68, 100, 0.95), rgba(72, 36, 63, 0.96));
+  color: #fff;
+  background: linear-gradient(135deg, rgba(184, 149, 61, 0.95), rgba(120, 94, 34, 0.96));
   box-shadow: var(--shadow-soft);
   font-size: 0.76rem;
   font-weight: 700;
@@ -224,8 +224,8 @@ body::before {
 }
 
 .search-bar button:hover {
-  filter: brightness(1.06);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28), 0 0 0 4px rgba(215, 122, 168, 0.08);
+  filter: brightness(1.1);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28), 0 0 0 4px rgba(217, 184, 95, 0.08);
   transform: translateY(-1px);
 }
 
@@ -281,12 +281,12 @@ body::before {
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
-  color: var(--pink);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.72rem;
+  color: var(--accent);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.25em;
 }
 
 .section-title::after {
@@ -359,8 +359,8 @@ body::before {
 
 .account-card:hover {
   transform: translateY(-4px) scale(1.005);
-  border-color: rgba(215, 122, 168, 0.45);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 15px rgba(215, 122, 168, 0.1);
+  border-color: rgba(217, 184, 95, 0.45);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 15px rgba(217, 184, 95, 0.1);
   background: linear-gradient(180deg, rgba(30, 36, 60, 0.92), rgba(16, 20, 35, 0.92));
 }
 
@@ -539,9 +539,10 @@ body::before {
 }
 
 .summoner-name {
-  font-size: 1.15rem;
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
   color: #fff7fb;
   white-space: nowrap;
   display: flex;
@@ -592,9 +593,9 @@ body::before {
 
 .position-badge {
   padding: 4px 10px;
-  border: 1px solid rgba(215, 122, 168, 0.22);
-  background: rgba(215, 122, 168, 0.10);
-  color: #ffd9e8;
+  border: 1px solid rgba(217, 184, 95, 0.22);
+  background: rgba(217, 184, 95, 0.10);
+  color: #fff0be;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -648,7 +649,7 @@ body::before {
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(215, 122, 168, 0.30);
+  border: 2px solid rgba(217, 184, 95, 0.30);
   display: block;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.24);
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
@@ -657,7 +658,7 @@ body::before {
 .top-champ img:hover {
   transform: translateY(-1px) scale(1.06);
   border-color: rgba(241, 182, 207, 0.7);
-  box-shadow: 0 0 18px rgba(215, 122, 168, 0.22);
+  box-shadow: 0 0 18px rgba(217, 184, 95, 0.22);
 }
 
 .rank-block {
@@ -715,7 +716,7 @@ body::before {
 }
 
 .rank-glow-master {
-  filter: drop-shadow(0 0 12px rgba(215, 122, 168, 0.5));
+  filter: drop-shadow(0 0 12px rgba(217, 184, 95, 0.5));
 }
 
 .rank-glow-grandmaster {
@@ -737,9 +738,10 @@ body::before {
 }
 
 .rank-name {
-  font-size: 0.8rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -918,8 +920,8 @@ body::before {
 
 .history-toggle-btn:hover, .share-btn:hover {
   color: var(--text);
-  border-color: rgba(215, 122, 168, 0.24);
-  background: rgba(215, 122, 168, 0.08);
+  border-color: rgba(217, 184, 95, 0.24);
+  background: rgba(217, 184, 95, 0.08);
   transform: translateY(-1px);
 }
 
@@ -1542,7 +1544,7 @@ body::before {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  border: 2px solid rgba(215, 122, 168, 0.4);
+  border: 2px solid rgba(217, 184, 95, 0.4);
 }
 
 .champ-modal__header h2 {
@@ -1568,7 +1570,7 @@ body::before {
 }
 
 .champ-modal__close:hover {
-  background: rgba(215, 122, 168, 0.15);
+  background: rgba(217, 184, 95, 0.15);
   color: #fff;
 }
 
@@ -1776,7 +1778,7 @@ body::before {
   max-width: 900px;
   max-height: 95vh;
   background: #0f111a;
-  border: 1px solid rgba(215, 122, 168, 0.3);
+  border: 1px solid rgba(217, 184, 95, 0.3);
   border-radius: 24px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
   display: flex;
@@ -2502,7 +2504,7 @@ body::before {
 
 .note-header h3 {
   font-size: 1rem;
-  color: var(--pink);
+  color: var(--accent);
   margin: 0;
 }
 
@@ -2615,7 +2617,7 @@ body::before {
 
 .heat-bar-fill {
   width: 100%;
-  background: var(--pink);
+  background: var(--accent);
   border-radius: 4px;
   transition: height 0.5s ease;
 }
@@ -2697,8 +2699,8 @@ body::before {
 .prediction-box {
   margin-top: 10px;
   padding: 14px;
-  background: rgba(215, 122, 168, 0.08);
-  border: 1px solid rgba(215, 122, 168, 0.2);
+  background: rgba(217, 184, 95, 0.08);
+  border: 1px solid rgba(217, 184, 95, 0.2);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -2712,7 +2714,7 @@ body::before {
 .prediction-icon {
   width: 45px;
   height: 45px;
-  filter: drop-shadow(0 0 8px rgba(215, 122, 168, 0.4));
+  filter: drop-shadow(0 0 8px rgba(217, 184, 95, 0.4));
 }
 .prediction-title {
   font-size: 0.85rem;
@@ -2743,7 +2745,7 @@ body::before {
 .tournament-box {
   width: 90%; max-width: 500px;
   background: #0f111a;
-  border: 1px solid rgba(215, 122, 168, 0.3);
+  border: 1px solid rgba(217, 184, 95, 0.3);
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.8);
@@ -2797,8 +2799,8 @@ body::before {
   height: 40px;
   padding: 0;
   border-radius: 10px;
-  background: rgba(215, 122, 168, 0.2);
-  border-color: rgba(215, 122, 168, 0.3);
+  background: rgba(217, 184, 95, 0.2);
+  border-color: rgba(217, 184, 95, 0.3);
 }
 
 .activity-toggle {
@@ -2900,8 +2902,8 @@ body::before {
 
 .reaction-btn:hover { background: rgba(255, 255, 255, 0.08); }
 .reaction-btn--active {
-  background: rgba(215, 122, 168, 0.1);
-  border-color: rgba(215, 122, 168, 0.2);
+  background: rgba(217, 184, 95, 0.1);
+  border-color: rgba(217, 184, 95, 0.2);
   color: #fff;
 }
 
@@ -3427,7 +3429,7 @@ body::before {
   max-width: 1100px;
   max-height: 92vh;
   border-radius: 24px;
-  border: 1px solid rgba(215, 122, 168, 0.2);
+  border: 1px solid rgba(217, 184, 95, 0.2);
   position: relative;
   overflow-y: auto;
   box-shadow: 0 30px 80px rgba(0,0,0,0.8);
@@ -3497,6 +3499,6 @@ body::before {
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--pink);
+  background: var(--accent);
 }
 
