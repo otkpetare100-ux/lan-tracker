@@ -1403,6 +1403,19 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
   channel.send({ embeds: [embed] });
 }
 
+// Función para notificar al admin vía DM
+async function notifyAdmin(message) {
+  if (!client || !process.env.ADMIN_DISCORD_ID) return;
+  try {
+    const admin = await client.users.fetch(process.env.ADMIN_DISCORD_ID);
+    if (admin) {
+      await admin.send(message);
+    }
+  } catch (e) {
+    console.error('[Admin Notify Error]', e);
+  }
+}
+
 module.exports = { 
   initBot, 
   notifyRankChange, 
@@ -1411,6 +1424,6 @@ module.exports = {
   notifyBetResults, 
   notifyRemake, 
   notifyChallengeComplete, 
-  updateUserRoles, 
+  notifyAdmin,
   GACHA_ITEMS 
 };

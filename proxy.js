@@ -79,6 +79,47 @@ async function connectDB() {
       }
     }, 60 * 1000);
 
+    // --- Monitor de Vencimiento de API Key (Riot Dev Key = 24h) ---
+    setInterval(async () => {
+      try {
+        const config = await db.collection('system_config').findOne({ key: 'riot_api_status' });
+        const currentKey = process.env.RIOT_API_KEY;
+        const now = new Date();
+
+        if (!config || config.api_key_value !== currentKey) {
+          // La clave ha cambiado o no existe registro: actualizar marca de tiempo
+          await db.collection('system_config').updateOne(
+            { key: 'riot_api_status' },
+            { 
+              $set: { 
+                api_key_value: currentKey, 
+                updated_at: now,
+                notified: false 
+              } 
+            },
+            { upsert: true }
+          );
+          console.log('[API Monitor] Nueva API Key detectada. Cronómetro de 24h iniciado.');
+        } else if (!config.notified) {
+          // Calcular cuánto tiempo ha pasado
+          const diffMs = now - new Date(config.updated_at);
+          const diffMin = Math.floor(diffMs / (1000 * 60));
+          
+          // 1439 minutos = 23h 59m
+          if (diffMin >= 1439) {
+            await notifyAdmin('⚠️ **RECORDATORIO:** Tu API Key de Riot vencerá en **1 minuto**. ¡Renuévala en el portal de Riot y actualiza Railway!');
+            await db.collection('system_config').updateOne(
+              { key: 'riot_api_status' },
+              { $set: { notified: true } }
+            );
+            console.log('[API Monitor] Notificación de vencimiento enviada al administrador.');
+          }
+        }
+      } catch (e) {
+        console.error('[API Monitor Error]', e);
+      }
+    }, 60 * 1000); // Revisar cada minuto
+
     // Escaneo de Partidas en Vivo cada 1 min
     
     setInterval(async () => {
