@@ -1350,10 +1350,32 @@ window.showCreateTournament = function() {
   `;
 };
 
+window.showCustomAlert = function(title, message) {
+  return new Promise(resolve => {
+    const dialog = document.getElementById('customDialog');
+    document.getElementById('cd-title').textContent = title;
+    document.getElementById('cd-message').textContent = message;
+    document.getElementById('cd-input').style.display = 'none';
+    
+    const cancelBtn = document.getElementById('cd-cancel');
+    const confirmBtn = document.getElementById('cd-confirm');
+    
+    cancelBtn.style.display = 'none'; // Alert solo tiene Aceptar
+    
+    const cleanup = () => {
+      dialog.style.display = 'none';
+      confirmBtn.onclick = null;
+    };
+    
+    confirmBtn.onclick = () => { cleanup(); resolve(true); };
+    dialog.style.display = 'flex';
+  });
+};
+
 window.saveTournament = async function() {
   const name = document.getElementById('t-name').value;
   const selected = Array.from(document.querySelectorAll('.t-participant:checked')).map(i => i.value);
-  if (!name || selected.length < 2) return alert('Datos insuficientes (mínimo nombre y 2 participantes)');
+  if (!name || selected.length < 2) return showCustomAlert('Datos insuficientes', 'Debes ingresar un nombre y seleccionar al menos 2 participantes.');
   
   await fetch('/tournaments', {
     method: 'POST',
@@ -1364,7 +1386,7 @@ window.saveTournament = async function() {
 };
 
 window.viewTournament = async function(id) {
-  alert('Visualización de bracket para el ID: ' + id + ' (Funcionalidad de guardado de ganador en desarrollo)');
+  showCustomAlert('Torneo', 'Visualización de bracket para el ID: ' + id + ' (En desarrollo)');
 };
 
 /* ---- Funcionalidad: Feed de Actividad ---- */
@@ -1641,8 +1663,69 @@ function renderScoreboardContent(data) {
   html += renderTeamTable('Equipo Rojo', redTeam, 'red-team', data.teams[200], maxDmg, data.gameDuration);
   html += '</div>';
   html += '<div id="tab-stats" class="tab-content">' + renderStatsContent(data) + '</div>';
+
   return html;
 }
+
+/* --- Diálogos Personalizados Premium --- */
+window.showCustomConfirm = function(title, message) {
+  return new Promise(resolve => {
+    const dialog = document.getElementById('customDialog');
+    document.getElementById('cd-title').textContent = title;
+    document.getElementById('cd-message').textContent = message;
+    
+    const input = document.getElementById('cd-input');
+    input.style.display = 'none';
+    input.value = '';
+    
+    const cancelBtn = document.getElementById('cd-cancel');
+    const confirmBtn = document.getElementById('cd-confirm');
+    
+    cancelBtn.style.display = 'block';
+    
+    const cleanup = () => {
+      dialog.style.display = 'none';
+      cancelBtn.onclick = null;
+      confirmBtn.onclick = null;
+    };
+    
+    cancelBtn.onclick = () => { cleanup(); resolve(false); };
+    confirmBtn.onclick = () => { cleanup(); resolve(true); };
+    
+    dialog.style.display = 'flex';
+  });
+};
+
+window.showCustomPrompt = function(title, message, defaultValue = '') {
+  return new Promise(resolve => {
+    const dialog = document.getElementById('customDialog');
+    document.getElementById('cd-title').textContent = title;
+    document.getElementById('cd-message').textContent = message;
+    
+    const input = document.getElementById('cd-input');
+    input.style.display = 'block';
+    input.value = defaultValue;
+    
+    const cancelBtn = document.getElementById('cd-cancel');
+    const confirmBtn = document.getElementById('cd-confirm');
+    
+    cancelBtn.style.display = 'block';
+    
+    const cleanup = () => {
+      dialog.style.display = 'none';
+      cancelBtn.onclick = null;
+      confirmBtn.onclick = null;
+      input.onkeydown = null;
+    };
+    
+    cancelBtn.onclick = () => { cleanup(); resolve(null); };
+    confirmBtn.onclick = () => { cleanup(); resolve(input.value); };
+    input.onkeydown = (e) => { if(e.key === 'Enter') confirmBtn.click(); };
+    
+    dialog.style.display = 'flex';
+    setTimeout(() => input.focus(), 100);
+  });
+};
 
 function renderStatsContent(data) {
   let html = '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">';

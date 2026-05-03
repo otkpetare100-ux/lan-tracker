@@ -315,8 +315,8 @@ accountsGrid.addEventListener('click', async (e) => {
 
   if (removeBtn) {
     const puuid = removeBtn.dataset.puuid;
-    const acc = accounts.find(a => a.puuid === puuid);
-    showDeleteConfirm(acc?.gameName || 'esta cuenta', async () => {
+    const ok = await showCustomConfirm('Eliminar Cuenta', '¿Estás seguro de que deseas dejar de rastrear a este jugador?');
+    if (ok) {
       await deleteAccount(puuid);
       accounts = accounts.filter(a => a.puuid !== puuid);
       updateGlobalRef();
@@ -325,7 +325,9 @@ accountsGrid.addEventListener('click', async (e) => {
         window.selectedToCompare = window.selectedToCompare.filter(p => p !== puuid);
       }
       applyFilters();
-    });
+      showToast('Cuenta eliminada', 'toast-neutral');
+    }
+    return;
   }
 
   if (refreshBtn) {
