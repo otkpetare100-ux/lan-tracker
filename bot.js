@@ -1007,7 +1007,10 @@ function initBot(db) {
           return interaction.message.delete().catch(() => {});
         }
 
-        const [act, choice, puuid] = interaction.customId.split('_');
+        const parts_bet = interaction.customId.split('_');
+        const act = parts_bet[0];
+        const choice = parts_bet[1];
+        const puuid = parts_bet.slice(2).join('_');
 
         if (act === 'bet') {
           // Obtener saldo del usuario para mostrarlo en el modal
@@ -1034,7 +1037,10 @@ function initBot(db) {
       }
 
       if (interaction.isModalSubmit()) {
-        const [type, action, choice, puuid] = interaction.customId.split('_');
+        const parts = interaction.customId.split('_');
+        const [type, action, choice] = parts;
+        const puuid = parts.slice(3).join('_');
+
         if (type !== 'modal' || action !== 'bet') return;
 
         const amount = parseInt(interaction.fields.getTextInputValue('bet_amount'));
