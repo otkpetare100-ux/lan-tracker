@@ -987,9 +987,9 @@ function initBot(db) {
               .setTitle('🐾 Guía de Comandos - LAN Tracker')
               .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
               .addFields(
-                { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango.\n`!stats [Nombre#TAG]` - Estadísticas.\n`!vincular Nombre#TAG` - Vincula tu cuenta.\n`!ladder` - Top 10 jugadores.' },
-                { name: '💰 Economía', value: '`!monedas` - Mira tu saldo.\n`!diario` - Reclama 100 coins.\n`!pagar @usuario [cant]` - Envía monedas.\n`!top_ricos` - Top 10 ricos.' },
-                { name: '🎮 Diversión', value: '`!apostar` - Apuesta.\n`!trade @u mio, suyo` - Trade.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reciclar` - Desencantar repetidos.' }
+                { name: '👤 Perfil y Rango', value: '`!perfil [N#T]` - Mira tu rango.\n`!stats [N#T]` - Estadísticas.\n`!ladder` - Top 10 Jugadores.\n`!shame` - Muro de la vergüenza.' },
+                { name: '💰 Economía', value: '`!monedas` - Tu saldo.\n`!diario` - 100 coins gratis.\n`!pagar @u cant` - Enviar coins.\n`!top_ricos` - Top 10 Ricos.' },
+                { name: '🎮 Diversión y Colección', value: '`!apostar` - Apuesta en vivo.\n`!ludopata` - Mira tus apuestas.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reroll` - Fusiona 3 repetidos.\n`!reciclar` - Desencanta repetidos.' }
               )
               .setColor(0x576bce)
               .setFooter({ text: 'Naafiri Bot' });
@@ -999,9 +999,10 @@ function initBot(db) {
             const adminEmbed = new EmbedBuilder()
               .setTitle('🛠️ Panel de Administración')
               .addFields(
-                { name: '💰 Economía', value: '`!admin_dar @u cant` - Dar.\n`!admin_quitar @u cant` - Quitar.\n`!admin_setcoins @u cant` - Setear.' },
-                { name: '🎒 Items', value: '`!admin_daritem @u id` - Dar item.\n`!admin_clearinv @u` - Vaciar.' },
-                { name: '🎭 Sistema', value: '`!admin_anuncio [msg]` - Anuncio.\n`!admin_purge [n]` - Limpiar chat.\n`!test_notif` - Test notificaciones.' }
+                { name: '💰 Economía', value: '`!admin_dar @u cant` - Dar.\n`!admin_quitar @u cant` - Quitar.\n`!admin_setcoins @u cant` - Setear.\n`!admin_resetdiario @u` - Reset cooldown diario.' },
+                { name: '🎒 Items', value: '`!admin_daritem @u id` - Dar item.\n`!admin_clearinv @u` - Vaciar mochila.' },
+                { name: '🎭 Sistema y Diagnóstico', value: '`!admin_stats` - Stats globales.\n`!admin_debug_key` - Estado API Key.\n`!admin_anuncio [msg]` - Anuncio.\n`!admin_purge [n]` - Limpiar chat.' },
+                { name: '🧪 Pruebas', value: '`!test_notif` - Test notificaciones.\n`!admin_syncroles` - Sincronizar roles.' }
               )
               .setColor(0xd93f3f)
               .setFooter({ text: 'Naafiri Admin' });
