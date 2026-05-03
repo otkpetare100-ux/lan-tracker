@@ -141,20 +141,21 @@
 
         .items-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
         }
 
         .item-card {
             background: #0d1117;
             border: 1px solid #21262d;
             border-radius: 12px;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 200px;
         }
 
         .item-card::before {
@@ -203,8 +204,8 @@
 
         .item-name {
             font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
             display: block;
             color: #fff;
             white-space: nowrap;
@@ -213,8 +214,8 @@
         }
 
         .item-rarity {
-            font-size: 0.7rem;
-            padding: 4px 12px;
+            font-size: 0.6rem;
+            padding: 3px 10px;
             border-radius: 4px;
             text-transform: uppercase;
             font-weight: 800;
