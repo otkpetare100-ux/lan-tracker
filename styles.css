@@ -588,13 +588,13 @@ body {
 
 /* --- Feed de Actividad --- */
 .activity-item {
-  padding: 12px 15px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  transition: var(--transition);
+  padding: 12px 15px 12px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.2s ease;
 }
 
 .activity-item:hover {
-  background: rgba(200, 155, 60, 0.05);
+  background: rgba(200, 155, 60, 0.07);
 }
 
 .activity-msg {
@@ -610,11 +610,13 @@ body {
 }
 
 /* Tipos de actividad */
-.activity-item--rank_up   { border-left: 3px solid #27a170; }
-.activity-item--rank_down { border-left: 3px solid #d93f3f; }
-.activity-item--live      { border-left: 3px solid #3b82f6; }
-.activity-item--goal      { border-left: 3px solid var(--gold-primary); }
-.activity-item--challenge_win { border-left: 3px solid #a855f7; }
+.activity-item--rank_up   { border-left: 3px solid #27a170; padding-left: 15px; }
+.activity-item--rank_down { border-left: 3px solid #d93f3f; padding-left: 15px; }
+.activity-item--live      { border-left: 3px solid #3b82f6; padding-left: 15px; }
+.activity-item--goal      { border-left: 3px solid var(--gold-primary); padding-left: 15px; }
+.activity-item--challenge_win { border-left: 3px solid #a855f7; padding-left: 15px; }
+.activity-item--bet_win   { border-left: 3px solid #22c55e; padding-left: 15px; }
+.activity-item--bet_loss  { border-left: 3px solid #f97316; padding-left: 15px; }
 
 .activity-sidebar-header {
   display: flex;

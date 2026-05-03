@@ -1417,9 +1417,20 @@ async function renderActivityFeed() {
     }
     sessionStorage.setItem('last_activity_count', logs.length);
 
+    const TYPE_ICON = {
+      rank_up:       '📈',
+      rank_down:     '📉',
+      live:          '🔴',
+      goal:          '🎯',
+      challenge_win: '🏆',
+      bet_win:       '💰',
+      bet_loss:      '💸',
+    };
+
     container.innerHTML = logs.map(function(log) {
+      const icon = TYPE_ICON[log.type] || '📋';
       return '<div class="activity-item activity-item--' + log.type + '">' +
-        '<div class="activity-msg">' + log.message + '</div>' +
+        '<div class="activity-msg"><span style="margin-right:6px;">' + icon + '</span>' + log.message + '</div>' +
         '<div class="activity-time">' + formatRelativeTime(log.timestamp) + '</div>' +
       '</div>';
     }).join('');
