@@ -126,7 +126,7 @@ function initBot(db) {
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
       
       helpCooldowns.set(msg.author.id, now);
-      return msg.reply({ embeds: [embed] });
+      return msg.channel.send({ content: `<@${msg.author.id}>`, embeds: [embed] });
     }
 
     if (command === 'help_admin' || command === 'admin_help') {
@@ -181,7 +181,7 @@ function initBot(db) {
         }
       );
 
-      msg.reply(`♻️ ¡Has desencantado **${itemsRemoved} objetos** repetidos y has recibido **${totalGain} Naafiri Coins**! 💰`);
+      msg.channel.send(`<@${msg.author.id}> ♻️ ¡Has desencantado **${itemsRemoved} objetos** repetidos y has recibido **${totalGain} Naafiri Coins**! 💰`);
     }
 
     if (command === 'perfil') {
@@ -243,9 +243,9 @@ function initBot(db) {
 
     if (command === 'vincular') {
       const slug = args.join(' '); // Soporta nombres con espacios
-      if (!slug) return msg.reply('Uso: `!vincular Nombre#TAG`');
+      if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: \`!vincular Nombre#TAG\``);
       const acc = await findAccountBySlug(slug);
-      if (!acc) return msg.reply('❌ No encontré esa cuenta en el dashboard.');
+      if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ No encontré esa cuenta en el dashboard.`);
 
       const res = await db.collection('accounts').updateOne(
         { puuid: acc.puuid },
@@ -259,16 +259,16 @@ function initBot(db) {
       );
 
       if (res.modifiedCount > 0 || res.upsertedCount > 0) {
-        msg.reply(`✅ ¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
+        msg.channel.send(`<@${msg.author.id}> ✅ ¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
       } else {
-        msg.reply('❌ No encontré esa cuenta en el dashboard.');
+        msg.channel.send(`<@${msg.author.id}> ❌ No encontré esa cuenta en el dashboard.`);
       }
     }
 
     if (command === 'monedas' || command === 'bal') {
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
       const bal = user ? user.coins : 0;
-      msg.reply(`💰 Tienes **${bal} Naafiri Coins**. Use \`!diario\` para reclamar más.`);
+      msg.channel.send(`<@${msg.author.id}> 💰 Tienes **${bal} Naafiri Coins**. Use \`!diario\` para reclamar más.`);
     }
 
     if (command === 'diario') {
@@ -282,16 +282,12 @@ function initBot(db) {
           const remaining = waitTime - diff;
           const hours = Math.floor(remaining / (1000 * 60 * 60));
           const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-          return msg.reply(`⌛ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
+          return msg.channel.send(`<@${msg.author.id}> ⌛ Ya reclamaste tus monedas hoy. Vuelve en **${hours}h ${minutes}m**.`);
         }
       }
 
-      await db.collection('economy').updateOne(
-        { discordId: msg.author.id },
-        { $inc: { coins: 100 }, $set: { lastDaily: now, discordTag: msg.author.tag } },
-        { upsert: true }
-      );
-      msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.');
+      await db.collection('economy').updateOne({ discordId: msg.author.id }, { $set: { lastDaily: new Date() }, $inc: { coins: 100 } }, { upsert: true });
+      msg.channel.send(`<@${msg.author.id}> 💰 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.`);
     }
 
     if (command === 'pagar' || command === 'enviar') {
@@ -299,16 +295,16 @@ function initBot(db) {
       const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
 
       if (!target || isNaN(amount) || amount <= 0) {
-        return msg.reply('❌ Uso: `!pagar @usuario [cantidad]`');
+        return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!pagar @usuario [cantidad]\``);
       }
 
       if (target.id === msg.author.id) {
-        return msg.reply('🤡 No puedes pagarte a ti mismo.');
+        return msg.channel.send(`<@${msg.author.id}> 🚫 No puedes pagarte a ti mismo.`);
       }
 
       const senderEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!senderEco || senderEco.coins < amount) {
-        return msg.reply(`❌ No tienes suficientes Naafiri Coins (Saldo: ${senderEco?.coins || 0}).`);
+        return msg.channel.send(`<@${msg.author.id}> ❌ No tienes suficientes Naafiri Coins (Saldo: ${senderEco?.coins || 0}).`);
       }
 
       // Transferencia atómica
@@ -319,7 +315,7 @@ function initBot(db) {
         { upsert: true }
       );
 
-      msg.channel.send(`💸 **${msg.author.username}** le ha enviado **${amount} Naafiri Coins** a **${target.username}**!`);
+      msg.channel.send(`<@${msg.author.id}> ✅ ¡Transferencia completada! Has enviado **${amount} coins** a **${target.username}**.`);
     }
 
     if (command === 'trade' || command === 'cambio') {
@@ -514,7 +510,7 @@ function initBot(db) {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
       if (!userEco || userEco.coins < COST) {
-        return msg.reply(`❌ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
+        return msg.channel.send(`<@${msg.author.id}> ❌ No tienes suficientes coins. El tiro de Gachapon cuesta **${COST} 💰**.`);
       }
 
       // Sistema de Pesos para Probabilidades
