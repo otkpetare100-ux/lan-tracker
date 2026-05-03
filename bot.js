@@ -977,15 +977,19 @@ function initBot(db) {
         const [act, choice, puuid] = interaction.customId.split('_');
 
         if (act === 'bet') {
+          // Obtener saldo del usuario para mostrarlo en el modal
+          const userEco = await dbInstance.collection('economy').findOne({ discordId: interaction.user.id });
+          const currentCoins = userEco ? userEco.coins : 0;
+
           const modal = new ModalBuilder()
             .setCustomId(`modal_bet_${choice}_${puuid}`)
-            .setTitle(`Apuesta: ${choice.toUpperCase()}`);
+            .setTitle(`Apuesta: ${choice.toUpperCase()} (Saldo: ${currentCoins})`);
 
           const amountInput = new TextInputBuilder()
             .setCustomId('bet_amount')
-            .setLabel('¿Cuánto quieres apostar?')
+            .setLabel(`¿Cuánto apostar? (Saldo: ${currentCoins})`)
             .setStyle(TextInputStyle.Short)
-            .setPlaceholder('Ingresa la cantidad de Naafiri Coins')
+            .setPlaceholder(`Ej: 100 (Tienes ${currentCoins})`)
             .setRequired(true);
 
           const firstActionRow = new ActionRowBuilder().addComponents(amountInput);
