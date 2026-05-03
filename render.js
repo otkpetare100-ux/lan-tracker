@@ -1485,15 +1485,15 @@ function formatRelativeTime(timestamp) {
   return new Date(timestamp).toLocaleDateString();
 }
 
-// Inicializar al cargar
-document.addEventListener('DOMContentLoaded', function() {
+// Inicializar al cargar (IIFE — scripts están al final del body, DOM ya existe)
+(function initActivitySidebar() {
   renderActivityFeed();
-  setInterval(renderActivityFeed, 30000); // Cada 30s
+  setInterval(renderActivityFeed, 30000);
   
-  const sidebar = document.getElementById('activity-sidebar');
-  const pinBtn = document.getElementById('activity-pin');
-
+  const sidebar   = document.getElementById('activity-sidebar');
   const toggleBtn = document.getElementById('activity-toggle');
+  const pinBtn    = document.getElementById('activity-pin');
+
   if (sidebar && toggleBtn) {
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1508,7 +1508,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (pinBtn) {
     pinBtn.addEventListener('click', toggleActivityPin);
   }
-});
+})();
 
 /* --- Hall of Fame Rendering --- */
 window.openHof = async function() {
