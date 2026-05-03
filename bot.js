@@ -191,7 +191,7 @@ function initBot(db) {
       if (!slug) {
         // Intentar buscar vinculación automática
         acc = await db.collection('accounts').findOne({ discordId: msg.author.id });
-        if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.`);
+        if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ No estás vinculado. Usa \`!perfil Nombre#TAG\` o vincúlate con \`!vincular\`.`);
       } else {
         acc = await findAccountBySlug(slug);
       }
@@ -320,10 +320,10 @@ function initBot(db) {
 
     if (command === 'trade' || command === 'cambio') {
       const target = msg.mentions.users.first();
-      if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: `!trade @usuario MiCampeon, SuCampeon``);
+      if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!trade @usuario MiCampeon, SuCampeon\``);
 
       const parts = args.slice(1).join(' ').split(',').map(p => p.trim());
-      if (parts.length < 2) return msg.channel.send(`<@${msg.author.id}> ❌ Indica ambos campeones separados por una coma. Ej: `!trade @user Lux, Teemo``);
+      if (parts.length < 2) return msg.channel.send(`<@${msg.author.id}> ❌ Indica ambos campeones separados por una coma. Ej: \`!trade @user Lux, Teemo\``);
 
       const senderEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       const targetEco = await db.collection('economy').findOne({ discordId: target.id });
@@ -449,7 +449,7 @@ function initBot(db) {
       const targetSlug = filteredArgs.slice(2).join(' ');
 
       if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
-        return msg.channel.send(`<@${msg.author.id}> ❌ Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]``);
+        return msg.channel.send(`<@${msg.author.id}> ❌ Uso: \`!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]\``);
       }
 
       const targetAcc = await findAccountBySlug(targetSlug);
@@ -579,7 +579,7 @@ function initBot(db) {
     if (command === 'mochila' || command === 'inv') {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!userEco || !userEco.inventory || userEco.inventory.length === 0) {
-        return msg.channel.send(`<@${msg.author.id}> 🎒 Tu mochila está vacía. ¡Usa `!gacha` para empezar tu colección!`);
+        return msg.channel.send(`<@${msg.author.id}> 🎒 Tu mochila está vacía. ¡Usa \`!gacha\` para empezar tu colección!`);
       }
 
       // Agrupar items duplicados y contar cantidad
@@ -655,7 +655,7 @@ function initBot(db) {
         const target = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
-          return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_dar @usuario cantidad``);
+          return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_dar @usuario cantidad\``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $inc: { coins: amount }, $set: { discordTag: target.tag } },
@@ -669,7 +669,7 @@ function initBot(db) {
         const target = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
-          return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_quitar @usuario cantidad``);
+          return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_quitar @usuario cantidad\``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $inc: { coins: -amount } }
@@ -683,7 +683,7 @@ function initBot(db) {
         const targetUser = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         
-        if (isNaN(amount)) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_setcoins [@usuario o @rol] cantidad``);
+        if (isNaN(amount)) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_setcoins [@usuario o @rol] cantidad\``);
 
         if (role) {
           const members = await msg.guild.members.fetch();
@@ -705,14 +705,14 @@ function initBot(db) {
           );
           return msg.channel.send(`<@${msg.author.id}> ✅ Saldo de **${targetUser.username}** establecido en **${amount} coins**.`);
         } else {
-          return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_setcoins [@usuario o @rol] cantidad``);
+          return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_setcoins [@usuario o @rol] cantidad\``);
         }
       }
 
       // !admin_resetdiario @usuario
       if (command === 'admin_resetdiario') {
         const target = msg.mentions.users.first();
-        if (!target) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_resetdiario @usuario``);
+        if (!target) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_resetdiario @usuario\``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $unset: { lastDaily: '' } }
@@ -724,7 +724,7 @@ function initBot(db) {
         const target = msg.mentions.users.first();
         const itemId = args[1];
         const item = GACHA_ITEMS.find(i => i.id === itemId);
-        if (!target || !item) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_daritem @usuario <itemId>``);
+        if (!target || !item) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_daritem @usuario <itemId>\``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $addToSet: { inventory: { id: item.id, name: item.name, rarity: item.rarity, date: new Date() } } },
@@ -800,7 +800,7 @@ function initBot(db) {
 
       if (command === 'admin_check') {
         const slug = args.join(' ');
-        if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_check Nombre#TAG``);
+        if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_check Nombre#TAG\``);
         
         const acc = await findAccountBySlug(slug);
         if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
@@ -838,7 +838,7 @@ function initBot(db) {
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
-        if (!target) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_clearinv @usuario``);
+        if (!target) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_clearinv @usuario\``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $set: { inventory: [] } }
@@ -849,7 +849,7 @@ function initBot(db) {
       // !admin_anuncio [mensaje]
       if (command === 'admin_anuncio') {
         const message = args.join(' ');
-        if (!message) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_anuncio [mensaje]``);
+        if (!message) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_anuncio [mensaje]\``);
         const embed = new EmbedBuilder()
           .setTitle('📢 ANUNCIO OFICIAL')
           .setDescription(message)
@@ -886,7 +886,7 @@ function initBot(db) {
       // !admin_cancelarApuestas Nombre#TAG
       if (command === 'admin_cancelarapuestas') {
         const slug = args.join(' ');
-        if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_cancelarApuestas Nombre#TAG``);
+        if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: \`!admin_cancelarApuestas Nombre#TAG\``);
         const [name, tag] = slug.split('#');
         const acc = await db.collection('accounts').findOne({
           gameName: { $regex: new RegExp(`^${name}$`, 'i') },
@@ -911,7 +911,7 @@ function initBot(db) {
       // !admin_resetAll CONFIRMAR
       if (command === 'admin_resetall') {
         if (args[0] !== 'CONFIRMAR') {
-          return msg.channel.send(`<@${msg.author.id}> ⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR``);
+          return msg.channel.send(`<@${msg.author.id}> ⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: \`!admin_resetAll CONFIRMAR\``);
         }
         const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
         return msg.channel.send(`<@${msg.author.id}> ✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
@@ -921,7 +921,7 @@ function initBot(db) {
       if (command === 'admin_purge') {
         const amount = args[0] ? parseInt(args[0]) : 100;
         if (isNaN(amount) || amount <= 0 || amount > 100) {
-          return msg.channel.send(`<@${msg.author.id}> ❌ Por favor, elige un número entre 1 y 100.`);
+          return msg.channel.send(`<@${msg.author.id}> ⚠️ Elija un número entre 1 y 100.`);
         }
 
         try {
