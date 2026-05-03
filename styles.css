@@ -883,6 +883,64 @@ body {
 .table-dmg { color: var(--gold-primary); font-size: 0.8rem; }
 .table-item { width: 24px; height: 24px; border-radius: 4px; margin-right: 2px; }
 
+/* Scoreboard Extras */
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px 8px 0 0;
+  margin-top: 15px;
+}
+
+.team-title {
+  font-family: var(--font-title);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.blue-team .team-title { color: #00b4ff; }
+.red-team .team-title { color: #ff4b4b; }
+
+.team-summary-stats {
+  display: flex;
+  gap: 15px;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.player-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--gold-primary);
+  font-family: var(--font-title);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(200, 155, 60, 0.2);
+  border-top: 4px solid var(--gold-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Modal Header */
 .modal-header {
   display: flex;
