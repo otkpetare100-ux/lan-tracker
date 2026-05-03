@@ -3,6 +3,20 @@ const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args
 
 let client = null;
 let targetChannelId = process.env.DISCORD_CHANNEL_ID;
+let DDRAGON_VERSION = '15.8.1';
+
+// Función para actualizar la versión de Data Dragon desde el bot
+async function updateBotDDragonVersion() {
+  try {
+    const res = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+    const versions = await res.json();
+    if (versions && versions.length > 0) {
+      DDRAGON_VERSION = versions[0];
+    }
+  } catch (e) {}
+}
+updateBotDDragonVersion();
+setInterval(updateBotDDragonVersion, 1000 * 60 * 60 * 24);
 
 const RANK_COLORS = {
   IRON: 0x51484a, BRONZE: 0x8c5230, SILVER: 0x80989d, GOLD: 0xcd8837,
@@ -137,7 +151,7 @@ function initBot(db) {
 
       const embed = new EmbedBuilder()
         .setTitle(`${acc.gameName}#${acc.tagLine}`)
-        .setThumbnail(`https://ddragon.leagueoflegends.com/cdn/15.8.1/img/profileicon/${acc.profileIconId}.png`)
+        .setThumbnail(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/${acc.profileIconId}.png`)
         .setColor(RANK_COLORS[acc.soloQ?.tier] || 0xffffff)
         .addFields(
           { name: 'Rango SoloQ', value: acc.soloQ ? `${acc.soloQ.tier} ${acc.soloQ.rank} (${acc.soloQ.leaguePoints} LP)` : 'Unranked', inline: true },
@@ -669,7 +683,7 @@ function initBot(db) {
         if (res.ok) {
           const game = await res.json();
           // Obtener nombre del campeón
-          const champRes = await fetch('https://ddragon.leagueoflegends.com/cdn/15.8.1/data/es_MX/champion.json');
+          const champRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/data/es_MX/champion.json`);
           const champData = await champRes.json();
           const me = game.participants.find(p => p.puuid === acc.puuid);
           const champName = me ? (Object.values(champData.data).find(c => c.key == me.championId)?.name || 'Desconocido') : 'Desconocido';

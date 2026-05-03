@@ -256,10 +256,8 @@ async function settleBets(acc) {
 
     while (attempts < maxAttempts) {
       try {
-        const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-summoner/${p.summonerId}`;
-        const leagueRes = await fetch(leagueUrl, {
-          headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
-        });
+        const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}`;
+        const leagueRes = await fetch(`${leagueUrl}?api_key=${API_KEY}`);
         const leagues = await leagueRes.json();
         const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5');
         
