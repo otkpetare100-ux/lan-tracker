@@ -491,8 +491,6 @@ function initBot(db) {
       msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ${revealMsg} 🤡`);
     }
 
-    }
-
     if (command === 'gacha' || command === 'tiro') {
       const COST = 10;
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
