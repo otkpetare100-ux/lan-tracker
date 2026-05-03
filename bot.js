@@ -91,7 +91,7 @@ function initBot(db) {
                 .addFields(
           { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
           { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!pagar @usuario [cant]` - Envía monedas a un amigo.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
-          { name: '🎮 Diversión y Apuestas', value: '`!apostar` - Apuesta (ahora también con botones).\n`!ludopata [@usuario]` - Mira estadísticas de apuestas.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!desencantar` - Recicla repetidos.\n`!reroll [rareza]` - Fusiona 3 repetidos.\n`!shame` - El muro de la vergüenza.' }
+          { name: '🎮 Diversión y Apuestas', value: '`!apostar` - Apuesta (ahora también con botones).\n`!trade @u mio, suyo` - Intercambia campeones.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!reroll [rareza]` - Fusiona 3 repetidos.' }
         )
         .setColor(0x576bce)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
@@ -285,6 +285,39 @@ function initBot(db) {
       );
 
       msg.channel.send(`💸 **${msg.author.username}** le ha enviado **${amount} Naafiri Coins** a **${target.username}**!`);
+    }
+
+    if (command === 'trade' || command === 'cambio') {
+      const target = msg.mentions.users.first();
+      if (!target || target.id === msg.author.id) return msg.reply('❌ Uso: `!trade @usuario MiCampeon, SuCampeon`');
+
+      const parts = args.slice(1).join(' ').split(',').map(p => p.trim());
+      if (parts.length < 2) return msg.reply('❌ Indica ambos campeones separados por una coma. Ej: `!trade @user Lux, Teemo`');
+
+      const senderEco = await db.collection('economy').findOne({ discordId: msg.author.id });
+      const targetEco = await db.collection('economy').findOne({ discordId: target.id });
+
+      if (!senderEco || !senderEco.inventory) return msg.reply('❌ No tienes items en tu mochila.');
+      if (!targetEco || !targetEco.inventory) return msg.reply('❌ El usuario destino no tiene mochila.');
+
+      const myItem = GACHA_ITEMS.find(i => i.name.toLowerCase().includes(parts[0].toLowerCase()) && senderEco.inventory.includes(i.id));
+      const suItem = GACHA_ITEMS.find(i => i.name.toLowerCase().includes(parts[1].toLowerCase()) && targetEco.inventory.includes(i.id));
+
+      if (!myItem) return msg.reply(`❌ No tienes a **${parts[0]}** en tu mochila.`);
+      if (!suItem) return msg.reply(`❌ **${target.username}** no tiene a **${parts[1]}**.`);
+
+      const embed = new EmbedBuilder()
+        .setTitle('🤝 Propuesta de Intercambio')
+        .setDescription(`**${msg.author.username}** quiere intercambiar:\n\n📤 Te da: **${myItem.name}** (${myItem.rarity})\n📥 Recibe: **${suItem.name}** (${suItem.rarity})\n\n¿Aceptas el trato, **${target.username}**?`)
+        .setColor(0x3498db)
+        .setFooter({ text: 'Esta oferta expira en 1 minuto.' });
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId(`tr_acc_${msg.author.id}_${target.id}_${myItem.id}_${suItem.id}`).setLabel('Aceptar ✅').setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId(`tr_rej_${msg.author.id}_${target.id}`).setLabel('Rechazar ❌').setStyle(ButtonStyle.Danger)
+      );
+
+      return msg.channel.send({ content: `<@${target.id}>`, embeds: [embed], components: [row] });
     }
 
     if (command === 'shame' || command === 'muro') {
@@ -957,6 +990,52 @@ function initBot(db) {
           content: `✅ **Apuesta registrada con éxito!**\n💰 **Cantidad:** ${amount} coins\n📈 **Multiplicador:** ${multiplier}x\n🎯 **Elección:** Que el jugador **${choice.toUpperCase()}**`, 
           ephemeral: true 
         });
+      }
+
+      // --- MANEJO DE TRADE ---
+      if (interaction.isButton() && interaction.customId.startsWith('tr_')) {
+        const parts = interaction.customId.split('_');
+        const action = parts[1];
+        const senderId = parts[2];
+        const targetId = parts[3];
+        const myItemId = parts[4];
+        const suItemId = parts[5];
+
+        if (interaction.user.id !== targetId) {
+          return interaction.reply({ content: '❌ Solo la persona que recibe la oferta puede responder.', ephemeral: true });
+        }
+
+        if (action === 'rej') {
+          await interaction.update({ content: '❌ Intercambio rechazado.', embeds: [], components: [] });
+          return;
+        }
+
+        if (action === 'acc') {
+          // Bloquear click doble
+          await interaction.deferUpdate();
+
+          const sEco = await dbInstance.collection('economy').findOne({ discordId: senderId });
+          const tEco = await dbInstance.collection('economy').findOne({ discordId: targetId });
+
+          if (!sEco.inventory.includes(myItemId) || !tEco.inventory.includes(suItemId)) {
+            return interaction.editReply({ content: '❌ Uno de los items ya no está disponible.', embeds: [], components: [] });
+          }
+
+          // Realizar intercambio
+          const newSInv = sEco.inventory.filter(id => id !== myItemId);
+          newSInv.push(suItemId);
+          const newTInv = tEco.inventory.filter(id => id !== suItemId);
+          newTInv.push(myItemId);
+
+          await dbInstance.collection('economy').updateOne({ discordId: senderId }, { $set: { inventory: newSInv } });
+          await dbInstance.collection('economy').updateOne({ discordId: targetId }, { $set: { inventory: newTInv } });
+
+          await interaction.editReply({ 
+            content: `✅ **¡Intercambio realizado con éxito!**\n🤝 <@${senderId}> y <@${targetId}> han intercambiado sus campeones.`, 
+            embeds: [], 
+            components: [] 
+          });
+        }
       }
     } catch (e) {
       console.error('[Interaction Error]', e);
