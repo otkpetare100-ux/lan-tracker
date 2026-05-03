@@ -1318,16 +1318,7 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
     .setColor(result === 'gana' ? 0x576bce : 0xd93f3f)
     .setTimestamp();
 
-  if (highlights) {
-    embedBet.addFields({
-      name: '🏆 Destacados de la Partida',
-      value: `⭐ **MVP:** **${highlights.mvp.name}** (${highlights.mvp.champion})\n` +
-             `⚔️ **Daño:** ${highlights.topDamage.name} (${Math.floor(highlights.topDamage.value).toLocaleString()})\n` +
-             `👁️ **Visión:** ${highlights.topVision.name} (${highlights.topVision.value})\n` +
-             `💰 **Oro:** ${highlights.topGold.name} (${Math.floor(highlights.topGold.value).toLocaleString()})`,
-      inline: false
-    });
-  }
+
 
   // Lógica de ganadores: solo si hubo apuestas
   if (totalBets > 0) {
