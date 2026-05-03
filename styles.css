@@ -564,14 +564,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+  background: linear-gradient(180deg, #f0c040 0%, #c89b3c 40%, #1a1200 100%);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ffe08a, var(--gold-primary));
-  box-shadow: 0 0 6px rgba(200, 155, 60, 0.6);
+  background: linear-gradient(180deg, #ffe566 0%, #f0c040 50%, #000000 100%);
+  box-shadow: 0 0 8px rgba(240, 192, 64, 0.7);
 }
 
 ::-webkit-scrollbar-corner {
