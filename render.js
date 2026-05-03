@@ -1418,8 +1418,8 @@ async function renderActivityFeed() {
     sessionStorage.setItem('last_activity_count', logs.length);
 
     const TYPE_ICON = {
-      rank_up:       '📈',
-      rank_down:     '📉',
+      level_up:      '📈',
+      lose_streak:   '📉',
       live:          '🔴',
       goal:          '🎯',
       challenge_win: '🏆',

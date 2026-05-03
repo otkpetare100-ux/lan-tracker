@@ -610,13 +610,13 @@ body {
 }
 
 /* Tipos de actividad */
-.activity-item--rank_up   { border-left: 3px solid #27a170; padding-left: 15px; }
-.activity-item--rank_down { border-left: 3px solid #d93f3f; padding-left: 15px; }
-.activity-item--live      { border-left: 3px solid #3b82f6; padding-left: 15px; }
-.activity-item--goal      { border-left: 3px solid var(--gold-primary); padding-left: 15px; }
+.activity-item--level_up   { border-left: 3px solid #27a170; padding-left: 15px; }
+.activity-item--lose_streak { border-left: 3px solid #d93f3f; padding-left: 15px; }
+.activity-item--live       { border-left: 3px solid #3b82f6; padding-left: 15px; }
+.activity-item--goal       { border-left: 3px solid var(--gold-primary); padding-left: 15px; }
 .activity-item--challenge_win { border-left: 3px solid #a855f7; padding-left: 15px; }
-.activity-item--bet_win   { border-left: 3px solid #22c55e; padding-left: 15px; }
-.activity-item--bet_loss  { border-left: 3px solid #f97316; padding-left: 15px; }
+.activity-item--bet_win    { border-left: 3px solid #22c55e; padding-left: 15px; }
+.activity-item--bet_loss   { border-left: 3px solid #f97316; padding-left: 15px; }
 
 .activity-sidebar-header {
   display: flex;
