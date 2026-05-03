@@ -115,18 +115,23 @@ function initBot(db) {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle('🐾 Guía de Comandos - LAN Tracker')
-        .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
-                .addFields(
-          { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
-          { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!pagar @usuario [cant]` - Envía monedas a un amigo.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
-          { name: '🎮 Diversión y Apuestas', value: '`!apostar` - Apuesta (ahora también con botones).\n`!trade @u mio, suyo` - Intercambia campeones.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!web` - Tu perfil premium en la web.' }
-        )
+        .setTitle('🐾 Centro de Ayuda - LAN Tracker')
+        .setDescription('Pulsa el botón de abajo para ver la guía de comandos de forma privada.')
         .setColor(0x576bce)
-        .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
+        .setFooter({ text: 'Naafiri Bot' });
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`help_main_${msg.author.id}`)
+          .setLabel('Ver Guía de Comandos 📖')
+          .setStyle(ButtonStyle.Primary)
+      );
+
+      const sentMsg = await msg.channel.send({ content: `<@${msg.author.id}>`, embeds: [embed], components: [row] });
       
-      helpCooldowns.set(msg.author.id, now);
-      return msg.channel.send({ content: `<@${msg.author.id}>`, embeds: [embed] });
+      // Auto-borrado preventivo tras 1 minuto
+      setTimeout(() => sentMsg.delete().catch(() => {}), 60000);
+      return;
     }
 
     if (command === 'help_admin' || command === 'admin_help') {
@@ -959,6 +964,27 @@ function initBot(db) {
       if (interaction.isButton()) {
         const parts = interaction.customId.split('_');
         const action = parts[0];
+
+        if (action === 'help') {
+          const userId = parts[2];
+          if (interaction.user.id !== userId) {
+            return interaction.reply({ content: '❌ Solo el autor del comando puede ver esta ayuda.', ephemeral: true });
+          }
+
+          const helpEmbed = new EmbedBuilder()
+            .setTitle('🐾 Guía de Comandos - LAN Tracker')
+            .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
+            .addFields(
+              { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango.\n`!stats [Nombre#TAG]` - Estadísticas.\n`!vincular Nombre#TAG` - Vincula tu cuenta.\n`!ladder` - Top 10 jugadores.' },
+              { name: '💰 Economía', value: '`!monedas` - Mira tu saldo.\n`!diario` - Reclama 100 coins.\n`!pagar @usuario [cant]` - Envía monedas.\n`!top_ricos` - Top 10 ricos.' },
+              { name: '🎮 Diversión', value: '`!apostar` - Apuesta.\n`!trade @u mio, suyo` - Trade.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!web` - Perfil Premium.' }
+            )
+            .setColor(0x576bce)
+            .setFooter({ text: 'Naafiri Bot' });
+
+          await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
+          return interaction.message.delete().catch(() => {});
+        }
 
         if (action === 'web') {
           const userId = parts[2];
