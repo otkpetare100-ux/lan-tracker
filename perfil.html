@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario | LAN Tracker</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --premium-gold: #c89b3c;
+            --premium-gold-dark: #785a28;
+            --dark-bg: #010a13;
+            --card-bg: #0a0e13;
+            --border-color: #1e2328;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #f0e6d2;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #091428 0%, #0a0e13 100%);
+            border: 1px solid var(--premium-gold-dark);
+            border-radius: 12px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--premium-gold), transparent);
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--premium-gold);
+            box-shadow: 0 0 20px rgba(200, 155, 60, 0.3);
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            font-weight: 800;
+            color: var(--premium-gold);
+        }
+
+        .user-info h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #f0e6d2 0%, #c8aa6e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--premium-gold);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #a09b8c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .inventory-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--premium-gold);
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: #010a13;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--premium-gold);
+            box-shadow: 0 5px 15px rgba(200, 155, 60, 0.2);
+        }
+
+        .item-img {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #0a0e13;
+            object-fit: cover;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .item-rarity {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .rarity-Legendario { background-color: rgba(241, 196, 15, 0.2); color: #f1c40f; border: 1px solid #f1c40f; }
+        .rarity-Épico { background-color: rgba(155, 89, 182, 0.2); color: #9b59b6; border: 1px solid #9b59b6; }
+        .rarity-Raro { background-color: rgba(52, 152, 219, 0.2); color: #3498db; border: 1px solid #3498db; }
+        .rarity-Común { background-color: rgba(149, 165, 166, 0.2); color: #95a5a6; border: 1px solid #95a5a6; }
+
+        .loading {
+            text-align: center;
+            padding: 100px;
+            font-size: 1.5rem;
+            color: var(--premium-gold);
+        }
+
+        .error-msg {
+            text-align: center;
+            padding: 100px;
+            color: #d93f3f;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 14, 19, 0.8);
+            border: 1px solid var(--premium-gold-dark);
+            color: var(--premium-gold);
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            background: var(--premium-gold);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← Volver al Tracker</a>
+
+    <div class="profile-container" id="profile-content">
+        <div class="loading">Invocando el perfil...</div>
+    </div>
+
+    <script>
+        // GACHA_ITEMS (Necesitamos esta lista en el cliente para mostrar los nombres e imágenes)
+        const GACHA_ITEMS = [
+            { id: 'COINS_50', name: 'Bolsa de Naafiri', rarity: 'Común', type: 'coins' },
+            { id: 'COINS_100', name: 'Cofre de Naafiri', rarity: 'Raro', type: 'coins' },
+            { id: 'COINS_500', name: 'Tesoro de Naafiri', rarity: 'Épico', type: 'coins' },
+            { id: 'COINS_1000', name: 'Reliquia de Naafiri', rarity: 'Legendario', type: 'coins' },
+            { id: 'Garen', name: 'Garen', rarity: 'Común' },
+            { id: 'Ashe', name: 'Ashe', rarity: 'Común' },
+            { id: 'Lux', name: 'Lux', rarity: 'Común' },
+            { id: 'MasterYi', name: 'Master Yi', rarity: 'Común' },
+            { id: 'Yasuo', name: 'Yasuo', rarity: 'Raro' },
+            { id: 'Zed', name: 'Zed', rarity: 'Raro' },
+            { id: 'LeeSin', name: 'Lee Sin', rarity: 'Raro' },
+            { id: 'Ezreal', name: 'Ezreal', rarity: 'Raro' },
+            { id: 'Thresh', name: 'Thresh', rarity: 'Épico' },
+            { id: 'Vayne', name: 'Vayne', rarity: 'Épico' },
+            { id: 'Jhin', name: 'Jhin', rarity: 'Épico' },
+            { id: 'Kaisa', name: 'Kai\'Sa', rarity: 'Épico' },
+            { id: 'Golden_Naafiri', name: 'Naafiri de Oro', rarity: 'Legendario' },
+            { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario' },
+            { id: 'God_King_Garen', name: 'Garen Rey de Dioses', rarity: 'Legendario' },
+            { id: 'Teemo', name: 'Teemo Satán', rarity: 'Legendario' }
+        ];
+
+        async function loadProfile() {
+            const pathParts = window.location.pathname.split('/');
+            const discordId = pathParts[pathParts.length - 1];
+            const content = document.getElementById('profile-content');
+
+            try {
+                const response = await fetch(`/api/profile/${discordId}`);
+                if (!response.ok) throw new Error('Perfil no encontrado');
+                const data = await response.json();
+
+                // Obtener versión de DDragon
+                const vRes = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+                const versions = await vRes.json();
+                const version = versions[0];
+
+                const inventory = data.inventory || [];
+                const inventoryHtml = inventory.length > 0 
+                    ? inventory.map(itemId => {
+                        const item = GACHA_ITEMS.find(i => i.id === itemId) || { name: itemId, rarity: 'Común' };
+                        const imgUrl = item.type === 'coins' 
+                            ? 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png'
+                            : `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${item.id}.png`;
+                        
+                        return `
+                            <div class="item-card">
+                                <img src="${imgUrl}" alt="${item.name}" class="item-img" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/29.png'">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-rarity rarity-${item.rarity}">${item.rarity}</span>
+                            </div>
+                        `;
+                    }).join('')
+                    : '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #a09b8c;">La mochila está vacía... por ahora.</p>';
+
+                content.innerHTML = `
+                    <div class="profile-header">
+                        <div class="user-avatar">${data.discordTag ? data.discordTag.charAt(0) : '?'}</div>
+                        <div class="user-info">
+                            <h1>${data.discordTag || 'Usuario Desconocido'}</h1>
+                            <div class="user-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">${data.coins.toLocaleString()}</span>
+                                    <span class="stat-label">Naafiri Coins</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">${inventory.length}</span>
+                                    <span class="stat-label">Campeones</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inventory-section">
+                        <div class="section-title">
+                            <i>🎒</i> Mi Mochila de Campeones
+                        </div>
+                        <div class="items-grid">
+                            ${inventoryHtml}
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                content.innerHTML = `
+                    <div class="error-msg">
+                        <h1>⚠️ Perfil no encontrado</h1>
+                        <p>No pudimos encontrar datos para este usuario. Asegúrate de estar vinculado en el servidor de Discord.</p>
+                        <a href="/" style="color: var(--premium-gold); text-decoration: none;">Volver al inicio</a>
+                    </div>
+                `;
+            }
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>

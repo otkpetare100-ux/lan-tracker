@@ -434,6 +434,23 @@ app.use('/pic', express.static(path.join(__dirname, 'pic')));
 
 // -------------------------------------------
 
+// ---- Rutas de Perfil Web ----
+app.get('/api/profile/:discordId', async (req, res) => {
+  const { discordId } = req.params;
+  try {
+    if (!db) return res.status(503).json({ error: 'DB no lista' });
+    const eco = await db.collection('economy').findOne({ discordId });
+    if (!eco) return res.status(404).json({ error: 'Perfil no encontrado' });
+    res.json(eco);
+  } catch (e) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+app.get('/perfil/:discordId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'perfil.html'));
+});
+
 // ---- Middleware de verificación de DB ----
 app.use('/accounts', (req, res, next) => {
   if (!db) {

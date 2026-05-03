@@ -91,7 +91,7 @@ function initBot(db) {
                 .addFields(
           { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
           { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!pagar @usuario [cant]` - Envía monedas a un amigo.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
-          { name: '🎮 Diversión y Apuestas', value: '`!apostar` - Apuesta (ahora también con botones).\n`!trade @u mio, suyo` - Intercambia campeones.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!reroll [rareza]` - Fusiona 3 repetidos.' }
+          { name: '🎮 Diversión y Apuestas', value: '`!apostar` - Apuesta (ahora también con botones).\n`!trade @u mio, suyo` - Intercambia campeones.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!web` - Tu perfil premium en la web.' }
         )
         .setColor(0x576bce)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
@@ -317,7 +317,19 @@ function initBot(db) {
         new ButtonBuilder().setCustomId(`tr_rej_${msg.author.id}_${target.id}`).setLabel('Rechazar ❌').setStyle(ButtonStyle.Danger)
       );
 
-      return msg.channel.send({ content: `<@${target.id}>`, embeds: [embed], components: [row] });
+      msg.channel.send({ content: `<@${target.id}>`, embeds: [embed], components: [row] });
+    }
+
+    if (command === 'web' || command === 'link') {
+      const url = `https://lan-tracker-production.up.railway.app/perfil/${msg.author.id}`;
+      const embed = new EmbedBuilder()
+        .setTitle('🌐 Tu Perfil Web Premium')
+        .setDescription(`¡Ya puedes ver tu colección de campeones y estadísticas de economía en la web!\n\n🔗 **[Haz clic aquí para ver tu perfil](${url})**`)
+        .setColor(0xc89b3c)
+        .setThumbnail('https://cdn-icons-png.flaticon.com/512/341/341040.png')
+        .setFooter({ text: 'Naafiri Web Dashboard' });
+
+      return msg.reply({ embeds: [embed] });
     }
 
     if (command === 'shame' || command === 'muro') {
