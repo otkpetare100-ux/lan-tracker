@@ -746,8 +746,14 @@ function initBot(db) {
           { discordId: msg.author.id, amount: 50, multiplier: 2.0, choice: 'gana', anonymous: false }
         ];
         const testLp = { tier: 'EMERALD', rank: 'II', lp: 74, diff: 38 };
-        await notifyBetResults('BODKIN ARROW#BHR', 'gana', testWinners, 0, 'Vi', testLp, '18/1/9', DDRAGON_VERSION, 1, 420);
-        return msg.reply('✅ Notificación de apuesta de prueba enviada.');
+        const testHighlights = {
+          mvp: { name: 'BODKIN ARROW', champion: 'Vi' },
+          topDamage: { name: 'KaisaPlayer', champion: 'Kaisa', value: 42500 },
+          topVision: { name: 'SupportGod', champion: 'Thresh', value: 85 },
+          topGold: { name: 'BODKIN ARROW', champion: 'Vi', value: 18200 }
+        };
+        await notifyBetResults('BODKIN ARROW#BHR', 'gana', testWinners, 0, 'Vi', testLp, '18/1/9', DDRAGON_VERSION, 1, 420, testHighlights);
+        return msg.reply('✅ Notificación de prueba con MVP y logros enviada.');
       }
 
       if (command === 'admin_check') {
@@ -1214,7 +1220,7 @@ const TIER_SHORT = {
 };
 
 // Notificación de resultados de apuestas
-async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420) {
+async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420, highlights = null) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
@@ -1250,6 +1256,17 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
     )
     .setColor(result === 'gana' ? 0x576bce : 0xd93f3f)
     .setTimestamp();
+
+  if (highlights) {
+    embedBet.addFields({
+      name: '🏆 Destacados de la Partida',
+      value: `⭐ **MVP:** **${highlights.mvp.name}** (${highlights.mvp.champion})\n` +
+             `⚔️ **Daño:** ${highlights.topDamage.name} (${Math.floor(highlights.topDamage.value).toLocaleString()})\n` +
+             `👁️ **Visión:** ${highlights.topVision.name} (${highlights.topVision.value})\n` +
+             `💰 **Oro:** ${highlights.topGold.name} (${Math.floor(highlights.topGold.value).toLocaleString()})`,
+      inline: false
+    });
+  }
 
   // Lógica de ganadores: solo si hubo apuestas
   if (totalBets > 0) {

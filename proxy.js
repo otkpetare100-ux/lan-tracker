@@ -164,6 +164,42 @@ async function connectDB() {
     setTimeout(connectDB, 5000);
   }
 }
+
+// Lógica de cálculo de MVP y Logros
+function calculateMatchHighlights(match) {
+  const participants = match.info.participants;
+  if (!participants || participants.length === 0) return null;
+
+  let mvp = participants[0];
+  let maxScore = -999;
+  
+  let topDamage = participants[0];
+  let topVision = participants[0];
+  let topGold = participants[0];
+
+  participants.forEach(p => {
+    // Fórmula de puntuación balanceada
+    const score = (p.kills * 4) + (p.assists * 2.5) - (p.deaths * 3) + (p.totalDamageDealtToChampions / 1500) + (p.visionScore / 1.5) + (p.goldEarned / 1000);
+    
+    if (score > maxScore) {
+      maxScore = score;
+      mvp = p;
+    }
+    if (p.totalDamageDealtToChampions > topDamage.totalDamageDealtToChampions) topDamage = p;
+    if (p.visionScore > topVision.visionScore) topVision = p;
+    if (p.goldEarned > topGold.goldEarned) topGold = p;
+  });
+
+  const getName = (p) => p.riotIdGameName || p.summonerName || 'Desconocido';
+
+  return {
+    mvp: { name: getName(mvp), champion: mvp.championName },
+    topDamage: { name: getName(topDamage), champion: topDamage.championName, value: topDamage.totalDamageDealtToChampions },
+    topVision: { name: getName(topVision), champion: topVision.championName, value: topVision.visionScore },
+    topGold: { name: getName(topGold), champion: topGold.championName, value: topGold.goldEarned }
+  };
+}
+
 // Función para liquidar apuestas
 async function settleBets(acc) {
   try {
@@ -293,7 +329,20 @@ async function settleBets(acc) {
     }
 
     // 4. Notificar en Discord con toda la info
-    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId);
+    const highlights = calculateMatchHighlights(match);
+    notifyBetResults(
+      `${acc.gameName}#${acc.tagLine}`, 
+      gameResult, 
+      winners, 
+      p.profileIcon, 
+      p.championName, 
+      lpDataObj, 
+      kda, 
+      DDRAGON_VERSION, 
+      openBets.length, 
+      match.info.queueId,
+      highlights
+    );
     
     // IMPORTANTE: Limpiar cache para permitir nueva partida
     clearCache();
