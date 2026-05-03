@@ -154,31 +154,34 @@ async function connectDB() {
               continue; // Ignorar partidas que no sean Ranked
             }
 
-            if (!liveCache.has(acc.puuid) && acc.lastLiveGameId !== game.gameId) {
+            if (!liveCache.has(acc.puuid)) {
+              // Re-anclar al cache si el servidor se reinició durante una partida
               liveCache.add(acc.puuid); 
-              
-              const me = game.participants.find(p => p.puuid === acc.puuid);
-              const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
-              const champName = champKey ? champData.data[champKey].name : 'Desconocido';
-              
-              console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName} (ID: ${game.gameId})`);
-              const now = new Date();
-              await db.collection('accounts').updateOne(
-                { puuid: acc.puuid }, 
-                { $set: { liveGameStartedAt: now, lastLiveGameId: game.gameId } }
-              );
-              const sentMsg = await notifyLiveGame(acc, { 
-                championName: champName, 
-                championId: champKey, 
-                profileIconId: me.profileIconId,
-                version: DDRAGON_VERSION 
-              });
 
-              // Borrar notificación después de 5 minutos (ventana de apuestas)
-              if (sentMsg) {
-                setTimeout(() => {
-                  sentMsg.delete().catch(err => console.error('[Bot] Error al borrar notificación:', err));
-                }, 5 * 60 * 1000);
+              if (acc.lastLiveGameId !== game.gameId) {
+                const me = game.participants.find(p => p.puuid === acc.puuid);
+                const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
+                const champName = champKey ? champData.data[champKey].name : 'Desconocido';
+                
+                console.log(`[Live] Partida detectada: ${acc.gameName} con ${champName} (ID: ${game.gameId})`);
+                const now = new Date();
+                await db.collection('accounts').updateOne(
+                  { puuid: acc.puuid }, 
+                  { $set: { liveGameStartedAt: now, lastLiveGameId: game.gameId } }
+                );
+                const sentMsg = await notifyLiveGame(acc, { 
+                  championName: champName, 
+                  championId: champKey, 
+                  profileIconId: me.profileIconId,
+                  version: DDRAGON_VERSION 
+                });
+
+                // Borrar notificación después de 5 minutos (ventana de apuestas)
+                if (sentMsg) {
+                  setTimeout(() => {
+                    sentMsg.delete().catch(err => console.error('[Bot] Error al borrar notificación:', err));
+                  }, 5 * 60 * 1000);
+                }
               }
             }
           } else if (res.status === 404) {
