@@ -1446,7 +1446,7 @@ function openActivitySidebar(withTimer = false) {
   if (!sidebar) return;
 
   sidebar.classList.remove('collapsed');
-  if (toggle) toggle.textContent = '«';
+  if (toggle) toggle.textContent = '»'; // » = cerrar (empujar hacia la derecha)
 
   if (withTimer && !isActivityPinned) {
     if (activityCloseTimer) clearTimeout(activityCloseTimer);
@@ -1462,7 +1462,7 @@ function closeActivitySidebar() {
   if (!sidebar) return;
 
   sidebar.classList.add('collapsed');
-  if (toggle) toggle.textContent = '»';
+  if (toggle) toggle.textContent = '«'; // « = abrir (jalar hacia la izquierda)
 }
 
 function toggleActivityPin(e) {
@@ -1470,7 +1470,12 @@ function toggleActivityPin(e) {
   const btn = document.getElementById('activity-pin');
   isActivityPinned = !isActivityPinned;
   
-  if (btn) btn.classList.toggle('activity-pin--active', isActivityPinned);
+  if (btn) {
+    btn.classList.toggle('activity-pin--active', isActivityPinned);
+    btn.style.opacity = isActivityPinned ? '1' : '0.5';
+    btn.style.color   = isActivityPinned ? 'var(--gold-primary)' : '';
+    btn.title = isActivityPinned ? 'Panel fijado (clic para desfijar)' : 'Fijar panel';
+  }
   
   if (isActivityPinned) {
     if (activityCloseTimer) clearTimeout(activityCloseTimer);
