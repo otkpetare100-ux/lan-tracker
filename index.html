@@ -71,6 +71,18 @@
 
   </main>
 
+  <!-- Sidebar de Actividad -->
+  <aside class="activity-sidebar collapsed" id="activity-sidebar">
+    <button class="activity-toggle" id="activity-toggle">»</button>
+    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+      <h3 style="font-family: var(--font-title); color: #fff; margin:0;">Feed Actividad</h3>
+      <button id="activity-pin" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.5;">📌</button>
+    </div>
+    <div id="activity-feed" style="padding: 10px; overflow-y: auto; height: calc(100% - 70px);">
+      <div class="empty-state-mini">Cargando actividad...</div>
+    </div>
+  </aside>
+
   <!-- Scripts -->
   <script src="chart.min.js"></script>
   <script src="render.js?v=3.0.0"></script>

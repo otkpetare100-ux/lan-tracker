@@ -224,7 +224,8 @@ function buildMatchDots(matches) {
   if (!matches || matches.length === 0) return '';
   return '<div class="match-dots">' +
     matches.slice(0, 5).map(function(m) {
-      return '<span class="mdot ' + (m.win ? 'mdot--w' : 'mdot--l') + '" title="' + (m.win ? 'Victoria' : 'Derrota') + ' · ' + escapeHTML(m.champion || '') + '"></span>';
+      const cls = m.win ? 'dot-win' : 'dot-loss';
+      return `<span class="dot ${cls}" title="${m.win ? 'Victoria' : 'Derrota'} · ${escapeHTML(m.champion || '')}"></span>`;
     }).join('') +
   '</div>';
 }
@@ -308,8 +309,13 @@ function buildCardHTML(acc, position) {
   const profileUrl = acc.discordId ? `/perfil/${acc.discordId}` : '#';
 
   return `
-    <div class="player-card" onclick="window.location.href='${profileUrl}'">
-      <div class="player-card-header">
+    <div class="player-card">
+      <div class="card-actions" style="position:absolute; top:10px; right:10px; display:flex; gap:5px; z-index:10;">
+        <button class="refresh-btn" style="background:transparent; border:none; color:var(--gold-primary); cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
+        <button class="note-btn" style="background:transparent; border:none; color:var(--gold-primary); cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Notas" data-puuid="${acc.puuid}">📝</button>
+        <button class="remove-btn" style="background:transparent; border:none; color:#d93f3f; cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Eliminar" data-puuid="${acc.puuid}">✕</button>
+      </div>
+      <div class="player-card-header" onclick="window.location.href='${profileUrl}'" style="cursor:pointer; margin-top:5px;">
         <div class="player-avatar-wrap">
           <img class="player-avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
           <div class="player-level">${acc.summonerLevel || '?'}</div>
@@ -320,7 +326,7 @@ function buildCardHTML(acc, position) {
         </div>
       </div>
       
-      <div class="player-rank-info">
+      <div class="player-rank-info" onclick="window.location.href='${profileUrl}'" style="cursor:pointer;">
         <img class="player-tier-icon" src="${rankIcon}" alt="${r.tier}" />
         <div class="player-tier-text">
           <span class="tier-name">${rankName}</span>
@@ -329,7 +335,7 @@ function buildCardHTML(acc, position) {
       </div>
       
       <div class="player-footer">
-        <div class="streak-tag ${streakClass}">${streakText}</div>
+        <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
         <div class="match-dots">${buildMatchDots(acc.matches)}</div>
       </div>
     </div>
@@ -339,34 +345,12 @@ function buildCardHTML(acc, position) {
 function renderAccounts(accounts) {
   window._accounts_ref = accounts;
   const grid = document.getElementById('accounts-grid');
+  if (!grid) return;
   if (accounts.length === 0) {
-    grid.innerHTML = '<div class="empty-state"><span class="empty-icon">🗡</span><p>Sin cuentas aún</p><small>Escribe Nombre#TAG y presiona Buscar</small></div>';
+    grid.innerHTML = '<div class="empty-state"><p>Sin cuentas aún</p></div>';
     return;
   }
-  grid.innerHTML = accounts.map(function(acc, idx) {
-    const topRank = idx < 3 ? (idx + 1) : null;
-    const streakClass = getStreakInfo(acc.streak).class;
-    const specialistClass = getSpecialistInfo(acc.matches).class;
-    const cardCls = 'account-card ' + (topRank ? ' top-' + topRank : '') + ' ' + streakClass + ' ' + specialistClass;
-    var div = document.createElement('div');
-    div.className = cardCls;
-    div.id = 'card-' + acc.puuid;
-    div.setAttribute('onclick', "openPlayerModal('" + acc.puuid + "', event)");
-    var r = getRankInfo(acc);
-    const rankColor = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
-    div.style.borderLeft = '4px solid ' + rankColor;
-    div.style.setProperty('--rank-glow', rankColor);
-    
-    // Ghost Splash Logic
-    if (acc.topChampions && acc.topChampions.length > 0 && acc.topChampions[0].name) {
-      const cName = getChampImageName(acc.topChampions[0].name).replace('.png', '');
-      const splashUrl = 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + cName + '_0.jpg';
-      div.style.setProperty('--ghost-splash', 'url(' + splashUrl + ')');
-    }
-
-    div.innerHTML = buildCardHTML(acc, idx);
-    return div.outerHTML;
-  }).join('');
+  grid.innerHTML = accounts.map((acc, idx) => buildCardHTML(acc, idx)).join('');
 }
 
 function showError(msg) {
@@ -492,92 +476,92 @@ function buildChampModalHTML(acc, champName) {
   }).join('');
 
   const statsGrid = stats ? `
-    <div class="stats-source-hint">Basado en las últimas ${stats.total} partidas</div>
-    <div class="champ-modal__layout">
+    <div class="stats-source-hint" style="color:var(--gold-primary); text-transform:uppercase; font-size:0.8rem; margin-bottom:15px;">Basado en las últimas ${stats.total} partidas</div>
+    <div style="display:flex; flex-wrap:wrap; gap:30px;">
       <!-- Columna Izquierda: Estadísticas Básicas e Impacto -->
-      <div class="champ-modal__col">
-        <div class="cstat-group-title">Rendimiento y Básicas</div>
+      <div style="flex:1; min-width:300px;">
+        <div style="color:#fff; font-family:var(--font-title); margin-bottom:10px;">Rendimiento y Básicas</div>
         <div class="player-stats-grid">
-          <div class="cstat-card">
-            <div class="cstat-label">Winrate</div>
-            <div class="cstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
-            <div class="cstat-sub">${stats.total} partidas</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Winrate</div>
+            <div class="pstat-value ${stats.winrate >= 50 ? 'text-win' : 'text-loss'}">${stats.winrate}%</div>
+            <div class="pstat-sub">${stats.total} partidas</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">KDA Promedio</div>
-            <div class="cstat-value">${stats.kda}</div>
-            <div class="cstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">KDA Promedio</div>
+            <div class="pstat-value">${stats.kda}</div>
+            <div class="pstat-sub">${stats.kills} / ${stats.deaths} / ${stats.assists}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">CS por Minuto</div>
-            <div class="cstat-value">${stats.csMin}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">CS por Minuto</div>
+            <div class="pstat-value">${stats.csMin}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Visión</div>
-            <div class="cstat-value">${stats.vision}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Visión</div>
+            <div class="pstat-value">${stats.vision}</div>
           </div>
         </div>
 
-        <div class="cstat-group-title" style="margin-top:16px;">Impacto y Objetivos</div>
+        <div style="color:#fff; font-family:var(--font-title); margin:15px 0 10px 0;">Impacto y Objetivos</div>
         <div class="player-stats-grid">
-          <div class="cstat-card">
-            <div class="cstat-label">Daño / Partida</div>
-            <div class="cstat-value">${stats.damage.toLocaleString()}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Daño / Partida</div>
+            <div class="pstat-value">${stats.damage.toLocaleString()}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Daño a Torres</div>
-            <div class="cstat-value">${stats.dmgTurret.toLocaleString()}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Daño a Torres</div>
+            <div class="pstat-value">${stats.dmgTurret.toLocaleString()}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Objetivos Robados</div>
-            <div class="cstat-value">${stats.objStolen}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Objetivos Robados</div>
+            <div class="pstat-value">${stats.objStolen}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Solo Kills</div>
-            <div class="cstat-value">${stats.soloKills}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Solo Kills</div>
+            <div class="pstat-value">${stats.soloKills}</div>
           </div>
         </div>
       </div>
 
       <!-- Columna Derecha: Economía y Logros -->
-      <div class="champ-modal__col">
-        <div class="cstat-group-title">Economía y Early Game</div>
+      <div style="flex:1; min-width:300px;">
+        <div style="color:#fff; font-family:var(--font-title); margin-bottom:10px;">Economía y Early Game</div>
         <div class="player-stats-grid">
-          <div class="cstat-card">
-            <div class="cstat-label">Oro por Minuto</div>
-            <div class="cstat-value">${stats.goldMin}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Oro por Minuto</div>
+            <div class="pstat-value">${stats.goldMin}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Ventaja Oro @15</div>
-            <div class="cstat-value ${stats.goldDiff15 >= 0 ? 'text-win' : 'text-loss'}">${stats.goldDiff15 > 0 ? '+' : ''}${stats.goldDiff15}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Ventaja Oro @15</div>
+            <div class="pstat-value ${stats.goldDiff15 >= 0 ? 'text-win' : 'text-loss'}">${stats.goldDiff15 > 0 ? '+' : ''}${stats.goldDiff15}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Ventaja CS @10</div>
-            <div class="cstat-value ${stats.csDiff10 >= 0 ? 'text-win' : 'text-loss'}">${stats.csDiff10 > 0 ? '+' : ''}${stats.csDiff10}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Ventaja CS @10</div>
+            <div class="pstat-value ${stats.csDiff10 >= 0 ? 'text-win' : 'text-loss'}">${stats.csDiff10 > 0 ? '+' : ''}${stats.csDiff10}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Consumibles</div>
-            <div class="cstat-value">${stats.consumables}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Consumibles</div>
+            <div class="pstat-value">${stats.consumables}</div>
           </div>
         </div>
 
-        <div class="cstat-group-title" style="margin-top:16px;">Logros y Datos de Impacto</div>
+        <div style="color:#fff; font-family:var(--font-title); margin:15px 0 10px 0;">Logros y Datos de Impacto</div>
         <div class="player-stats-grid">
-          <div class="cstat-card">
-            <div class="cstat-label">Pentakills</div>
-            <div class="cstat-value" style="color:#f4c874">${stats.penta}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Pentakills</div>
+            <div class="pstat-value" style="color:#f4c874">${stats.penta}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Perfect Games</div>
-            <div class="cstat-value" style="color:#f4c874">${stats.perfectGames}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Perfect Games</div>
+            <div class="pstat-value" style="color:#f4c874">${stats.perfectGames}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Racha Máxima</div>
-            <div class="cstat-value" style="color:#00C65E">${stats.maxWinStreak}</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Racha Máxima</div>
+            <div class="pstat-value" style="color:#00C65E">${stats.maxWinStreak}</div>
           </div>
-          <div class="cstat-card">
-            <div class="cstat-label">Duración Prom.</div>
-            <div class="cstat-value">${stats.avgDuration} min</div>
+          <div class="pstat-card">
+            <div class="pstat-label">Duración Prom.</div>
+            <div class="pstat-value">${stats.avgDuration} min</div>
           </div>
         </div>
       </div>
@@ -585,16 +569,16 @@ function buildChampModalHTML(acc, champName) {
   ` : '<div class="empty-stats">Sin datos suficientes en el historial reciente</div>';
 
   return `
-    <div class="champ-modal__box">
-      <div class="champ-modal__header">
-        <div class="champ-modal__title-wrap">
-          <img class="champ-modal__main-img" src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImageName(champName)}" />
+    <div class="modal-content">
+      <div class="modal-header">
+        <img src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImageName(champName)}" />
+        <div class="names-wrap" style="flex:1;">
           <h2>${escapeHTML(champName)}</h2>
         </div>
-        <button class="champ-modal__close" onclick="closeChampModal()">✕</button>
+        <button class="modal-close" onclick="closeChampModal()">✕</button>
       </div>
-      <div class="champ-modal__tabs">${tabsHTML}</div>
-      <div class="champ-modal__body">${statsGrid}</div>
+      <div style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto;">${tabsHTML}</div>
+      <div>${statsGrid}</div>
     </div>
   `;
 }
@@ -836,38 +820,31 @@ function buildPlayerModalHTML(acc) {
   }
 
   return `
-    <div class="player-modal__box">
-      <div class="player-modal__header" ${centeredSplashUrl ? `style="--modal-splash: url(${centeredSplashUrl})"` : ''}>
-        <div class="player-modal__profile">
-          <img class="player-modal__avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
-          <div class="names-wrap">
-            <h3>${escapeHTML(acc.gameName)} <span class="tag">#${escapeHTML(acc.tagLine)}</span></h3>
-            ${specialistHTML}
-            <p style="color:${color}">${rankStr} - ${r.lp} LP</p>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <img src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
+        <div class="names-wrap" style="flex: 1;">
+          <h2>${escapeHTML(acc.gameName)} <span style="font-size:1rem; opacity:0.7;">#${escapeHTML(acc.tagLine)}</span></h2>
+          ${specialistHTML}
+          <p style="color:${color}; margin:0; font-weight:700;">${rankStr} - ${r.lp} LP</p>
         </div>
-        <button class="player-modal__close" onclick="closePlayerModal()">✕</button>
+        <button class="modal-close" onclick="closePlayerModal()">✕</button>
       </div>
-      <div class="player-modal__body">
-        <div class="player-modal__layout">
-          <!-- Columna Izquierda: Estadísticas -->
-          <div class="player-modal__col-stats">
-            <div class="stats-source-hint">Desempeño SoloQ (Últimas 20)</div>
-            ${statsHTML}
-          </div>
-
-          <!-- Columna Derecha: Visualizaciones -->
-          <div class="player-modal__col-visuals">
-            ${heatMapHTML}
-            
-            <div class="rank-history-section">
-              <div class="cstat-group-title" style="margin-top: 12px;">Progresión de LP</div>
-              <div class="lp-chart-wrapper" style="height: 180px; position: relative; margin-bottom: 12px;">
-                <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
-              </div>
+      <div class="modal-body" style="display: flex; flex-wrap: wrap; gap: 30px;">
+        <div style="flex: 1; min-width: 300px;">
+          <div style="margin-bottom:15px; color:var(--gold-primary); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Desempeño SoloQ (Últimas 20)</div>
+          ${statsHTML}
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+          ${heatMapHTML}
+          <div class="rank-history-section" style="margin-top: 20px;">
+            <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Progresión de LP</div>
+            <div class="lp-chart-wrapper" style="height: 180px; background: rgba(0,0,0,0.3); border-radius:12px; padding:10px;">
+              <canvas id="lpChart-${acc.puuid}" class="lp-chart-canvas"></canvas>
             </div>
           </div>
         </div>
+      </div>
 
         <div class="rank-history-section" style="margin-top: 0;">
           <div class="cstat-group-title">Historial de Divisiones</div>
@@ -1045,19 +1022,19 @@ window.openLeaderboard = function() {
   const records = calculateGlobalRecords(accounts);
   
   modal.innerHTML = `
-    <div class="leaderboard-box">
+    <div class="modal-content">
       <div class="leaderboard-header">
         <div class="leaderboard-title-group">
           <h2>Récords de la Perrera</h2>
-          <button class="leaderboard-refresh" onclick="refreshLeaderboard()" title="Actualizar récords">↻</button>
+          <button class="history-btn-mini" onclick="refreshLeaderboard()">↻ Actualizar</button>
         </div>
-        <button class="leaderboard-close" onclick="closeLeaderboard()">✕</button>
+        <button class="modal-close" onclick="closeLeaderboard()">✕</button>
       </div>
       <div class="leaderboard-body" id="leaderboard-body-grid">
         <div class="leader-grid">
           ${renderLeaderGridHTML(records)}
         </div>
-        <div class="shame-title">🤡 Salón de la Vergüenza</div>
+        <h3 style="font-family: var(--font-title); color: #d93f3f; margin: 30px 0 15px 0;">🤡 Salón de la Vergüenza</h3>
         <div class="leader-grid">
           ${renderLeaderCard('El Imán de Balas', records.maxDeaths, 'Más Muertes Promedio')}
           ${renderLeaderCard('El Topo', records.minVision, 'Menos Visión Promedio')}
@@ -1091,7 +1068,7 @@ window.refreshLeaderboard = function() {
     <div class="leader-grid">
       ${renderLeaderGridHTML(records)}
     </div>
-    <div class="shame-title">🤡 Salón de la Vergüenza</div>
+    <h3 style="font-family: var(--font-title); color: #d93f3f; margin: 30px 0 15px 0;">🤡 Salón de la Vergüenza</h3>
     <div class="leader-grid">
       ${renderLeaderCard('El Imán de Balas', records.maxDeaths, 'Más Muertes Promedio')}
       ${renderLeaderCard('El Topo', records.minVision, 'Menos Visión Promedio')}
@@ -1152,14 +1129,12 @@ function renderLeaderCard(title, data, sub) {
 
   function renderCard(displayVal) {
     return `
-      <div class="leader-card">
-        <div class="leader-title">${title}</div>
-        <div class="leader-profile">
-          <img class="leader-avatar" src="${getProfileIconUrl(data.acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
-          <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
-          <div class="leader-value">${displayVal}</div>
-          <div class="leader-sub">${sub}</div>
-        </div>
+      <div class="leader-item">
+        <div class="leader-label">${title}</div>
+        <img style="width:50px; height:50px; border-radius:10px; margin: 10px 0; border: 1px solid var(--gold-dark);" src="${getProfileIconUrl(data.acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
+        <div class="leader-name">${escapeHTML(data.acc.gameName)}</div>
+        <div class="leader-value">${displayVal}</div>
+        <div style="font-size:0.7rem; color:#aaa; margin-top:5px;">${sub}</div>
       </div>
     `;
   }
@@ -1179,18 +1154,18 @@ window.openNoteModal = function(puuid) {
   const currentNote = escapeHTML(acc.notes || '');
   
   modal.innerHTML = `
-    <div class="note-box">
-      <div class="note-header">
-        <h3>Notas: ${escapeHTML(acc.gameName)}</h3>
-        <button class="note-close" onclick="closeNoteModal()">✕</button>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="margin:0;">Notas: ${escapeHTML(acc.gameName)}</h2>
+        <button class="modal-close" onclick="closeNoteModal()">✕</button>
       </div>
-      <div class="note-body">
-        <textarea id="note-textarea-${puuid}" class="note-textarea" maxlength="200" placeholder="Añade una nota sobre este jugador (máx 200 caracteres)...">${currentNote}</textarea>
-        <div class="note-footer">
-          <span class="note-counter" id="note-counter-${puuid}">${currentNote.length}/200</span>
-          <div class="note-actions">
-            <button class="note-cancel" onclick="closeNoteModal()">Cancelar</button>
-            <button class="note-save" onclick="saveNote('${puuid}')">Guardar</button>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:15px;">
+        <textarea id="note-textarea-${puuid}" style="width:100%; height:120px; background:rgba(0,0,0,0.3); border:1px solid var(--gold-dark); color:#fff; padding:15px; border-radius:8px; resize:none; outline:none;" maxlength="200" placeholder="Añade una nota sobre este jugador (máx 200 caracteres)...">${currentNote}</textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="note-counter-${puuid}" style="color:var(--gold-primary); font-size:0.8rem;">${currentNote.length}/200</span>
+          <div style="display:flex; gap:10px;">
+            <button onclick="closeNoteModal()" style="background:transparent; border:1px solid #d93f3f; color:#d93f3f; padding:8px 15px; border-radius:6px; cursor:pointer;">Cancelar</button>
+            <button class="note-save" onclick="saveNote('${puuid}')" style="background:var(--gold-primary); border:none; color:#000; padding:8px 15px; border-radius:6px; font-weight:800; cursor:pointer;">Guardar</button>
           </div>
         </div>
       </div>
