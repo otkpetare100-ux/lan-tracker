@@ -787,6 +787,24 @@ function initBot(db) {
         const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
         return msg.reply(`✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
       }
+
+      // !admin_purge [cantidad]
+      if (command === 'admin_purge') {
+        const amount = parseInt(args[0]) || 100;
+        if (amount <= 0 || amount > 100) {
+          return msg.reply('❌ Por favor, elige un número entre 1 y 100.');
+        }
+
+        try {
+          // Eliminar mensajes (filtrando los de más de 14 días automáticamente)
+          const deleted = await msg.channel.bulkDelete(amount, true);
+          const confirm = await msg.channel.send(`✅ Se han eliminado **${deleted.size}** mensajes.`);
+          setTimeout(() => confirm.delete().catch(() => {}), 5000);
+        } catch (e) {
+          console.error('[Purge Error]', e);
+          msg.reply('❌ Error al intentar borrar mensajes. (Nota: Discord no permite borrar masivamente mensajes de más de 14 días).');
+        }
+      }
     }
 
   });
