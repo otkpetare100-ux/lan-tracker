@@ -642,7 +642,7 @@ function initBot(db) {
       }
 
       if (command === 'admin_testsummary') {
-        await sendDailySummary();
+        await sendDailySummary(db);
         return msg.reply('✅ Resumen diario de prueba enviado.');
       }
 
