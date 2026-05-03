@@ -308,37 +308,44 @@ function buildCardHTML(acc, position) {
     : titleCase(r.tier) + ' ' + (r.division || '');
 
   const profileUrl = acc.discordId ? `/perfil/${acc.discordId}` : '#';
+  
+  const rankNum = position + 1;
+  const rankClass = rankNum <= 3 ? `rank-${rankNum}` : '';
 
   return `
-    <div class="player-card" id="card-${acc.puuid}">
-      <div class="card-actions" style="position:absolute; top:10px; right:10px; display:flex; gap:5px; z-index:10;">
-        <button class="refresh-btn" style="background:transparent; border:none; color:var(--gold-primary); cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
-        <button class="note-btn" style="background:transparent; border:none; color:var(--gold-primary); cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Notas" data-puuid="${acc.puuid}">📝</button>
-        <button class="remove-btn" style="background:transparent; border:none; color:#d93f3f; cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Eliminar" data-puuid="${acc.puuid}">✕</button>
-      </div>
-      <div class="player-card-header" onclick="window.location.href='${profileUrl}'" style="cursor:pointer; margin-top:5px;">
-        <div class="player-avatar-wrap">
-          <img class="player-avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
-          <div class="player-level">${acc.summonerLevel || '?'}</div>
+    <div class="scoreboard-row" id="card-${acc.puuid}" onclick="window.location.href='${profileUrl}'">
+      
+      <div class="score-rank ${rankClass}">#${rankNum}</div>
+      
+      <div class="score-player">
+        <div class="score-avatar-wrap">
+          <img class="score-avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
+          <div class="score-level">${acc.summonerLevel || '?'}</div>
         </div>
-        <div class="player-names">
-          <span class="player-name">${escapeHTML(acc.gameName)}</span>
-          <span class="player-tag">#${escapeHTML(acc.tagLine)}</span>
+        <div class="score-names">
+          <span class="score-name">${escapeHTML(acc.gameName)}</span>
+          <span class="score-tag">#${escapeHTML(acc.tagLine)}</span>
         </div>
       </div>
       
-      <div class="player-rank-info" onclick="window.location.href='${profileUrl}'" style="cursor:pointer;">
-        <img class="player-tier-icon" src="${rankIcon}" alt="${r.tier}" />
-        <div class="player-tier-text">
-          <span class="tier-name">${rankName}</span>
-          <span class="lp-text">${r.lp} LP · ${wr !== null ? wr + '%' : '--'} WR</span>
+      <div class="score-stats">
+        <img class="score-tier-icon" src="${rankIcon}" alt="${r.tier}" />
+        <div class="score-tier-text">
+          <span class="score-tier-name">${rankName}</span>
+          <span class="score-lp-text">${r.lp} LP · ${wr !== null ? wr + '%' : '--'} WR</span>
         </div>
       </div>
       
-      <div class="player-footer">
-        <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
-        <div class="match-dots">${buildMatchDots(acc.matches)}</div>
+      <div class="score-actions" onclick="event.stopPropagation()">
+        ${buildMatchDots(acc.matches)}
+        <div class="score-btn-group" style="margin-left: 10px;">
+          <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
+          <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
+          <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" data-puuid="${acc.puuid}">📝</button>
+          <button class="remove-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar" data-puuid="${acc.puuid}">✕</button>
+        </div>
       </div>
+      
     </div>
   `;
 }

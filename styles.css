@@ -203,10 +203,10 @@ body {
 
 /* --- Grilla de Cuentas --- */
 .accounts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 25px;
-  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 .section-title {
@@ -226,15 +226,15 @@ body {
   background: linear-gradient(to right, rgba(200, 155, 60, 0.4), transparent);
 }
 
-/* --- Carta de Jugador (NUEVO DISEÑO) --- */
-.player-card {
+/* --- Scoreboard Row (Reemplazo de Player Card) --- */
+.scoreboard-row {
   background: var(--bg-card);
-  border: var(--border-gold);
-  border-radius: 16px;
-  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 20px;
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  align-items: center;
+  gap: 20px;
   transition: var(--transition);
   position: relative;
   overflow: hidden;
@@ -242,106 +242,118 @@ body {
   cursor: pointer;
 }
 
-.player-card:hover {
-  transform: translateY(-8px);
+.scoreboard-row:hover {
+  transform: translateX(5px);
   border-color: var(--gold-primary);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  background: rgba(200, 155, 60, 0.05);
 }
 
-.player-card-header {
+.score-rank {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #555;
+  min-width: 40px;
+  text-align: center;
+}
+
+.rank-1 { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); } /* Oro */
+.rank-2 { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.5); } /* Plata */
+.rank-3 { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.5); } /* Bronce */
+
+.score-player {
   display: flex;
   align-items: center;
   gap: 15px;
+  flex: 2;
+  min-width: 200px;
 }
 
-.player-avatar-wrap {
+.score-avatar-wrap {
   position: relative;
-  width: 70px;
-  height: 70px;
+  width: 48px;
+  height: 48px;
 }
 
-.player-avatar {
+.score-avatar {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 50%;
   border: 1px solid var(--gold-dark);
 }
 
-.player-level {
+.score-level {
   position: absolute;
   bottom: -5px;
   right: -5px;
-  background: var(--gold-primary);
-  color: black;
-  font-size: 0.7rem;
+  background: #000;
+  color: var(--gold-primary);
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  border: 1px solid var(--gold-dark);
 }
 
-.player-names {
-  flex: 1;
+.score-names {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.player-name {
-  display: block;
-  font-size: 1.3rem;
+.score-name {
+  font-size: 1.1rem;
   font-weight: 800;
   font-family: var(--font-title);
+  letter-spacing: 0.5px;
 }
 
-.player-tag {
+.score-tag {
   font-size: 0.8rem;
-  color: var(--gold-primary);
-  opacity: 0.7;
+  color: #777;
 }
 
-.player-rank-info {
+.score-stats {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.player-tier-icon {
-  width: 40px;
-  height: 40px;
-}
-
-.player-tier-text {
-  text-align: right;
-}
-
-.tier-name {
-  display: block;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--gold-primary);
-}
-
-.lp-text {
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-
-/* Barra de Racha */
-.player-footer {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  gap: 12px;
+  flex: 1.5;
+  min-width: 180px;
 }
 
-.streak-tag {
-  font-size: 0.7rem;
+.score-tier-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.score-tier-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.score-tier-name {
+  font-size: 0.9rem;
   font-weight: 800;
-  padding: 3px 10px;
-  border-radius: 20px;
-  text-transform: uppercase;
+  color: var(--gold-primary);
 }
 
-.streak-win { background: rgba(39, 161, 112, 0.2); color: #27a170; }
-.streak-loss { background: rgba(217, 63, 63, 0.2); color: #d93f3f; }
+.score-lp-text {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.score-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.score-btn-group {
+  display: flex;
+  gap: 8px;
+}
 
 /* --- Sidebar de Actividad --- */
 .activity-sidebar {
@@ -371,13 +383,6 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-}
-
-.modal-content {
-  background: var(--bg-card);
-  border: var(--border-gold);
-  border-radius: 20px;
-  box-shadow: 0 0 100px rgba(0,0,0,0.9);
 }
 
 /* --- Perfil de Usuario --- */
@@ -544,17 +549,8 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.player-card {
+.scoreboard-row {
   animation: fade-in-up 0.6s ease forwards;
-}
-
-.player-avatar-wrap::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  border-radius: 12px;
-  animation: gold-pulse 3s infinite ease-in-out;
-  pointer-events: none;
 }
 
 /* Scrollbar Personalizada */
@@ -1069,12 +1065,24 @@ body {
 
 /* Responsive Final */
 @media (max-width: 1024px) {
-  .accounts-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .accounts-grid { grid-template-columns: 1fr; }
+  .scoreboard-row {
+    flex-wrap: wrap;
+    padding: 15px;
+  }
+  .score-actions {
+    flex-basis: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
 }
 
 @media (max-width: 768px) {
   .topnav-inner { padding: 10px 15px; }
   .topnav-actions { display: none; }
-  .player-card { padding: 15px; }
+  .scoreboard-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .score-rank { position: absolute; top: 15px; right: 15px; }
   .user-info h1 { font-size: 2rem; }
 }
