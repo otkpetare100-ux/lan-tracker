@@ -249,7 +249,13 @@ function initBot(db) {
         { $set: { discordId: msg.author.id } }
       );
 
-      if (res.modifiedCount > 0) {
+      await db.collection('economy').updateOne(
+        { discordId: msg.author.id },
+        { $set: { linkedPuuid: acc.puuid, discordTag: msg.author.tag } },
+        { upsert: true }
+      );
+
+      if (res.modifiedCount > 0 || res.upsertedCount > 0) {
         msg.reply(`✅ ¡Cuenta vinculada! Ahora eres oficialmente **${acc.gameName}#${acc.tagLine}**.`);
       } else {
         msg.reply('❌ No encontré esa cuenta en el dashboard.');

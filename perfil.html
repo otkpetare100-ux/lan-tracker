@@ -33,35 +33,37 @@
         }
 
         .profile-header {
-            background: linear-gradient(135deg, #091428 0%, #0a0e13 100%);
+            background: linear-gradient(135deg, #050a12 0%, #0a0e13 100%);
             border: 1px solid var(--premium-gold-dark);
             border-radius: 12px;
             padding: 40px;
             display: flex;
             align-items: center;
             gap: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             margin-bottom: 40px;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
-        .profile-header::before {
+        .profile-header::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--premium-gold), transparent);
+            right: -100px;
+            top: -100px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(200,155,60,0.1) 0%, transparent 70%);
+            z-index: 0;
         }
 
         .user-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--premium-gold);
-            box-shadow: 0 0 20px rgba(200, 155, 60, 0.3);
+            width: 130px;
+            height: 130px;
+            border-radius: 12px;
+            border: 2px solid var(--premium-gold);
+            box-shadow: 0 0 30px rgba(200, 155, 60, 0.2);
             background-color: #000;
             display: flex;
             align-items: center;
@@ -69,113 +71,171 @@
             font-size: 50px;
             font-weight: 800;
             color: var(--premium-gold);
-        }
-
-        .user-info h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #f0e6d2 0%, #c8aa6e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .user-stats {
-            display: flex;
-            gap: 40px;
-            margin-top: 15px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--premium-gold);
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #a09b8c;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .inventory-section {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 30px;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: var(--premium-gold);
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .item-card {
-            background: #010a13;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s ease;
+            z-index: 1;
             position: relative;
             overflow: hidden;
         }
 
+        .user-info {
+            z-index: 1;
+        }
+
+        .user-info h1 {
+            margin: 0;
+            font-size: 2.8rem;
+            letter-spacing: 1px;
+            font-weight: 800;
+            background: linear-gradient(to bottom, #ffffff 0%, #c8aa6e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.03);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            min-width: 120px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--premium-gold);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .inventory-section {
+            background-color: rgba(10, 14, 19, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            backdrop-filter: blur(5px);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 20px;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            letter-spacing: 1px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
+        }
+
+        .item-card {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
         .item-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--premium-gold);
-            box-shadow: 0 5px 15px rgba(200, 155, 60, 0.2);
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(200, 155, 60, 0.4);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+
+        .item-img-container {
+            width: 100%;
+            aspect-ratio: 0.7;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            background-color: #000;
+            position: relative;
         }
 
         .item-img {
             width: 100%;
-            aspect-ratio: 1;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            background-color: #0a0e13;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .item-card:hover .item-img {
+            transform: scale(1.1);
         }
 
         .item-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
             display: block;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .item-rarity {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 10px;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 4px;
             text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1px;
+            display: inline-block;
         }
 
-        .rarity-Legendario { background-color: rgba(241, 196, 15, 0.2); color: #f1c40f; border: 1px solid #f1c40f; }
-        .rarity-Épico { background-color: rgba(155, 89, 182, 0.2); color: #9b59b6; border: 1px solid #9b59b6; }
-        .rarity-Raro { background-color: rgba(52, 152, 219, 0.2); color: #3498db; border: 1px solid #3498db; }
-        .rarity-Común { background-color: rgba(149, 165, 166, 0.2); color: #95a5a6; border: 1px solid #95a5a6; }
+        /* Efectos por Rareza */
+        .card-Legendario { border-color: rgba(241, 196, 15, 0.3); box-shadow: 0 0 20px rgba(241, 196, 15, 0.1); }
+        .card-Legendario:hover { border-color: #f1c40f; box-shadow: 0 0 30px rgba(241, 196, 15, 0.3); }
+        .rarity-Legendario { background: #f1c40f; color: #000; box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+
+        .card-Épico { border-color: rgba(155, 89, 182, 0.3); }
+        .card-Épico:hover { border-color: #9b59b6; box-shadow: 0 0 25px rgba(155, 89, 182, 0.2); }
+        .rarity-Épico { background: #9b59b6; color: #fff; }
+
+        .card-Raro { border-color: rgba(52, 152, 219, 0.3); }
+        .card-Raro:hover { border-color: #3498db; }
+        .rarity-Raro { background: #3498db; color: #fff; }
+
+        .rarity-Común { background: rgba(255,255,255,0.1); color: #ccc; }
 
         .loading {
             text-align: center;
@@ -257,8 +317,10 @@
                         }
                         
                         return `
-                            <div class="item-card">
-                                <img src="${imgUrl}" alt="${item.name}" class="item-img" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/29.png'">
+                            <div class="item-card card-${item.rarity}">
+                                <div class="item-img-container">
+                                    <img src="${imgUrl}" alt="${item.name}" class="item-img" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/29.png'">
+                                </div>
                                 <span class="item-name">${item.name}</span>
                                 <span class="item-rarity rarity-${item.rarity}">${item.rarity}</span>
                             </div>

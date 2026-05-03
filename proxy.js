@@ -453,6 +453,11 @@ app.get('/api/profile/:discordId', async (req, res) => {
       linkedAcc = await db.collection('accounts').findOne({ puuid: eco.linkedPuuid });
     }
     
+    // Fallback: si no hay linkedPuuid en eco, buscar en accounts por discordId
+    if (!linkedAcc) {
+      linkedAcc = await db.collection('accounts').findOne({ discordId });
+    }
+    
     res.json({ ...eco, linkedAcc });
   } catch (e) {
     res.status(500).json({ error: 'Error del servidor' });
