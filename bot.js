@@ -790,8 +790,8 @@ function initBot(db) {
 
       // !admin_purge [cantidad]
       if (command === 'admin_purge') {
-        const amount = parseInt(args[0]) || 100;
-        if (amount <= 0 || amount > 100) {
+        const amount = args[0] ? parseInt(args[0]) : 100;
+        if (isNaN(amount) || amount <= 0 || amount > 100) {
           return msg.reply('❌ Por favor, elige un número entre 1 y 100.');
         }
 

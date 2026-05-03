@@ -259,7 +259,10 @@ async function settleBets(acc) {
         const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}`;
         const leagueRes = await fetch(`${leagueUrl}?api_key=${API_KEY}`);
         const leagues = await leagueRes.json();
-        const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5' || l.queueType === 'RANKED_FLEX_SR');
+        
+        // Identificar el tipo de cola objetivo según la partida
+        const targetQueueType = match.info.queueId === 420 ? 'RANKED_SOLO_5x5' : 'RANKED_FLEX_SR';
+        const soloQ = leagues.find(l => l.queueType === targetQueueType);
         
         if (soloQ) {
           // ACTUALIZACIÓN: Guardar el nuevo rango en la DB
