@@ -553,21 +553,42 @@ body {
   animation: fade-in-up 0.6s ease forwards;
 }
 
-/* Scrollbar Personalizada */
+/* Scrollbar Premium */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-deep);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gold-dark);
-  border-radius: 4px;
+  background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+  border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffe08a, var(--gold-primary));
+  box-shadow: 0 0 6px rgba(200, 155, 60, 0.6);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Scrollbar extra-discreta para el sidebar del feed */
+#activity-feed::-webkit-scrollbar {
+  width: 3px;
+}
+
+#activity-feed::-webkit-scrollbar-thumb {
+  background: var(--gold-dark);
+  border-radius: 10px;
+}
+
+#activity-feed::-webkit-scrollbar-thumb:hover {
   background: var(--gold-primary);
 }
 
