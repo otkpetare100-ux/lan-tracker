@@ -90,13 +90,31 @@ function initBot(db) {
         .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
                 .addFields(
           { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango y estadísticas.\n`!stats [Nombre#TAG]` - Estadísticas detalladas.\n`!vincular Nombre#TAG` - Vincula tu cuenta de Discord.\n`!ladder` - Top 10 mejores jugadores.' },
-          { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
-          { name: '🎮 Diversión y Apuestas', value: '`!apostar [cant] [gana/pierde] [Nombre#TAG]` - Apuesta en una partida en vivo.\n`!ludopata [@usuario]` - Mira estadísticas de apuestas.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!desencantar` - Recicla repetidos.\n`!reroll [rareza]` - Fusiona 3 repetidos.\n`!shame` - El muro de la vergüenza.' }
+          { name: '💰 Economía', value: '`!monedas` - Mira tu saldo actual.\n`!diario` - Reclama tus 100 coins diarias.\n`!pagar @usuario [cant]` - Envía monedas a un amigo.\n`!top_ricos` - Top 10 usuarios con más monedas.' },
+          { name: '🎮 Diversión y Apuestas', value: '`!apostar` - Apuesta (ahora también con botones).\n`!ludopata [@usuario]` - Mira estadísticas de apuestas.\n`!gacha` - Consigue un campeón (10 coins).\n`!mochila` - Mira tu colección.\n`!desencantar` - Recicla repetidos.\n`!reroll [rareza]` - Fusiona 3 repetidos.\n`!shame` - El muro de la vergüenza.' }
         )
         .setColor(0x576bce)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
       
       helpCooldowns.set(msg.author.id, now);
+      return msg.reply({ embeds: [embed] });
+    }
+
+    if (command === 'help_admin' || command === 'admin_help') {
+      if (!isAdmin(msg.author.id)) return msg.reply('🚫 No tienes permisos de administrador.');
+
+      const embed = new EmbedBuilder()
+        .setTitle('🛠️ Panel de Administración - LAN Tracker')
+        .setColor(0xd93f3f)
+        .addFields(
+          { name: '💰 Gestión de Monedas', value: '`!admin_dar @u cant` - Dar monedas.\n`!admin_quitar @u cant` - Quitar monedas.\n`!admin_setcoins @u cant` - Fijar saldo.\n`!admin_resetall CONFIRMAR` - Resetear TODO.' },
+          { name: '🎒 Gestión de Items', value: '`!admin_daritem @u id` - Dar campeón.\n`!admin_clearinv @u` - Vaciar mochila.' },
+          { name: '📡 Sistema y Debug', value: '`!admin_scan` - Escaneo manual.\n`!admin_check N#T` - Forzar aviso de partida.\n`!admin_syncroles` - Sincronizar roles de Discord.\n`!admin_purge [n]` - Limpiar mensajes del canal.' },
+          { name: '🎭 Notificaciones y Test', value: '`!admin_anuncio [msg]` - Enviar anuncio.\n`!admin_testnotif` - Test partida en vivo.\n`!admin_testbet` - Test resultados apuestas.\n`!admin_testsummary` - Test resumen diario.' },
+          { name: '⚖️ Apuestas', value: '`!admin_cancelarapuestas N#T` - Reembolsar apuestas abiertas.' }
+        )
+        .setFooter({ text: 'Acceso Restringido · Naafiri Admin' });
+
       return msg.reply({ embeds: [embed] });
     }
     if (command === 'desencantar' || command === 'reciclar') {
