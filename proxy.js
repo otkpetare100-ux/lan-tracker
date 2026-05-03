@@ -126,12 +126,19 @@ async function connectDB() {
                 { puuid: acc.puuid }, 
                 { $set: { liveGameStartedAt: now, lastLiveGameId: game.gameId } }
               );
-              notifyLiveGame(acc, { 
+              const sentMsg = await notifyLiveGame(acc, { 
                 championName: champName, 
                 championId: champKey, 
                 profileIconId: me.profileIconId,
                 version: DDRAGON_VERSION 
               });
+
+              // Borrar notificación después de 5 minutos (ventana de apuestas)
+              if (sentMsg) {
+                setTimeout(() => {
+                  sentMsg.delete().catch(err => console.error('[Bot] Error al borrar notificación:', err));
+                }, 5 * 60 * 1000);
+              }
             }
           } else if (res.status === 404) {
             // SÓLO si es 404 (Not Found) significa que la partida terminó

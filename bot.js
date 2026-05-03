@@ -674,7 +674,17 @@ function initBot(db) {
           const me = game.participants.find(p => p.puuid === acc.puuid);
           const champName = me ? (Object.values(champData.data).find(c => c.key == me.championId)?.name || 'Desconocido') : 'Desconocido';
 
-          const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId); const cName = champKey ? champData.data[champKey].name : 'Desconocido'; await notifyLiveGame(acc, { championName: cName, championId: champKey });
+          const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId); 
+          const cName = champKey ? champData.data[champKey].name : 'Desconocido'; 
+          
+          const sentMsg = await notifyLiveGame(acc, { championName: cName, championId: champKey });
+          
+          if (sentMsg) {
+            setTimeout(() => {
+              sentMsg.delete().catch(() => {});
+            }, 5 * 60 * 1000);
+          }
+
           return msg.reply(`✅ **${acc.gameName}** está en partida. Notificación enviada.`);
         } else {
           return msg.reply(`💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
@@ -849,7 +859,7 @@ async function notifyLiveGame(acc, gameData) {
     .setColor(0x576bce)
     .setTimestamp();
 
-  channel.send({ embeds: [embed] });
+  return await channel.send({ embeds: [embed] });
 }
 
 // Recordatorio Primera Victoria
