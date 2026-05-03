@@ -68,18 +68,53 @@ async function connectDB() {
     // Inicializar Bot de Discord
     initBot(db);
 
-    // Resumen Diario cada 24h
-    setInterval(() => sendDailySummary(db), 24 * 60 * 60 * 1000);
-
-    // Recordatorio de Primera Victoria (9 AM)
+    // --- Sistema de Notificaciones Periódicas ---
     setInterval(async () => {
       const now = new Date();
-      if (now.getHours() === 9 && now.getMinutes() === 0) {
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+
+      // 1. Recordatorio matutino (Ahora a las 12:00 PM)
+      if (hour === 12 && minute === 0) {
         sendDailyMotivation(db);
+      }
+
+      // 2. Resumen de la Perrera cada 4h (Solo de 9:00 AM a 10:00 PM)
+      // Horas: 9:00, 13:00, 17:00, 21:00
+      const summaryHours = [9, 13, 17, 21];
+      if (summaryHours.includes(hour) && minute === 0) {
+        sendDailySummary(db);
       }
     }, 60 * 1000);
 
     // --- Monitor de Vencimiento de API Key (Riot Dev Key = 24h) ---
+    setInterval(async () => {
+      try {
+        const config = await db.collection('system_config').findOne({ key: 'riot_api_status' });
+        const currentKey = process.env.RIOT_API_KEY;
+        const now = new Date();
+
+        if (!config || config.api_key_value !== currentKey) {
+          await db.collection('system_config').updateOne(
+            { key: 'riot_api_status' },
+            { $set: { api_key_value: currentKey, updated_at: now, notified: false } },
+            { upsert: true }
+          );
+        } else if (!config.notified) {
+          const diffMs = now - new Date(config.updated_at);
+          const diffMin = Math.floor(diffMs / (1000 * 60));
+          if (diffMin >= 1439) {
+            await notifyAdmin('⚠️ **RECORDATORIO:** Tu API Key de Riot vencerá en **1 minuto**. ¡Renuévala!');
+            await db.collection('system_config').updateOne(
+              { key: 'riot_api_status' },
+              { $set: { notified: true } }
+            );
+          }
+        }
+      } catch (e) { console.error('[API Monitor Error]', e); }
+    }, 60 * 1000);
+
+    // Escaneo de Partidas en Vivo cada 1 min
     setInterval(async () => {
       try {
         const config = await db.collection('system_config').findOne({ key: 'riot_api_status' });
