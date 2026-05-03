@@ -222,10 +222,11 @@ function buildTopChampsHTML(topChampions, puuid) {
 
 function buildMatchDots(matches) {
   if (!matches || matches.length === 0) return '';
-  return '<div class="match-dots">' +
+  return '<div class="match-dots" style="display:flex; gap:4px; margin-top:5px;">' +
     matches.slice(0, 5).map(function(m) {
       const cls = m.win ? 'dot-win' : 'dot-loss';
-      return `<span class="dot ${cls}" title="${m.win ? 'Victoria' : 'Derrota'} · ${escapeHTML(m.champion || '')}"></span>`;
+      const mId = m.matchId || m.gameId;
+      return `<span class="dot ${cls}" style="cursor:pointer;" title="${m.win ? 'Victoria' : 'Derrota'} · ${escapeHTML(m.champion || '')}" onclick="event.stopPropagation(); openMatchModal('${mId}')"></span>`;
     }).join('') +
   '</div>';
 }
@@ -309,7 +310,7 @@ function buildCardHTML(acc, position) {
   const profileUrl = acc.discordId ? `/perfil/${acc.discordId}` : '#';
 
   return `
-    <div class="player-card">
+    <div class="player-card" id="card-${acc.puuid}">
       <div class="card-actions" style="position:absolute; top:10px; right:10px; display:flex; gap:5px; z-index:10;">
         <button class="refresh-btn" style="background:transparent; border:none; color:var(--gold-primary); cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
         <button class="note-btn" style="background:transparent; border:none; color:var(--gold-primary); cursor:pointer; font-size:1rem; opacity:0.6; transition:var(--transition);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Notas" data-puuid="${acc.puuid}">📝</button>
@@ -844,14 +845,14 @@ function buildPlayerModalHTML(acc) {
             </div>
           </div>
         </div>
-      </div>
-
-        <div class="rank-history-section" style="margin-top: 0;">
-          <div class="cstat-group-title">Historial de Divisiones</div>
-          <div id="rank-history-${acc.puuid}" class="rank-history-container">
+        
+        <div class="rank-history-section" style="width: 100%; margin-top: 20px;">
+          <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Historial de Divisiones</div>
+          <div id="rank-history-${acc.puuid}" class="rank-history-container" style="background: rgba(0,0,0,0.3); border-radius:12px; padding:15px; border: 1px solid rgba(255,255,255,0.05);">
             <div class="empty-stats">Cargando historial...</div>
           </div>
         </div>
+
       </div>
     </div>
   `;
@@ -1463,10 +1464,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const sidebar = document.getElementById('activity-sidebar');
   const pinBtn = document.getElementById('activity-pin');
 
-  if (sidebar) {
-    sidebar.addEventListener('click', () => {
+  const toggleBtn = document.getElementById('activity-toggle');
+  if (sidebar && toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (sidebar.classList.contains('collapsed')) {
-        openActivitySidebar(true); // Abrir con auto-cierre
+        openActivitySidebar(true);
       } else {
         closeActivitySidebar();
       }
