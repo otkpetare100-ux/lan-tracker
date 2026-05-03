@@ -403,10 +403,13 @@ function buildCardHTML(acc, position) {
               '<span class="summoner-region">LAN</span>' +
               '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
             '</div>' +
-            (acc.economy ? '<div class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:6px; width:fit-content;">' +
+            (acc.discordId ? '<a href="/perfil/' + acc.discordId + '" class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(200,155,60,0.1); border:1px solid rgba(200,155,60,0.2); padding:4px 8px; border-radius:6px; width:fit-content; text-decoration:none; cursor:pointer; transition:all 0.2s ease;" onmouseover="this.style.background=\'rgba(200,155,60,0.2)\'" onmouseout="this.style.background=\'rgba(200,155,60,0.1)\'">' +
+              '<span style="color:#f4c874">💰 ' + (acc.economy?.coins || 0) + '</span>' +
+              '<span style="color:#9d6cff">🎒 Mochila</span>' +
+            '</a>' : (acc.economy ? '<div class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:6px; width:fit-content;">' +
               '<span style="color:#f4c874">💰 ' + (acc.economy.coins || 0) + '</span>' +
               '<span style="color:#9d6cff">🎒 ' + (acc.economy.inventory?.length || 0) + '</span>' +
-            '</div>' : '') +
+            '</div>' : '')) +
           '</div>' +
           '<div class="main-pool-container">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
         '</div>' +

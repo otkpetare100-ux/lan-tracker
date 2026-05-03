@@ -137,7 +137,15 @@
     });
 
     function openBackpackPrompt() {
-      const discordId = prompt("Ingresa tu Discord ID para ver tu mochila:");
+      let discordId = localStorage.getItem('myDiscordId');
+      
+      if (!discordId) {
+        discordId = prompt("Ingresa tu Discord ID para ver tu mochila (se guardará para la próxima vez):");
+        if (discordId) {
+          localStorage.setItem('myDiscordId', discordId.trim());
+        }
+      }
+
       if (discordId) {
         window.location.href = `/perfil/${discordId.trim()}`;
       }
