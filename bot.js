@@ -246,6 +246,13 @@ function initBot(db) {
       });
     }
 
+    if (command === 'test_notif') {
+      if (!isAdmin(msg.author.id)) return;
+      await sendDailySummary(dbInstance);
+      await sendDailyMotivation(dbInstance);
+      return;
+    }
+
     if (command === 'vincular') {
       const slug = args.join(' '); // Soporta nombres con espacios
       if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: \`!vincular Nombre#TAG\``);
