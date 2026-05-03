@@ -111,7 +111,7 @@ function initBot(db) {
 
       if (now - lastUsed < cooldownAmount) {
         const timeLeft = Math.ceil((cooldownAmount - (now - lastUsed)) / 60000);
-        return msg.reply(`⌛ Por favor, espera **${timeLeft} minuto(s)** para volver a usar el comando de ayuda.`);
+        return msg.channel.send(`<@${msg.author.id}> ⌛ Por favor, espera **${timeLeft} minuto(s)** para volver a usar el comando de ayuda.`);
       }
 
       const embed = new EmbedBuilder()
@@ -130,7 +130,7 @@ function initBot(db) {
     }
 
     if (command === 'help_admin' || command === 'admin_help') {
-      if (!isAdmin(msg.author.id)) return msg.reply('🚫 No tienes permisos de administrador.');
+      if (!isAdmin(msg.author.id)) return msg.channel.send(`<@${msg.author.id}> 🚫 No tienes permisos de administrador.`);
 
       const embed = new EmbedBuilder()
         .setTitle('🛠️ Panel de Administración - LAN Tracker')
@@ -144,12 +144,12 @@ function initBot(db) {
         )
         .setFooter({ text: 'Acceso Restringido · Naafiri Admin' });
 
-      return msg.reply({ embeds: [embed] });
+      return msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
     if (command === 'desencantar' || command === 'reciclar') {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!userEco || !userEco.inventory || userEco.inventory.length === 0) {
-        return msg.reply('🎒 No tienes nada en tu mochila para desencantar.');
+        return msg.channel.send(`<@${msg.author.id}> 🎒 No tienes nada en tu mochila para desencantar.`);
       }
 
       const grouped = {};
@@ -170,7 +170,7 @@ function initBot(db) {
       }
 
       if (itemsRemoved === 0) {
-        return msg.reply('✨ No tienes objetos repetidos en tu mochila.');
+        return msg.channel.send(`<@${msg.author.id}> ✨ No tienes objetos repetidos en tu mochila.`);
       }
 
       await db.collection('economy').updateOne(
@@ -191,12 +191,12 @@ function initBot(db) {
       if (!slug) {
         // Intentar buscar vinculación automática
         acc = await db.collection('accounts').findOne({ discordId: msg.author.id });
-        if (!acc) return msg.reply('❌ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.');
+        if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ No estás vinculado. Usa `!perfil Nombre#TAG` o vincúlate con `!vincular`.`);
       } else {
         acc = await findAccountBySlug(slug);
       }
 
-      if (!acc) return msg.reply('Jugador no encontrado en el dashboard.');
+      if (!acc) return msg.channel.send(`<@${msg.author.id}> Jugador no encontrado en el dashboard.`);
 
       const embed = new EmbedBuilder()
         .setTitle(`${acc.gameName}#${acc.tagLine}`)
@@ -209,7 +209,7 @@ function initBot(db) {
         )
         .setFooter({ text: 'LAN Tracker Bot' });
 
-      msg.reply({ embeds: [embed] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
     if (command === 'ladder') {
@@ -223,7 +223,7 @@ function initBot(db) {
         .setDescription(list || 'No hay jugadores registrados.')
         .setColor(0xf4c874);
 
-      msg.reply({ embeds: [embed] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
     // --- Fase 1: Vínculo y Economía ---
@@ -320,16 +320,16 @@ function initBot(db) {
 
     if (command === 'trade' || command === 'cambio') {
       const target = msg.mentions.users.first();
-      if (!target || target.id === msg.author.id) return msg.reply('❌ Uso: `!trade @usuario MiCampeon, SuCampeon`');
+      if (!target || target.id === msg.author.id) return msg.channel.send(`<@${msg.author.id}> ❌ Uso: `!trade @usuario MiCampeon, SuCampeon``);
 
       const parts = args.slice(1).join(' ').split(',').map(p => p.trim());
-      if (parts.length < 2) return msg.reply('❌ Indica ambos campeones separados por una coma. Ej: `!trade @user Lux, Teemo`');
+      if (parts.length < 2) return msg.channel.send(`<@${msg.author.id}> ❌ Indica ambos campeones separados por una coma. Ej: `!trade @user Lux, Teemo``);
 
       const senderEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       const targetEco = await db.collection('economy').findOne({ discordId: target.id });
 
-      if (!senderEco || !senderEco.inventory) return msg.reply('❌ No tienes items en tu mochila.');
-      if (!targetEco || !targetEco.inventory) return msg.reply('❌ El usuario destino no tiene mochila.');
+      if (!senderEco || !senderEco.inventory) return msg.channel.send(`<@${msg.author.id}> ❌ No tienes items en tu mochila.`);
+      if (!targetEco || !targetEco.inventory) return msg.channel.send(`<@${msg.author.id}> ❌ El usuario destino no tiene mochila.`);
 
       // Búsqueda robusta: exacto primero, luego parcial
       const findItem = (inv, name) => {
@@ -341,8 +341,8 @@ function initBot(db) {
       const myItem = findItem(senderEco.inventory, parts[0]);
       const suItem = findItem(targetEco.inventory, parts[1]);
 
-      if (!myItem) return msg.reply(`❌ No tienes a **${parts[0]}** en tu mochila.`);
-      if (!suItem) return msg.reply(`❌ **${target.username}** no tiene a **${parts[1]}**.`);
+      if (!myItem) return msg.channel.send(`<@${msg.author.id}> ❌ No tienes a **${parts[0]}** en tu mochila.`);
+      if (!suItem) return msg.channel.send(`<@${msg.author.id}> ❌ **${target.username}** no tiene a **${parts[1]}**.`);
 
       const embed = new EmbedBuilder()
         .setTitle('🤝 Propuesta de Intercambio')
@@ -372,7 +372,7 @@ function initBot(db) {
           .setStyle(ButtonStyle.Primary)
       );
 
-      const sentMsg = await msg.reply({ embeds: [embed], components: [row] });
+      const sentMsg = await msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed], components: [row] });
       
       // Auto-borrado preventivo tras 1 minuto si no interactúa
       setTimeout(() => sentMsg.delete().catch(() => {}), 60000);
@@ -390,7 +390,7 @@ function initBot(db) {
         .setDescription(list || 'Todos son pro players por ahora.')
         .setColor(0xd93f3f);
 
-      msg.reply({ embeds: [embed] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
     if (command === 'top_ricos' || command === 'top_coins') {
@@ -402,7 +402,7 @@ function initBot(db) {
         .setDescription(list || 'Nadie tiene monedas aún.')
         .setColor(0xf1c40f);
 
-      msg.reply({ embeds: [embed] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
     if (command === 'ludopata' || command === 'bets') {
@@ -410,7 +410,7 @@ function initBot(db) {
       const bets = await db.collection('bets').find({ discordId: targetUser.id }).toArray();
 
       if (bets.length === 0) {
-        return msg.reply(`${targetUser.id === msg.author.id ? 'No has' : 'Este usuario no ha'} realizado ninguna apuesta todavía. 🎰`);
+        return msg.channel.send(`<@${msg.author.id}> ${targetUser.id === msg.author.id ? 'No has' : 'Este usuario no ha'} realizado ninguna apuesta todavía. 🎰`);
       }
 
       const wins = bets.filter(b => b.status === 'won').length;
@@ -437,7 +437,7 @@ function initBot(db) {
         .setColor(netProfit >= 0 ? 0x2ecc71 : 0xe74c3c)
         .setFooter({ text: 'Naafiri Bot · LAN Tracker' });
 
-      msg.reply({ embeds: [embed] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
     if (command === 'apostar') {
@@ -449,11 +449,11 @@ function initBot(db) {
       const targetSlug = filteredArgs.slice(2).join(' ');
 
       if (isNaN(amount) || amount <= 0 || !['gana', 'pierde'].includes(choice) || !targetSlug) {
-        return msg.reply('❌ Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]`');
+        return msg.channel.send(`<@${msg.author.id}> ❌ Uso: `!apostar [cantidad] [gana/pierde] Nombre#TAG [anonimo]``);
       }
 
       const targetAcc = await findAccountBySlug(targetSlug);
-      if (!targetAcc) return msg.reply('❌ Ese jugador no está registrado en el dashboard.');
+      if (!targetAcc) return msg.channel.send(`<@${msg.author.id}> ❌ Ese jugador no está registrado en el dashboard.`);
 
       // 1. Calcular multiplicador dinámico basado en Winrate
       let multiplier = 2.0;
@@ -472,17 +472,17 @@ function initBot(db) {
         const diffMins = Math.floor(diffMs / 60000);
 
         if (diffMins >= 5) {
-          return msg.reply(`❌ **Demasiado tarde.** El aviso de partida de **${targetAcc.gameName}** salió hace ${diffMins} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
+          return msg.channel.send(`<@${msg.author.id}> ❌ **Demasiado tarde.** El aviso de partida de **${targetAcc.gameName}** salió hace ${diffMins} minutos. Solo se permite apostar durante los primeros 5 minutos.`);
         }
       } else {
-        return msg.reply(`❌ No detecto que **${targetAcc.gameName}** esté en una partida activa ahora mismo.`);
+        return msg.channel.send(`<@${msg.author.id}> ❌ No detecto que **${targetAcc.gameName}** esté en una partida activa ahora mismo.`);
       }
 
       const existingBet = await db.collection('bets').findOne({ discordId: msg.author.id, targetPuuid: targetAcc.puuid, status: 'open' });
-      if (existingBet) return msg.reply('⚠️ Ya tienes una apuesta activa por este jugador en esta partida.');
+      if (existingBet) return msg.channel.send(`<@${msg.author.id}> ⚠️ Ya tienes una apuesta activa por este jugador en esta partida.`);
 
       const user = await db.collection('economy').findOne({ discordId: msg.author.id });
-      if (!user || user.coins < amount) return msg.reply('❌ No tienes suficientes Naafiri Coins.');
+      if (!user || user.coins < amount) return msg.channel.send(`<@${msg.author.id}> ❌ No tienes suficientes Naafiri Coins.`);
 
       // Guardar apuesta
       if (isAnonymous) msg.delete().catch(() => {});
@@ -502,7 +502,7 @@ function initBot(db) {
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
       
       const revealMsg = isAnonymous ? '¡La elección se revelará al final!' : `has apostado a que **${choice}**`;
-      msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ${revealMsg} 🤡`);
+      msg.channel.send(`<@${msg.author.id}> ✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ${revealMsg} 🤡`);
     }
 
     if (command === 'gacha' || command === 'tiro') {
@@ -569,7 +569,7 @@ function initBot(db) {
         .setColor(color)
         .setFooter({ text: `Gastaste ${COST} coins · Saldo restante: ${userEco.coins - COST + (selected.type === 'coins' ? selected.amount : 0)} 💰 · Naafiri Bot` });
 
-      msg.reply({ embeds: [embedGacha] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embedGacha] });
 
       if (selected.rarity === 'Legendario') {
         msg.channel.send(`🎊 ¡ATENCIÓN! **${msg.author.username}** acaba de conseguir un objeto **LEGENDARIO**: **${selected.name}**! 🎊`);
@@ -579,7 +579,7 @@ function initBot(db) {
     if (command === 'mochila' || command === 'inv') {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
       if (!userEco || !userEco.inventory || userEco.inventory.length === 0) {
-        return msg.reply('🎒 Tu mochila está vacía. ¡Usa `!gacha` para empezar tu colección!');
+        return msg.channel.send(`<@${msg.author.id}> 🎒 Tu mochila está vacía. ¡Usa `!gacha` para empezar tu colección!`);
       }
 
       // Agrupar items duplicados y contar cantidad
@@ -600,14 +600,14 @@ function initBot(db) {
         .setDescription(items)
         .setColor(0x2ecc71);
 
-      msg.reply({ embeds: [embed] });
+      msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
     }
 
     
     if (command === 'reroll' || command === 'fusionar') {
       const rarityArg = args[0] ? args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase() : 'Común';
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
-      if (!userEco || !userEco.inventory) return msg.reply('🎒 Tu mochila está vacía.');
+      if (!userEco || !userEco.inventory) return msg.channel.send(`<@${msg.author.id}> 🎒 Tu mochila está vacía.`);
 
       const counts = {}; const duplicates = [];
       for (const item of userEco.inventory) {
@@ -617,7 +617,7 @@ function initBot(db) {
         }
       }
 
-      if (duplicates.length < 3) return msg.reply(`❌ Necesitas al menos **3 copias repetidas** de rareza **${rarityArg}**.`);
+      if (duplicates.length < 3) return msg.channel.send(`<@${msg.author.id}> ❌ Necesitas al menos **3 copias repetidas** de rareza **${rarityArg}**.`);
 
       const toRemove = duplicates.slice(0, 3);
       const rarities = ['Común', 'Raro', 'Épico', 'Legendario'];
@@ -639,7 +639,7 @@ function initBot(db) {
 
       await db.collection('economy').updateOne({ discordId: msg.author.id }, { $set: { inventory: newInv } });
       const upgradeMsg = resultRarity !== rarityArg ? ' ✨ **¡UPGRADE!** ✨' : '';
-      msg.reply(`♻️ Has fusionado 3 repetidos **${rarityArg}** y obtuviste: **${selected.name}** (${selected.rarity})${upgradeMsg}`);
+      msg.channel.send(`<@${msg.author.id}> ♻️ Has fusionado 3 repetidos **${rarityArg}** y obtuviste: **${selected.name}** (${selected.rarity})${upgradeMsg}`);
     }
 
     // =============================================
@@ -647,7 +647,7 @@ function initBot(db) {
     // =============================================
     if (command.startsWith('admin_')) {
       if (!isAdmin(msg.author.id)) {
-        return msg.reply('🚫 No tienes permisos de administrador.');
+        return msg.channel.send(`<@${msg.author.id}> 🚫 No tienes permisos de administrador.`);
       }
 
       // !admin_dar @usuario cantidad
@@ -655,13 +655,13 @@ function initBot(db) {
         const target = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
-          return msg.reply('Uso: `!admin_dar @usuario cantidad`');
+          return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_dar @usuario cantidad``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $inc: { coins: amount }, $set: { discordTag: target.tag } },
           { upsert: true }
         );
-        return msg.reply(`✅ **+${amount} coins** dados a ${target.username}.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ **+${amount} coins** dados a ${target.username}.`);
       }
 
       // !admin_quitar @usuario cantidad
@@ -669,12 +669,12 @@ function initBot(db) {
         const target = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         if (!target || isNaN(amount) || amount <= 0)
-          return msg.reply('Uso: `!admin_quitar @usuario cantidad`');
+          return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_quitar @usuario cantidad``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $inc: { coins: -amount } }
         );
-        return msg.reply(`✅ **-${amount} coins** quitados a ${target.username}.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ **-${amount} coins** quitados a ${target.username}.`);
       }
 
       // !admin_setcoins @usuario cantidad
@@ -683,7 +683,7 @@ function initBot(db) {
         const targetUser = msg.mentions.users.first();
         const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
         
-        if (isNaN(amount)) return msg.reply('Uso: `!admin_setcoins [@usuario o @rol] cantidad`');
+        if (isNaN(amount)) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_setcoins [@usuario o @rol] cantidad``);
 
         if (role) {
           const members = await msg.guild.members.fetch();
@@ -696,46 +696,46 @@ function initBot(db) {
               { upsert: true }
             );
           }
-          return msg.reply(`✅ **${amount} coins** asignadas a los **${roleMembers.size}** miembros del rol **${role.name}**.`);
+          return msg.channel.send(`<@${msg.author.id}> ✅ **${amount} coins** asignadas a los **${roleMembers.size}** miembros del rol **${role.name}**.`);
         } else if (targetUser) {
           await db.collection('economy').updateOne(
             { discordId: targetUser.id },
             { $set: { coins: amount, discordTag: targetUser.tag } },
             { upsert: true }
           );
-          return msg.reply(`✅ Saldo de **${targetUser.username}** establecido en **${amount} coins**.`);
+          return msg.channel.send(`<@${msg.author.id}> ✅ Saldo de **${targetUser.username}** establecido en **${amount} coins**.`);
         } else {
-          return msg.reply('Uso: `!admin_setcoins [@usuario o @rol] cantidad`');
+          return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_setcoins [@usuario o @rol] cantidad``);
         }
       }
 
       // !admin_resetdiario @usuario
       if (command === 'admin_resetdiario') {
         const target = msg.mentions.users.first();
-        if (!target) return msg.reply('Uso: `!admin_resetdiario @usuario`');
+        if (!target) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_resetdiario @usuario``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $unset: { lastDaily: '' } }
         );
-        return msg.reply(`✅ Cooldown de diario reseteado para **${target.username}**.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Cooldown de diario reseteado para **${target.username}**.`);
       }
 
       if (command === 'admin_daritem') {
         const target = msg.mentions.users.first();
         const itemId = args[1];
         const item = GACHA_ITEMS.find(i => i.id === itemId);
-        if (!target || !item) return msg.reply('Uso: `!admin_daritem @usuario <itemId>`');
+        if (!target || !item) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_daritem @usuario <itemId>``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $addToSet: { inventory: { id: item.id, name: item.name, rarity: item.rarity, date: new Date() } } },
           { upsert: true }
         );
-        return msg.reply(`✅ Item **${item.name}** (${item.rarity}) dado a **${target.username}**.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Item **${item.name}** (${item.rarity}) dado a **${target.username}**.`);
       }
 
       if (command === 'admin_scan') {
         const accounts = await db.collection('accounts').find({}).toArray();
-        const statusMsg = await msg.reply(`🔍 Escaneando partidas en vivo para **${accounts.length}** cuentas...`);
+        const statusMsg = await msg.channel.send(`<@${msg.author.id}> 🔍 Escaneando partidas en vivo para **${accounts.length}** cuentas...`);
         
         let found = 0;
         let results = [];
@@ -768,19 +768,19 @@ function initBot(db) {
       if (command === 'admin_debug_key') {
         const key = process.env.RIOT_API_KEY || 'NO DEFINIDA';
         const masked = key.length > 10 ? `${key.substring(0, 7)}...${key.substring(key.length - 4)}` : 'Muy corta';
-        return msg.reply(`🔑 **Debug Key:**\n- Máscara: \`${masked}\`\n- Longitud: \`${key.length}\`\n- Variable ENV: \`${process.env.RIOT_API_KEY ? 'Detectada ✅' : 'No detectada ❌'}\``);
+        return msg.channel.send(`<@${msg.author.id}> 🔑 **Debug Key:**\n- Máscara: \`${masked}\`\n- Longitud: \`${key.length}\`\n- Variable ENV: \`${process.env.RIOT_API_KEY ? 'Detectada ✅' : 'No detectada ❌'}\``);
       }
 
       if (command === 'admin_testnotif') {
         const testAcc = { gameName: 'Jugador de Prueba', tagLine: 'LAN' };
         const testData = { championName: 'Naafiri', championId: 'Naafiri' };
         await notifyLiveGame(testAcc, testData);
-        return msg.reply('✅ Notificación de partida en vivo de prueba enviada.');
+        return msg.channel.send(`<@${msg.author.id}> ✅ Notificación de partida en vivo de prueba enviada.`);
       }
 
       if (command === 'admin_testsummary') {
         await sendDailySummary(db);
-        return msg.reply('✅ Resumen diario de prueba enviado.');
+        return msg.channel.send(`<@${msg.author.id}> ✅ Resumen diario de prueba enviado.`);
       }
 
             if (command === 'admin_testbet') {
@@ -795,15 +795,15 @@ function initBot(db) {
           topGold: { name: 'BODKIN ARROW', champion: 'Vi', value: 18200 }
         };
         await notifyBetResults('BODKIN ARROW#BHR', 'gana', testWinners, 0, 'Vi', testLp, '18/1/9', DDRAGON_VERSION, 1, 420, testHighlights);
-        return msg.reply('✅ Notificación de prueba con MVP y logros enviada.');
+        return msg.channel.send(`<@${msg.author.id}> ✅ Notificación de prueba con MVP y logros enviada.`);
       }
 
       if (command === 'admin_check') {
         const slug = args.join(' ');
-        if (!slug) return msg.reply('Uso: `!admin_check Nombre#TAG`');
+        if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_check Nombre#TAG``);
         
         const acc = await findAccountBySlug(slug);
-        if (!acc) return msg.reply('❌ Jugador no encontrado en el dashboard.');
+        if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
 
         const url = `https://la1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${acc.puuid.trim()}`;
         const res = await fetch(url, {
@@ -829,27 +829,27 @@ function initBot(db) {
             }, 5 * 60 * 1000);
           }
 
-          return msg.reply(`✅ **${acc.gameName}** está en partida. Notificación enviada.`);
+          return msg.channel.send(`<@${msg.author.id}> ✅ **${acc.gameName}** está en partida. Notificación enviada.`);
         } else {
-          return msg.reply(`💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
+          return msg.channel.send(`<@${msg.author.id}> 💤 **${acc.gameName}** no parece estar en partida ahora mismo.`);
         }
       }
 
       // !admin_clearinv @usuario
       if (command === 'admin_clearinv') {
         const target = msg.mentions.users.first();
-        if (!target) return msg.reply('Uso: `!admin_clearinv @usuario`');
+        if (!target) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_clearinv @usuario``);
         await db.collection('economy').updateOne(
           { discordId: target.id },
           { $set: { inventory: [] } }
         );
-        return msg.reply(`✅ Inventario de **${target.username}** vaciado.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Inventario de **${target.username}** vaciado.`);
       }
 
       // !admin_anuncio [mensaje]
       if (command === 'admin_anuncio') {
         const message = args.join(' ');
-        if (!message) return msg.reply('Uso: `!admin_anuncio [mensaje]`');
+        if (!message) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_anuncio [mensaje]``);
         const embed = new EmbedBuilder()
           .setTitle('📢 ANUNCIO OFICIAL')
           .setDescription(message)
@@ -880,21 +880,21 @@ function initBot(db) {
             { name: '🏆 Usuario más rico', value: richest[0] ? `${richest[0].discordTag} — ${richest[0].coins} coins` : 'N/A', inline: false }
           )
           .setColor(0x576bce);
-        return msg.reply({ embeds: [embed] });
+        return msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
       }
 
       // !admin_cancelarApuestas Nombre#TAG
       if (command === 'admin_cancelarapuestas') {
         const slug = args.join(' ');
-        if (!slug) return msg.reply('Uso: `!admin_cancelarApuestas Nombre#TAG`');
+        if (!slug) return msg.channel.send(`<@${msg.author.id}> Uso: `!admin_cancelarApuestas Nombre#TAG``);
         const [name, tag] = slug.split('#');
         const acc = await db.collection('accounts').findOne({
           gameName: { $regex: new RegExp(`^${name}$`, 'i') },
           tagLine:  { $regex: new RegExp(`^${tag}$`, 'i') }
         });
-        if (!acc) return msg.reply('❌ Jugador no encontrado en el dashboard.');
+        if (!acc) return msg.channel.send(`<@${msg.author.id}> ❌ Jugador no encontrado en el dashboard.`);
         const openBets = await db.collection('bets').find({ targetPuuid: acc.puuid, status: 'open' }).toArray();
-        if (!openBets.length) return msg.reply('No hay apuestas abiertas para ese jugador.');
+        if (!openBets.length) return msg.channel.send(`<@${msg.author.id}> No hay apuestas abiertas para ese jugador.`);
         for (const bet of openBets) {
           await db.collection('economy').updateOne(
             { discordId: bet.discordId },
@@ -905,23 +905,23 @@ function initBot(db) {
           { targetPuuid: acc.puuid, status: 'open' },
           { $set: { status: 'cancelled' } }
         );
-        return msg.reply(`✅ **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ **${openBets.length}** apuesta(s) canceladas y reembolsadas para **${acc.gameName}#${acc.tagLine}**.`);
       }
 
       // !admin_resetAll CONFIRMAR
       if (command === 'admin_resetall') {
         if (args[0] !== 'CONFIRMAR') {
-          return msg.reply('⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR`');
+          return msg.channel.send(`<@${msg.author.id}> ⚠️ Esto pondrá a **0 coins** a TODOS los usuarios.\nPara confirmar escribe: `!admin_resetAll CONFIRMAR``);
         }
         const result = await db.collection('economy').updateMany({}, { $set: { coins: 0 } });
-        return msg.reply(`✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
+        return msg.channel.send(`<@${msg.author.id}> ✅ Reset global completado. **${result.modifiedCount}** usuario(s) puestos a 0 coins.`);
       }
 
       // !admin_purge [cantidad]
       if (command === 'admin_purge') {
         const amount = args[0] ? parseInt(args[0]) : 100;
         if (isNaN(amount) || amount <= 0 || amount > 100) {
-          return msg.reply('❌ Por favor, elige un número entre 1 y 100.');
+          return msg.channel.send(`<@${msg.author.id}> ❌ Por favor, elige un número entre 1 y 100.`);
         }
 
         try {
@@ -931,13 +931,13 @@ function initBot(db) {
           setTimeout(() => confirm.delete().catch(() => {}), 5000);
         } catch (e) {
           console.error('[Purge Error]', e);
-          msg.reply('❌ Error al intentar borrar mensajes. (Nota: Discord no permite borrar masivamente mensajes de más de 14 días).');
+          msg.channel.send(`<@${msg.author.id}> ❌ Error al intentar borrar mensajes. (Nota: Discord no permite borrar masivamente mensajes de más de 14 días).`);
         }
       }
       // !admin_syncroles
       if (command === 'admin_syncroles') {
         const accounts = await db.collection('accounts').find({ discordId: { $exists: true } }).toArray();
-        msg.reply(`🔄 Sincronizando roles para **${accounts.length}** usuarios...`);
+        msg.channel.send(`<@${msg.author.id}> 🔄 Sincronizando roles para **${accounts.length}** usuarios...`);
         
         let success = 0;
         for (const acc of accounts) {
