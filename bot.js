@@ -649,10 +649,10 @@ function initBot(db) {
       }
 
       if (command === 'admin_testnotif') {
-        const testAcc = { gameName: 'Jugador de Prueba' };
-        const testData = { championName: 'Naafiri' };
+        const testAcc = { gameName: 'Jugador de Prueba', tagLine: 'LAN' };
+        const testData = { championName: 'Naafiri', championId: 'Naafiri' };
         await notifyLiveGame(testAcc, testData);
-        return msg.reply('✅ Notificación de prueba enviada al canal de anuncios.');
+        return msg.reply('✅ Notificación de partida en vivo de prueba enviada.');
       }
 
       if (command === 'admin_testsummary') {
@@ -805,9 +805,15 @@ async function notifyRankChange(data) {
   const emoji = promoted ? '🎉' : '💀';
   const action = promoted ? '¡SUBIÓ DE RANGO!' : 'BAJÓ DE RANGO...';
 
+  const queueName = promoted ? 'Rank Up' : 'Rank Down';
+  const title = `${queueName} for ${name}`;
+
   const embed = new EmbedBuilder()
-    .setTitle(`${emoji} ${action}`)
-    .setDescription(`**${name}** ahora es **${newRank}**\n*(Antes: ${oldRank})*`)
+    .setTitle(title)
+    .addFields(
+      { name: 'Rango Actual', value: newRank, inline: true },
+      { name: 'Rango Anterior', value: oldRank, inline: true }
+    )
     .setColor(color)
     .setTimestamp();
 
@@ -866,10 +872,14 @@ async function notifyLiveGame(acc, gameData) {
   const lp = acc.soloQ?.leaguePoints || 0;
   const rankDisplay = tier === 'UNRANKED' ? 'Unranked' : `${tier} ${rank} (${lp} LP)`;
 
+  const title = `Live Game for ${acc.gameName}#${acc.tagLine}`;
+
   const embed = new EmbedBuilder()
-    .setAuthor({ name: `${acc.gameName}#${acc.tagLine}`, iconURL: playerIcon })
-    .setTitle('PARTIDA EN VIVO')
-    .setDescription(`¡Acaba de entrar en una partida!\n**Rango:** ${rankDisplay}\n**Campeón:** ${gameData.championName || 'Desconocido'}`)
+    .setTitle(title)
+    .addFields(
+      { name: 'Campeón', value: gameData.championName || 'Desconocido', inline: true },
+      { name: 'Rango', value: rankDisplay, inline: true }
+    )
     .setThumbnail(champIcon)
     .setColor(0x576bce)
     .setTimestamp();
@@ -987,9 +997,11 @@ async function notifyRemake(targetName) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
+  const title = `Remake for ${targetName}`;
+
   const embedRemake = new EmbedBuilder()
-    .setTitle('🔄 Remake Detectado')
-    .setDescription(`La partida de **${targetName}** fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automáticamente. 💰`)
+    .setTitle(title)
+    .setDescription(`La partida fue un remake (menos de 3:30 min).\nTodas las apuestas han sido **reembolsadas** automáticamente. 💰`)
     .setColor(0xf39c12)
     .setTimestamp();
 
@@ -1002,9 +1014,14 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
 
+  const title = `Challenge Complete for ${targetName}`;
+
   const embed = new EmbedBuilder()
-    .setTitle('✨ ¡RETO COMPLETADO! ✨')
-    .setDescription(`¡Increíble! **${targetName}** ha superado los siguientes retos en su última partida:\n\n${challenges.map(c => `🔹 ${c}`).join('\n')}\n\nRecompensa total: **${coins} Naafiri Coins** 💰`)
+    .setTitle(title)
+    .addFields(
+      { name: 'Retos Superados', value: challenges.map(c => `🔹 ${c}`).join('\n'), inline: false },
+      { name: 'Recompensa', value: `${coins} Naafiri Coins 💰`, inline: true }
+    )
     .setColor(0xf4c874)
     .setThumbnail('https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Season_2023_-_Master_1.png')
     .setTimestamp();
