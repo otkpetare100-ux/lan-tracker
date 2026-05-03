@@ -139,17 +139,20 @@ function initBot(db) {
 
       const embed = new EmbedBuilder()
         .setTitle('🛠️ Panel de Administración - LAN Tracker')
+        .setDescription('Pulsa el botón de abajo para ver los comandos de administrador de forma privada.')
         .setColor(0xd93f3f)
-        .addFields(
-          { name: '💰 Gestión de Monedas', value: '`!admin_dar @u cant` - Dar monedas.\n`!admin_quitar @u cant` - Quitar monedas.\n`!admin_setcoins @u cant` - Fijar saldo.\n`!admin_resetall CONFIRMAR` - Resetear TODO.' },
-          { name: '🎒 Gestión de Items', value: '`!admin_daritem @u id` - Dar campeón.\n`!admin_clearinv @u` - Vaciar mochila.' },
-          { name: '📡 Sistema y Debug', value: '`!admin_scan` - Escaneo manual.\n`!admin_check N#T` - Forzar aviso de partida.\n`!admin_syncroles` - Sincronizar roles de Discord.\n`!admin_purge [n]` - Limpiar mensajes del canal.' },
-          { name: '🎭 Notificaciones y Test', value: '`!admin_anuncio [msg]` - Enviar anuncio.\n`!admin_testnotif` - Test partida en vivo.\n`!admin_testbet` - Test resultados apuestas.\n`!admin_testsummary` - Test resumen diario.' },
-          { name: '⚖️ Apuestas', value: '`!admin_cancelarapuestas N#T` - Reembolsar apuestas abiertas.' }
-        )
-        .setFooter({ text: 'Acceso Restringido · Naafiri Admin' });
+        .setFooter({ text: 'Naafiri Admin' });
 
-      return msg.channel.send({ content: `<@${msg.author.id}>`,  embeds: [embed] });
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`help_admin_${msg.author.id}`)
+          .setLabel('Abrir Consola Admin 🛠️')
+          .setStyle(ButtonStyle.Danger)
+      );
+
+      const sentMsg = await msg.channel.send({ content: `<@${msg.author.id}>`, embeds: [embed], components: [row] });
+      setTimeout(() => sentMsg.delete().catch(() => {}), 60000);
+      return;
     }
     if (command === 'desencantar' || command === 'reciclar') {
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
@@ -973,23 +976,39 @@ function initBot(db) {
         const action = parts[0];
 
         if (action === 'help') {
+          const typeHelp = parts[1];
           const userId = parts[2];
           if (interaction.user.id !== userId) {
-            return interaction.reply({ content: '❌ Solo el autor del comando puede ver esta ayuda.', ephemeral: true });
+            return interaction.reply({ content: '❌ No tienes acceso a esta ayuda.', ephemeral: true });
           }
 
-          const helpEmbed = new EmbedBuilder()
-            .setTitle('🐾 Guía de Comandos - LAN Tracker')
-            .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
-            .addFields(
-              { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango.\n`!stats [Nombre#TAG]` - Estadísticas.\n`!vincular Nombre#TAG` - Vincula tu cuenta.\n`!ladder` - Top 10 jugadores.' },
-              { name: '💰 Economía', value: '`!monedas` - Mira tu saldo.\n`!diario` - Reclama 100 coins.\n`!pagar @usuario [cant]` - Envía monedas.\n`!top_ricos` - Top 10 ricos.' },
-              { name: '🎮 Diversión', value: '`!apostar` - Apuesta.\n`!trade @u mio, suyo` - Trade.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!web` - Perfil Premium.' }
-            )
-            .setColor(0x576bce)
-            .setFooter({ text: 'Naafiri Bot' });
+          if (typeHelp === 'main') {
+            const helpEmbed = new EmbedBuilder()
+              .setTitle('🐾 Guía de Comandos - LAN Tracker')
+              .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
+              .addFields(
+                { name: '👤 Perfil y Rango', value: '`!perfil [Nombre#TAG]` - Mira tu rango.\n`!stats [Nombre#TAG]` - Estadísticas.\n`!vincular Nombre#TAG` - Vincula tu cuenta.\n`!ladder` - Top 10 jugadores.' },
+                { name: '💰 Economía', value: '`!monedas` - Mira tu saldo.\n`!diario` - Reclama 100 coins.\n`!pagar @usuario [cant]` - Envía monedas.\n`!top_ricos` - Top 10 ricos.' },
+                { name: '🎮 Diversión', value: '`!apostar` - Apuesta.\n`!trade @u mio, suyo` - Trade.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reciclar` - Desencantar repetidos.' }
+              )
+              .setColor(0x576bce)
+              .setFooter({ text: 'Naafiri Bot' });
 
-          await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
+            await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
+          } else if (typeHelp === 'admin') {
+            const adminEmbed = new EmbedBuilder()
+              .setTitle('🛠️ Panel de Administración')
+              .addFields(
+                { name: '💰 Economía', value: '`!admin_dar @u cant` - Dar.\n`!admin_quitar @u cant` - Quitar.\n`!admin_setcoins @u cant` - Setear.' },
+                { name: '🎒 Items', value: '`!admin_daritem @u id` - Dar item.\n`!admin_clearinv @u` - Vaciar.' },
+                { name: '🎭 Sistema', value: '`!admin_anuncio [msg]` - Anuncio.\n`!admin_purge [n]` - Limpiar chat.\n`!test_notif` - Test notificaciones.' }
+              )
+              .setColor(0xd93f3f)
+              .setFooter({ text: 'Naafiri Admin' });
+
+            await interaction.reply({ embeds: [adminEmbed], ephemeral: true });
+          }
+          
           return interaction.message.delete().catch(() => {});
         }
 
