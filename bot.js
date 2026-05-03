@@ -1042,8 +1042,8 @@ function initBot(db) {
           return interaction.reply({ content: '❌ Cantidad inválida. Debe ser un número mayor a 0.', ephemeral: true });
         }
 
-        const targetAcc = await db.collection('accounts').findOne({ puuid });
-        if (!targetAcc) return interaction.reply({ content: '❌ El jugador ya no está registrado.', ephemeral: true });
+        const targetAcc = await dbInstance.collection('accounts').findOne({ puuid: puuid.trim() });
+        if (!targetAcc) return interaction.reply({ content: `❌ El jugador con ID \`${puuid.substring(0,8)}...\` ya no está registrado o hubo un error de sesión.`, ephemeral: true });
 
         // Validar tiempo (5 min)
         if (targetAcc.liveGameStartedAt) {
@@ -1057,13 +1057,13 @@ function initBot(db) {
         }
 
         // Validar saldo
-        const user = await db.collection('economy').findOne({ discordId: interaction.user.id });
+        const user = await dbInstance.collection('economy').findOne({ discordId: interaction.user.id });
         if (!user || user.coins < amount) {
           return interaction.reply({ content: `❌ No tienes suficientes Naafiri Coins (Saldo: ${user?.coins || 0}).`, ephemeral: true });
         }
 
         // Validar si ya tiene apuesta
-        const existing = await db.collection('bets').findOne({ discordId: interaction.user.id, targetPuuid: puuid, status: 'open' });
+        const existing = await dbInstance.collection('bets').findOne({ discordId: interaction.user.id, targetPuuid: puuid.trim(), status: 'open' });
         if (existing) {
           return interaction.reply({ content: '⚠️ Ya tienes una apuesta activa por este jugador.', ephemeral: true });
         }
@@ -1077,7 +1077,7 @@ function initBot(db) {
         }
 
         // Registrar apuesta
-        await db.collection('bets').insertOne({
+        await dbInstance.collection('bets').insertOne({
           discordId: interaction.user.id,
           amount,
           choice,
@@ -1088,7 +1088,7 @@ function initBot(db) {
           date: new Date()
         });
 
-        await db.collection('economy').updateOne({ discordId: interaction.user.id }, { $inc: { coins: -amount } });
+        await dbInstance.collection('economy').updateOne({ discordId: interaction.user.id }, { $inc: { coins: -amount } });
 
         await interaction.reply({ 
           content: `✅ **Apuesta registrada con éxito!**\n💰 **Cantidad:** ${amount} coins\n📈 **Multiplicador:** ${multiplier}x\n🎯 **Elección:** Que el jugador **${choice.toUpperCase()}**`, 
