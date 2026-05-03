@@ -360,15 +360,24 @@ function initBot(db) {
     }
 
     if (command === 'web' || command === 'link') {
-      const url = `https://lan-tracker-production.up.railway.app/perfil/${msg.author.id}`;
       const embed = new EmbedBuilder()
         .setTitle('🌐 Tu Perfil Web Premium')
-        .setDescription(`¡Ya puedes ver tu colección de campeones y estadísticas de economía en la web!\n\n🔗 **[Haz clic aquí para ver tu perfil](${url})**`)
+        .setDescription('Pulsa el botón de abajo para generar tu enlace personal. El enlace será privado y este mensaje se eliminará automáticamente.')
         .setColor(0xc89b3c)
-        .setThumbnail('https://cdn-icons-png.flaticon.com/512/341/341040.png')
         .setFooter({ text: 'Naafiri Web Dashboard' });
 
-      return msg.reply({ embeds: [embed] });
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`web_link_${msg.author.id}`)
+          .setLabel('Ver Mi Mochila 🎒')
+          .setStyle(ButtonStyle.Primary)
+      );
+
+      const sentMsg = await msg.reply({ embeds: [embed], components: [row] });
+      
+      // Auto-borrado preventivo tras 1 minuto si no interactúa
+      setTimeout(() => sentMsg.delete().catch(() => {}), 60000);
+      return;
     }
 
     if (command === 'shame' || command === 'muro') {
@@ -949,8 +958,25 @@ function initBot(db) {
   client.on('interactionCreate', async (interaction) => {
     try {
       if (interaction.isButton()) {
-        const [action, choice, puuid] = interaction.customId.split('_');
-        if (action !== 'bet') return;
+        const parts = interaction.customId.split('_');
+        const action = parts[0];
+
+        if (action === 'web') {
+          const userId = parts[2];
+          if (interaction.user.id !== userId) {
+            return interaction.reply({ content: '❌ Solo el autor del comando puede generar su link.', ephemeral: true });
+          }
+          const url = `https://lan-tracker-production.up.railway.app/perfil/${userId}`;
+          await interaction.reply({ 
+            content: `🔗 Aquí tienes tu perfil privado:\n${url}`, 
+            ephemeral: true 
+          });
+        // Eliminar el mensaje público original
+          return interaction.message.delete().catch(() => {});
+        }
+
+        const [act, choice, puuid] = interaction.customId.split('_');
+        if (act !== 'bet') return;
 
         const modal = new ModalBuilder()
           .setCustomId(`modal_bet_${choice}_${puuid}`)
