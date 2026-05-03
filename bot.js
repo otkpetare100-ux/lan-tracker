@@ -1275,9 +1275,9 @@ const QUEUE_NAMES = {
 };
 
 const TIER_SHORT = {
-  IRON: 'I', BRONZE: 'B', SILVER: 'S', GOLD: 'G',
-  PLATINUM: 'P', EMERALD: 'E', DIAMOND: 'D', MASTER: 'M',
-  GRANDMASTER: 'GM', CHALLENGER: 'C'
+  IRON: 'Hierro', BRONZE: 'Bronce', SILVER: 'Plata', GOLD: 'Oro',
+  PLATINUM: 'Plat', EMERALD: 'Esme', DIAMOND: 'Diam', MASTER: 'Maestro',
+  GRANDMASTER: 'GM', CHALLENGER: 'Chall'
 };
 
 // Notificación de resultados de apuestas
@@ -1300,7 +1300,7 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
   if (lpData && typeof lpData === 'object') {
     const shortTier = TIER_SHORT[lpData.tier] || lpData.tier || '';
     const div = lpData.rank || '';
-    rankStr = `${shortTier}${div} ${lpData.lp}LP`;
+    rankStr = `${shortTier} ${div} - ${lpData.lp}LP`;
     const prefix = lpData.diff >= 0 ? '+' : '';
     lpChangeStr = `${prefix}${lpData.diff} LP`;
   } else if (typeof lpData === 'string') {
