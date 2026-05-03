@@ -241,6 +241,34 @@ function initBot(db) {
       msg.reply('🪙 ¡Recibiste **100 Naafiri Coins**! Úsalas sabiamente.');
     }
 
+    if (command === 'pagar' || command === 'enviar') {
+      const target = msg.mentions.users.first();
+      const amount = parseInt(args.find(a => !isNaN(a) && a !== ''));
+
+      if (!target || isNaN(amount) || amount <= 0) {
+        return msg.reply('❌ Uso: `!pagar @usuario [cantidad]`');
+      }
+
+      if (target.id === msg.author.id) {
+        return msg.reply('🤡 No puedes pagarte a ti mismo.');
+      }
+
+      const senderEco = await db.collection('economy').findOne({ discordId: msg.author.id });
+      if (!senderEco || senderEco.coins < amount) {
+        return msg.reply(`❌ No tienes suficientes Naafiri Coins (Saldo: ${senderEco?.coins || 0}).`);
+      }
+
+      // Transferencia atómica
+      await db.collection('economy').updateOne({ discordId: msg.author.id }, { $inc: { coins: -amount } });
+      await db.collection('economy').updateOne(
+        { discordId: target.id }, 
+        { $inc: { coins: amount }, $set: { discordTag: target.tag } }, 
+        { upsert: true }
+      );
+
+      msg.channel.send(`💸 **${msg.author.username}** le ha enviado **${amount} Naafiri Coins** a **${target.username}**!`);
+    }
+
     if (command === 'shame' || command === 'muro') {
       const accounts = await db.collection('accounts').find({}).toArray();
       const losers = accounts.sort((a,b) => (a.soloQ?.wins / (a.soloQ?.wins + a.soloQ?.losses || 1)) - (b.soloQ?.wins / (b.soloQ?.wins + b.soloQ?.losses || 1))).slice(0, 5);
