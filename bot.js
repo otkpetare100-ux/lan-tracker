@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
@@ -809,6 +809,100 @@ function initBot(db) {
 
   });
 
+  // --- MANEJO DE INTERACCIONES (BOTONES Y MODALS) ---
+  client.on('interactionCreate', async (interaction) => {
+    try {
+      if (interaction.isButton()) {
+        const [action, choice, puuid] = interaction.customId.split('_');
+        if (action !== 'bet') return;
+
+        const modal = new ModalBuilder()
+          .setCustomId(`modal_bet_${choice}_${puuid}`)
+          .setTitle(`Apuesta: ${choice.toUpperCase()}`);
+
+        const amountInput = new TextInputBuilder()
+          .setCustomId('bet_amount')
+          .setLabel('¿Cuánto quieres apostar?')
+          .setStyle(TextInputStyle.Short)
+          .setPlaceholder('Ingresa la cantidad de Naafiri Coins')
+          .setRequired(true);
+
+        const firstActionRow = new ActionRowBuilder().addComponents(amountInput);
+        modal.addComponents(firstActionRow);
+
+        await interaction.showModal(modal);
+      }
+
+      if (interaction.isModalSubmit()) {
+        const [type, action, choice, puuid] = interaction.customId.split('_');
+        if (type !== 'modal' || action !== 'bet') return;
+
+        const amount = parseInt(interaction.fields.getTextInputValue('bet_amount'));
+        if (isNaN(amount) || amount <= 0) {
+          return interaction.reply({ content: '❌ Cantidad inválida. Debe ser un número mayor a 0.', ephemeral: true });
+        }
+
+        const targetAcc = await db.collection('accounts').findOne({ puuid });
+        if (!targetAcc) return interaction.reply({ content: '❌ El jugador ya no está registrado.', ephemeral: true });
+
+        // Validar tiempo (5 min)
+        if (targetAcc.liveGameStartedAt) {
+          const now = new Date();
+          const startedAt = new Date(targetAcc.liveGameStartedAt);
+          if ((now - startedAt) / 60000 >= 5) {
+            return interaction.reply({ content: `❌ **Demasiado tarde.** La partida empezó hace más de 5 minutos.`, ephemeral: true });
+          }
+        } else {
+          return interaction.reply({ content: '❌ No detecto que el jugador esté en partida ahora mismo.', ephemeral: true });
+        }
+
+        // Validar saldo
+        const user = await db.collection('economy').findOne({ discordId: interaction.user.id });
+        if (!user || user.coins < amount) {
+          return interaction.reply({ content: `❌ No tienes suficientes Naafiri Coins (Saldo: ${user?.coins || 0}).`, ephemeral: true });
+        }
+
+        // Validar si ya tiene apuesta
+        const existing = await db.collection('bets').findOne({ discordId: interaction.user.id, targetPuuid: puuid, status: 'open' });
+        if (existing) {
+          return interaction.reply({ content: '⚠️ Ya tienes una apuesta activa por este jugador.', ephemeral: true });
+        }
+
+        // Calcular multiplicador
+        let multiplier = 2.0;
+        if (targetAcc.soloQ && (targetAcc.soloQ.wins + targetAcc.soloQ.losses) > 0) {
+          const wr = (targetAcc.soloQ.wins / (targetAcc.soloQ.wins + targetAcc.soloQ.losses)) * 100;
+          if (wr > 60) multiplier = 1.5;
+          else if (wr < 45) multiplier = 3.0;
+        }
+
+        // Registrar apuesta
+        await db.collection('bets').insertOne({
+          discordId: interaction.user.id,
+          amount,
+          choice,
+          targetPuuid: puuid,
+          targetName: `${targetAcc.gameName}#${targetAcc.tagLine}`,
+          status: 'open',
+          multiplier: multiplier,
+          date: new Date()
+        });
+
+        await db.collection('economy').updateOne({ discordId: interaction.user.id }, { $inc: { coins: -amount } });
+
+        await interaction.reply({ 
+          content: `✅ **Apuesta registrada con éxito!**\n💰 **Cantidad:** ${amount} coins\n📈 **Multiplicador:** ${multiplier}x\n🎯 **Elección:** Que el jugador **${choice.toUpperCase()}**`, 
+          ephemeral: true 
+        });
+      }
+    } catch (e) {
+      console.error('[Interaction Error]', e);
+      if (interaction.isRepliable()) {
+        interaction.reply({ content: '❌ Ocurrió un error al procesar tu apuesta.', ephemeral: true }).catch(() => {});
+      }
+    }
+  });
+
   client.login(process.env.DISCORD_TOKEN);
 }
 
@@ -902,7 +996,19 @@ async function notifyLiveGame(acc, gameData) {
     .setColor(0x576bce)
     .setTimestamp();
 
-  return await channel.send({ embeds: [embed] });
+  const row = new ActionRowBuilder()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(`bet_gana_${acc.puuid}`)
+        .setLabel('Gana 💰')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(`bet_pierde_${acc.puuid}`)
+        .setLabel('Pierde 💀')
+        .setStyle(ButtonStyle.Danger)
+    );
+
+  return await channel.send({ embeds: [embed], components: [row] });
 }
 
 // Recordatorio Primera Victoria
