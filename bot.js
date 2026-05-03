@@ -97,7 +97,10 @@ function initBot(db) {
   // Comandos básicos por mensaje (Prefijo !)
   client.on('messageCreate', async (msg) => {
     if (msg.author.bot || !msg.content.startsWith('!')) return;
-    
+
+    // Eliminar el comando con un pequeño delay para no romper el procesamiento
+    setTimeout(() => msg.delete().catch(() => {}), 2000);
+
     const args = msg.content.slice(1).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
