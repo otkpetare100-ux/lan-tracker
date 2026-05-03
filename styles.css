@@ -370,7 +370,7 @@ body {
 }
 
 .activity-sidebar.collapsed {
-  transform: translateX(280px);
+  transform: translateX(100%);
 }
 
 /* --- Modales Glassmorphism --- */
@@ -607,6 +607,28 @@ body {
   font-size: 0.7rem;
   color: var(--gold-primary);
   opacity: 0.6;
+}
+
+/* Tipos de actividad */
+.activity-item--rank_up   { border-left: 3px solid #27a170; }
+.activity-item--rank_down { border-left: 3px solid #d93f3f; }
+.activity-item--live      { border-left: 3px solid #3b82f6; }
+.activity-item--goal      { border-left: 3px solid var(--gold-primary); }
+.activity-item--challenge_win { border-left: 3px solid #a855f7; }
+
+.activity-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.empty-state-mini {
+  text-align: center;
+  padding: 30px 15px;
+  color: #555;
+  font-size: 0.85rem;
 }
 
 .activity-toggle {

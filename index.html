@@ -64,12 +64,12 @@
 
   <!-- Sidebar de Actividad -->
   <aside class="activity-sidebar collapsed" id="activity-sidebar">
-    <button class="activity-toggle" id="activity-toggle">»</button>
-    <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-      <h3 style="font-family: var(--font-title); color: #fff; margin:0;">Feed Actividad</h3>
-      <button id="activity-pin" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.5;">📌</button>
+    <button class="activity-toggle" id="activity-toggle">«</button>
+    <div class="activity-sidebar-header">
+      <h3 style="font-family: var(--font-title); color: #fff; margin:0; font-size:1rem;">📡 Feed Actividad</h3>
+      <button id="activity-pin" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.5; transition: opacity 0.2s;" title="Fijar panel">📌</button>
     </div>
-    <div id="activity-feed" style="padding: 10px; overflow-y: auto; height: calc(100% - 70px);">
+    <div id="activity-feed" style="overflow-y: auto; height: calc(100% - 70px);">
       <div class="empty-state-mini">Cargando actividad...</div>
     </div>
   </aside>

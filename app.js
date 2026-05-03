@@ -503,3 +503,34 @@ async function saveNote(puuid) {
     if (btn) { btn.textContent = 'Guardar'; btn.disabled = false; }
   }
 }
+
+/* ---- Feed de Actividad: Inicialización ---- */
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('activity-toggle');
+  const pinBtn    = document.getElementById('activity-pin');
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sidebar = document.getElementById('activity-sidebar');
+      if (!sidebar) return;
+      if (sidebar.classList.contains('collapsed')) {
+        if (typeof openActivitySidebar === 'function') openActivitySidebar();
+      } else {
+        if (typeof closeActivitySidebar === 'function') closeActivitySidebar();
+      }
+    });
+  }
+
+  if (pinBtn) {
+    pinBtn.addEventListener('click', (e) => {
+      if (typeof toggleActivityPin === 'function') toggleActivityPin(e);
+    });
+  }
+
+  // Carga inicial + refresco automático cada 30s
+  if (typeof renderActivityFeed === 'function') {
+    renderActivityFeed();
+    setInterval(renderActivityFeed, 30000);
+  }
+});
