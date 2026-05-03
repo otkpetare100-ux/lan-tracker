@@ -97,6 +97,9 @@ function initBot(db) {
   // Comandos básicos por mensaje (Prefijo !)
   client.on('messageCreate', async (msg) => {
     if (msg.author.bot || !msg.content.startsWith('!')) return;
+    
+    // Auto-eliminar el comando del usuario para mantener el chat limpio
+    msg.delete().catch(() => {});
 
     const args = msg.content.slice(1).trim().split(/ +/);
     const command = args.shift().toLowerCase();
