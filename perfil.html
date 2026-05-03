@@ -240,11 +240,21 @@
 
                 const inventory = data.inventory || [];
                 const inventoryHtml = inventory.length > 0 
-                    ? inventory.map(itemId => {
-                        const item = GACHA_ITEMS.find(i => i.id === itemId) || { name: itemId, rarity: 'Común' };
-                        const imgUrl = item.type === 'coins' 
-                            ? 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png'
-                            : `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${item.id}.png`;
+                    ? inventory.map(itemObj => {
+                        // Buscar info extendida en GACHA_ITEMS (usando el ID guardado en el objeto del inventario)
+                        const item = GACHA_ITEMS.find(i => i.id === itemObj.id) || itemObj;
+                        
+                        let imgUrl = 'https://ddragon.leagueoflegends.com/cdn/' + version + '/img/profileicon/29.png';
+                        
+                        if (item.type === 'coins') {
+                            imgUrl = 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png';
+                        } else if (item.img) {
+                            // Si tiene img (ej: Naafiri_1), usamos splash/loading
+                            imgUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${item.img}.jpg`;
+                        } else {
+                            // Fallback al icono cuadrado por ID
+                            imgUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${item.id}.png`;
+                        }
                         
                         return `
                             <div class="item-card">
@@ -256,11 +266,21 @@
                     }).join('')
                     : '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #a09b8c;">La mochila está vacía... por ahora.</p>';
 
+                const displayName = data.linkedAcc 
+                    ? `${data.linkedAcc.gameName}#${data.linkedAcc.tagLine}`
+                    : (data.discordTag || 'Usuario Desconocido');
+
+                const displayAvatar = data.linkedAcc
+                    ? `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${data.linkedAcc.profileIconId}.png`
+                    : null;
+
                 content.innerHTML = `
                     <div class="profile-header">
-                        <div class="user-avatar">${data.discordTag ? data.discordTag.charAt(0) : '?'}</div>
+                        <div class="user-avatar">
+                            ${displayAvatar ? `<img src="${displayAvatar}" style="width:100%; height:100%; border-radius:50%;">` : (data.discordTag ? data.discordTag.charAt(0) : '?')}
+                        </div>
                         <div class="user-info">
-                            <h1>${data.discordTag || 'Usuario Desconocido'}</h1>
+                            <h1>${displayName}</h1>
                             <div class="user-stats">
                                 <div class="stat-item">
                                     <span class="stat-value">${data.coins.toLocaleString()}</span>

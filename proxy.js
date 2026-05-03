@@ -446,7 +446,14 @@ app.get('/api/profile/:discordId', async (req, res) => {
     if (!db) return res.status(503).json({ error: 'DB no lista' });
     const eco = await db.collection('economy').findOne({ discordId });
     if (!eco) return res.status(404).json({ error: 'Perfil no encontrado' });
-    res.json(eco);
+    
+    // Buscar cuenta de LoL vinculada si existe
+    let linkedAcc = null;
+    if (eco.linkedPuuid) {
+      linkedAcc = await db.collection('accounts').findOne({ puuid: eco.linkedPuuid });
+    }
+    
+    res.json({ ...eco, linkedAcc });
   } catch (e) {
     res.status(500).json({ error: 'Error del servidor' });
   }
