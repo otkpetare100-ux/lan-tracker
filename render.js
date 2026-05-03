@@ -293,161 +293,47 @@ async function toggleReaction(puuid, emoji) {
 }
 
 function buildCardHTML(acc, position) {
-  const r          = getRankInfo(acc);
-  const wr         = computeWinrate(r.wins, r.losses);
-  const wrCls      = winrateClass(wr);
-  const color      = RANK_COLORS[r.tier] || RANK_COLORS.UNRANKED;
+  const r = getRankInfo(acc);
+  const wr = computeWinrate(r.wins, r.losses);
+  
+  const streakClass = acc.streak >= 3 ? 'streak-win' : acc.streak <= -3 ? 'streak-loss' : '';
+  const streakText = acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)} Loss` : '';
+  
+  const rankIcon = RANK_ICONS[r.tier] || RANK_ICONS.UNRANKED;
   const noDivisionTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
-  const rankStr    = noDivisionTiers.includes(r.tier) 
+  const rankName = noDivisionTiers.includes(r.tier) 
     ? titleCase(r.tier) 
     : titleCase(r.tier) + ' ' + (r.division || '');
-  const iconUrl    = getProfileIconUrl(acc.profileIconId);
 
-  const updatedStr    = acc.updatedAt
-    ? 'Act: ' + new Date(acc.updatedAt).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'})
-    : '';
-  const posLabel      = acc.mainPosition || '—';
-  const streak        = buildStreakHTML(acc.streak);
-  const recentDots    = buildMatchDots(acc.matches);
-  const watermarkHTML = RANK_ICONS[r.tier]
-    ? '<div class="rank-watermark"><img src="' + RANK_ICONS[r.tier] + '" alt="" /></div>'
-    : '';
+  const profileUrl = acc.discordId ? `/perfil/${acc.discordId}` : '#';
 
-  let ringColor = 'rgba(255, 255, 255, 0.1)';
-  if (wr !== null) {
-      if (wr >= 55) ringColor = '#73d38a';
-      else if (wr >= 48) ringColor = '#d9b85f';
-      else ringColor = '#e06474';
-  }
-  
-  const wrHTML = wr !== null
-    ? '<div class="wr-ring" style="background: conic-gradient(' + ringColor + ' ' + wr + '%, rgba(255, 255, 255, 0.05) 0);">' +
-        '<div class="wr-ring-inner">' +
-          '<div class="wr-number ' + wrCls + '">' + wr + '%</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="wr-info">' +
-        '<div class="wr-label">Winrate</div>' +
-        '<div class="wr-games">' + r.wins + 'V ' + r.losses + 'D</div>' +
-      '</div>'
-    : '<div class="wr-ring" style="background: rgba(255, 255, 255, 0.05);"><div class="wr-ring-inner"><div class="wr-number empty">—</div></div></div>' +
-      '<div class="wr-info"><div class="wr-label">Sin partidas</div></div>';
-
-  let streakIcon = '';
-  if (acc.streak >= 3) {
-    streakIcon = '<span class="status-icon fire-streak" title="¡En racha de victorias! 🔥">🔥 ' + acc.streak + '</span>';
-  } else if (acc.streak <= -3) {
-    streakIcon = '<span class="status-icon ice-streak" title="En racha de derrotas ❄️">❄️ ' + Math.abs(acc.streak) + '</span>';
-  }
-
-  const hasFrame = r.tier && r.tier.toUpperCase() !== 'UNRANKED';
-  const frameHTML = hasFrame 
-    ? '<img src="/pic/frame/' + r.tier.toLowerCase() + '-frame.png" class="rank-frame frame-' + r.tier.toLowerCase() + '" onerror="this.remove()">' 
-    : '';
-
-  const rankIconHTML = RANK_ICONS[r.tier]
-    ? '<img src="' + RANK_ICONS[r.tier] + '" alt="' + r.tier + '" class="rank-icon" />'
-    : '❓';
-
-  const historyBtn = '<button class="history-toggle-btn" data-puuid="' + acc.puuid + '">' +
-    '<span class="history-btn-text">Ver historial</span><span class="history-arrow">▾</span>' +
-  '</button>';
-
-    const POSITION_ICONS = {
-      TOP: '<img src="/pic/roll/top_roll.png" class="role-icon-inline">',
-      JNG: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
-      JUNGLE: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
-      JUNGLA: '<img src="/pic/roll/jungle_roll.png" class="role-icon-inline">',
-      MID: '<img src="/pic/roll/middle_roll.png" class="role-icon-inline">',
-      MIDDLE: '<img src="/pic/roll/middle_roll.png" class="role-icon-inline">',
-      ADC: '<img src="/pic/roll/adc_roll.png" class="role-icon-inline">',
-      BOTTOM: '<img src="/pic/roll/adc_roll.png" class="role-icon-inline">',
-      SUP: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
-      SUPPORT: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
-      SOPORTE: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
-      UTILITY: '<img src="/pic/roll/supp_roll.png" class="role-icon-inline">',
-      SUPERIOR: '<img src="/pic/roll/top_roll.png" class="role-icon-inline">',
-      '—': '<img src="/pic/roll/all_roll.png" class="role-icon-inline">'
-    };
-    const roleIcon = POSITION_ICONS[posLabel] || POSITION_ICONS[posLabel.toUpperCase()] || '❓';
-
-    const streakInfo = getStreakInfo(acc.streak);
-    const glowClass = streakInfo.glow;
-
-    // --- Funcionalidad: Badge de Especialista (Idea 7) ---
-    const specInfo = getSpecialistInfo(acc.matches);
-    const specialistChamp = specInfo.name;
-
-    const specialistHTML = specialistChamp 
-      ? '<div class="specialist-badge" title="Especialista en ' + escapeHTML(specialistChamp) + '"><span>OTP</span> ' + escapeHTML(specialistChamp) + '</div>' 
-      : '';
-
-
-    return watermarkHTML +
-    '<div class="card-main-grid">' +
-      '<div class="card-left">' +
-        '<div class="icon-wrap ' + glowClass + '">' +
-          frameHTML +
-          '<img class="profile-main-icon" src="' + iconUrl + '" alt="Icono" onerror="this.src=\'' + FALLBACK_ICON_URL + '\'" />' +
-          '<span class="icon-level">' + acc.summonerLevel + '</span>' +
-        '</div>' +
-        '<div class="summoner-info-wrap">' +
-          '<div class="summoner-info" title="Ver perfil detallado">' +
-            '<div class="summoner-name">' + 
-              '<span>' + escapeHTML(acc.gameName) + '</span>' +
-              '<div class="live-status-dot ' + (acc.isLive ? 'status-online' : 'status-offline') + '" title="' + (acc.isLive ? 'En partida' : 'Fuera de partida') + '"></div>' +
-            '</div>' +
-            '<div class="summoner-tag">#' + escapeHTML(acc.tagLine) + ' ' + streakIcon + ' ' + recentDots + '</div>' +
-            specialistHTML +
-            '<div class="summoner-meta">' +
-              '<span class="summoner-region">LAN</span>' +
-              '<span class="position-badge" title="Posición principal">' + roleIcon + ' ' + escapeHTML(posLabel) + '</span>' +
-            '</div>' +
-            (acc.discordId ? '<a href="/perfil/' + acc.discordId + '" class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(200,155,60,0.1); border:1px solid rgba(200,155,60,0.2); padding:4px 8px; border-radius:6px; width:fit-content; text-decoration:none; cursor:pointer; transition:all 0.2s ease;" onmouseover="this.style.background=\'rgba(200,155,60,0.2)\'" onmouseout="this.style.background=\'rgba(200,155,60,0.1)\'">' +
-              '<span style="color:#f4c874">💰 ' + (acc.economy?.coins || 0) + '</span>' +
-              '<span style="color:#9d6cff">🎒 Mochila</span>' +
-            '</a>' : (acc.economy ? '<div class="card-economy-mini" style="margin-top:8px; display:flex; gap:10px; font-size:0.75rem; font-weight:800; background:rgba(0,0,0,0.2); padding:4px 8px; border-radius:6px; width:fit-content;">' +
-              '<span style="color:#f4c874">💰 ' + (acc.economy.coins || 0) + '</span>' +
-              '<span style="color:#9d6cff">🎒 ' + (acc.economy.inventory?.length || 0) + '</span>' +
-            '</div>' : '')) +
-          '</div>' +
-          '<div class="main-pool-container">' + buildTopChampsHTML(acc.topChampions, acc.puuid) + '</div>' +
-        '</div>' +
-      '</div>' +
+  return `
+    <div class="player-card" onclick="window.location.href='${profileUrl}'">
+      <div class="player-card-header">
+        <div class="player-avatar-wrap">
+          <img class="player-avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
+          <div class="player-level">${acc.summonerLevel || '?'}</div>
+        </div>
+        <div class="player-names">
+          <span class="player-name">${escapeHTML(acc.gameName)}</span>
+          <span class="player-tag">#${escapeHTML(acc.tagLine)}</span>
+        </div>
+      </div>
       
-      '<div class="card-right">' +
-        '<div class="rank-block">' +
-          '<div class="rank-emblem">' + 
-            '<img src="' + (RANK_ICONS[r.tier] || RANK_ICONS.UNRANKED) + '" alt="' + r.tier + '" class="rank-icon rank-glow-' + r.tier.toLowerCase() + '" />' +
-          '</div>' +
-          '<div class="rank-info-text">' +
-            '<div class="rank-name" style="color:' + color + '">' + rankStr + '</div>' +
-            '<div class="rank-lp">' + (r.tier !== 'UNRANKED' ? r.lp + ' LP' : '—') + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="winrate-block ' + (wr >= 55 ? 'wr-glow-good' : (wr < 48 ? 'wr-glow-bad' : '')) + '">' + wrHTML + '</div>' +
-      '</div>' +
+      <div class="player-rank-info">
+        <img class="player-tier-icon" src="${rankIcon}" alt="${r.tier}" />
+        <div class="player-tier-text">
+          <span class="tier-name">${rankName}</span>
+          <span class="lp-text">${r.lp} LP · ${wr !== null ? wr + '%' : '--'} WR</span>
+        </div>
+      </div>
       
-      '<div class="card-actions">' +
-        '<button class="note-btn ' + (acc.notes ? 'has-note' : '') + '" data-puuid="' + acc.puuid + '" title="Notas de cuenta">📝</button>' +
-        '<button class="refresh-btn" data-puuid="' + acc.puuid + '" title="Actualizar">↻</button>' +
-        '<button class="remove-btn" data-puuid="' + acc.puuid + '" title="Eliminar">✕</button>' +
-      '</div>' +
-    '</div>' +
-  '<div class="history-section">' +
-    '<div class="card-bottom-actions">' +
-      '<div class="card-bottom-left">' +
-        historyBtn +
-        '<button class="share-btn" data-puuid="' + acc.puuid + '" title="Compartir">🔗 Compartir</button>' +
-        buildReactionsHTML(acc.reactions, acc.puuid) +
-      '</div>' +
-      (updatedStr ? '<span class="updated-time">' + updatedStr + '</span>' : '') +
-      '<button class="compare-btn" data-puuid="' + acc.puuid + '" onclick="toggleCompare(\'' + acc.puuid + '\')">⚖ Comparar</button>' +
-    '</div>' +
-    '<div class="history-content" id="history-' + acc.puuid + '" style="display:none;">' +
-      buildMatchHistoryHTML(acc.matches, acc.puuid) +
-    '</div>' +
-  '</div>';
+      <div class="player-footer">
+        <div class="streak-tag ${streakClass}">${streakText}</div>
+        <div class="match-dots">${buildMatchDots(acc.matches)}</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderAccounts(accounts) {
