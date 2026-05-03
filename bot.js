@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 
 let client = null;
+let dbInstance = null;
 let targetChannelId = process.env.DISCORD_CHANNEL_ID;
 let DDRAGON_VERSION = '15.8.1';
 
@@ -53,6 +54,7 @@ function getRankScore(acc) {
 }
 
 function initBot(db) {
+  dbInstance = db;
   if (!process.env.DISCORD_TOKEN) {
     console.warn('⚠️ No se detectó DISCORD_TOKEN. El bot no iniciará.');
     return;
@@ -805,6 +807,21 @@ function initBot(db) {
           msg.reply('❌ Error al intentar borrar mensajes. (Nota: Discord no permite borrar masivamente mensajes de más de 14 días).');
         }
       }
+      // !admin_syncroles
+      if (command === 'admin_syncroles') {
+        const accounts = await db.collection('accounts').find({ discordId: { $exists: true } }).toArray();
+        msg.reply(`🔄 Sincronizando roles para **${accounts.length}** usuarios...`);
+        
+        let success = 0;
+        for (const acc of accounts) {
+          const tier = acc.soloQ?.tier;
+          if (tier) {
+            const ok = await updateUserRoles(acc.discordId, tier);
+            if (ok) success++;
+          }
+        }
+        return msg.channel.send(`✅ Sincronización completada: **${success}/${accounts.length}** actualizados.`);
+      }
     }
 
   });
@@ -931,22 +948,22 @@ async function notifyRankChange(data) {
 
   channel.send({ embeds: [embed] });
 
-  /* 
-  // Actualizar Rol si está vinculado (Desactivado temporalmente)
-  const acc = await db.collection('accounts').findOne({ gameName: name });
-  if (acc && acc.discordId) {
-    updateUserRoles(acc.discordId, newRank.split(' ')[0]);
+  // Actualizar Rol si está vinculado
+  if (dbInstance) {
+    const acc = await dbInstance.collection('accounts').findOne({ gameName: name });
+    if (acc && acc.discordId) {
+      updateUserRoles(acc.discordId, newRank.split(' ')[0]);
+    }
   }
-  */
 }
 
 async function updateUserRoles(discordId, tier) {
-  if (!client) return;
+  if (!client) return false;
   try {
-    const guild = client.guilds.cache.first(); // Asumimos un solo servidor
-    if (!guild) return;
-    const member = await guild.members.fetch(discordId);
-    if (!member) return;
+    const guild = client.guilds.cache.first();
+    if (!guild) return false;
+    const member = await guild.members.fetch(discordId).catch(() => null);
+    if (!member) return false;
 
     const roleEnvMap = {
       IRON: 'ROLE_IRON', BRONZE: 'ROLE_BRONZE', SILVER: 'ROLE_SILVER', GOLD: 'ROLE_GOLD',
@@ -955,16 +972,25 @@ async function updateUserRoles(discordId, tier) {
     };
 
     const targetRoleId = process.env[roleEnvMap[tier.toUpperCase()]];
-    if (!targetRoleId) return;
+    if (!targetRoleId) return false;
 
-    // Quitar otros roles de rango (opcional)
-    const allRankRoles = Object.values(roleEnvMap).map(v => process.env[v]).filter(id => id);
-    await member.roles.remove(allRankRoles);
+    const allRankRoleIds = Object.values(roleEnvMap).map(v => process.env[v]).filter(id => id);
+    
+    // Solo actuar si el usuario no tiene YA el rol correcto
+    if (member.roles.cache.has(targetRoleId)) return true;
+
+    // Quitar otros roles de rango
+    const rolesToRemove = allRankRoleIds.filter(id => id !== targetRoleId && member.roles.cache.has(id));
+    if (rolesToRemove.length > 0) {
+      await member.roles.remove(rolesToRemove);
+    }
     
     // Añadir nuevo rol
     await member.roles.add(targetRoleId);
+    return true;
   } catch (e) {
-    console.error('Error actualizando roles:', e);
+    console.error(`[Role Error] No se pudo actualizar rol para ${discordId}:`, e.message);
+    return false;
   }
 }
 
