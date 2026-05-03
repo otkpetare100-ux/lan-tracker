@@ -39,6 +39,32 @@ function isAdmin(userId) {
 // Cooldown para !help (5 minutos)
 const helpCooldowns = new Map();
 
+// --- SISTEMA DE GACHAPON ---
+const GACHA_ITEMS = [
+  { id: 'Naafiri', name: 'Naafiri (Base)', rarity: 'Común', weight: 70, img: 'Naafiri_0' },
+  { id: 'Aatrox', name: 'Aatrox', rarity: 'Común', weight: 70, img: 'Aatrox_0' },
+  { id: 'Yasuo', name: 'Yasuo', rarity: 'Común', weight: 70, img: 'Yasuo_0' },
+  { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
+  { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 },
+  { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
+  { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
+  { id: 'COINS_250', name: 'Cofre de 250 Coins', rarity: 'Raro', weight: 15, type: 'coins', amount: 250 },
+  { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
+  { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
+  { id: 'COINS_1000', name: 'Tesoro de 1000 Coins', rarity: 'Legendario', weight: 2, type: 'coins', amount: 1000 },
+  { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
+  { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' },
+  // Agregados del perfil web para compatibilidad
+  { id: 'Garen', name: 'Garen', rarity: 'Común', weight: 0 },
+  { id: 'Ashe', name: 'Ashe', rarity: 'Común', weight: 0 },
+  { id: 'Lux_Base', name: 'Lux', rarity: 'Común', weight: 0 },
+  { id: 'MasterYi', name: 'Master Yi', rarity: 'Común', weight: 0 },
+  { id: 'Ezreal', name: 'Ezreal', rarity: 'Raro', weight: 0 },
+  { id: 'Vayne', name: 'Vayne', rarity: 'Épico', weight: 0 },
+  { id: 'Kaisa', name: 'Kai\'Sa', rarity: 'Épico', weight: 0 },
+  { id: 'Teemo', name: 'Teemo Satán', rarity: 'Legendario', weight: 0 }
+];
+
 
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -300,8 +326,15 @@ function initBot(db) {
       if (!senderEco || !senderEco.inventory) return msg.reply('❌ No tienes items en tu mochila.');
       if (!targetEco || !targetEco.inventory) return msg.reply('❌ El usuario destino no tiene mochila.');
 
-      const myItem = GACHA_ITEMS.find(i => i.name.toLowerCase().includes(parts[0].toLowerCase()) && senderEco.inventory.includes(i.id));
-      const suItem = GACHA_ITEMS.find(i => i.name.toLowerCase().includes(parts[1].toLowerCase()) && targetEco.inventory.includes(i.id));
+      // Búsqueda robusta: exacto primero, luego parcial
+      const findItem = (inv, name) => {
+        const exact = GACHA_ITEMS.find(i => i.name.toLowerCase() === name.toLowerCase() && inv.includes(i.id));
+        if (exact) return exact;
+        return GACHA_ITEMS.find(i => i.name.toLowerCase().includes(name.toLowerCase()) && inv.includes(i.id));
+      };
+
+      const myItem = findItem(senderEco.inventory, parts[0]);
+      const suItem = findItem(targetEco.inventory, parts[1]);
 
       if (!myItem) return msg.reply(`❌ No tienes a **${parts[0]}** en tu mochila.`);
       if (!suItem) return msg.reply(`❌ **${target.username}** no tiene a **${parts[1]}**.`);
@@ -458,22 +491,7 @@ function initBot(db) {
       msg.reply(`✅ Apuesta registrada ${isAnonymous ? '(Anónima)' : ''}: **${amount} coins** (Multiplicador: **${multiplier}x**). ${revealMsg} 🤡`);
     }
 
-    // --- SISTEMA DE GACHAPON ---
-    const GACHA_ITEMS = [
-      { id: 'Naafiri', name: 'Naafiri (Base)', rarity: 'Común', weight: 70, img: 'Naafiri_0' },
-      { id: 'Aatrox', name: 'Aatrox', rarity: 'Común', weight: 70, img: 'Aatrox_0' },
-      { id: 'Yasuo', name: 'Yasuo', rarity: 'Común', weight: 70, img: 'Yasuo_0' },
-      { id: 'Zed', name: 'Zed', rarity: 'Común', weight: 70, img: 'Zed_0' },
-      { id: 'COINS_50', name: 'Bolsa de 50 Coins', rarity: 'Común', weight: 50, type: 'coins', amount: 50 },
-      { id: 'Lux', name: 'Lux Cosmic', rarity: 'Raro', weight: 20, img: 'Lux_15' },
-      { id: 'LeeSin', name: 'Lee Sin God Fist', rarity: 'Raro', weight: 20, img: 'LeeSin_11' },
-      { id: 'COINS_250', name: 'Cofre de 250 Coins', rarity: 'Raro', weight: 15, type: 'coins', amount: 250 },
-      { id: 'Jhin', name: 'Jhin Dark Star', rarity: 'Épico', weight: 8, img: 'Jhin_5' },
-      { id: 'Naafiri_Soul', name: 'Naafiri Soul Fighter', rarity: 'Épico', weight: 8, img: 'Naafiri_1' },
-      { id: 'COINS_1000', name: 'Tesoro de 1000 Coins', rarity: 'Legendario', weight: 2, type: 'coins', amount: 1000 },
-      { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario', weight: 2, img: 'Lux_7' },
-      { id: 'Golden_Naafiri', name: 'Naafiri Dorada (Exclusiva)', rarity: 'Legendario', weight: 2, img: 'Naafiri_0' }
-    ];
+    }
 
     if (command === 'gacha' || command === 'tiro') {
       const COST = 10;
@@ -1045,8 +1063,8 @@ function initBot(db) {
           const newTInv = tEco.inventory.filter(id => id !== suItemId);
           newTInv.push(myItemId);
 
-          await dbInstance.collection('economy').updateOne({ discordId: senderId }, { $set: { inventory: newSInv } });
-          await dbInstance.collection('economy').updateOne({ discordId: targetId }, { $set: { inventory: newTInv } });
+          await dbInstance.collection('economy').updateOne({ discordId: senderId }, { $set: { inventory: newSInv, discordTag: interaction.user.tag } });
+          await dbInstance.collection('economy').updateOne({ discordId: targetId }, { $set: { inventory: newTInv, discordTag: interaction.user.tag } });
 
           await interaction.editReply({ 
             content: `✅ **¡Intercambio realizado con éxito!**\n🤝 <@${senderId}> y <@${targetId}> han intercambiado sus campeones.`, 
@@ -1333,4 +1351,14 @@ async function notifyChallengeComplete(targetName, challenges, coins) {
   channel.send({ embeds: [embed] });
 }
 
-module.exports = { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete };
+module.exports = { 
+  initBot, 
+  notifyRankChange, 
+  notifyLiveGame, 
+  sendDailySummary, 
+  notifyBetResults, 
+  notifyRemake, 
+  notifyChallengeComplete, 
+  updateUserRoles, 
+  GACHA_ITEMS 
+};

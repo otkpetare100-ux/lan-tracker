@@ -219,36 +219,16 @@
     </div>
 
     <script>
-        // GACHA_ITEMS (Necesitamos esta lista en el cliente para mostrar los nombres e imágenes)
-        const GACHA_ITEMS = [
-            { id: 'COINS_50', name: 'Bolsa de Naafiri', rarity: 'Común', type: 'coins' },
-            { id: 'COINS_100', name: 'Cofre de Naafiri', rarity: 'Raro', type: 'coins' },
-            { id: 'COINS_500', name: 'Tesoro de Naafiri', rarity: 'Épico', type: 'coins' },
-            { id: 'COINS_1000', name: 'Reliquia de Naafiri', rarity: 'Legendario', type: 'coins' },
-            { id: 'Garen', name: 'Garen', rarity: 'Común' },
-            { id: 'Ashe', name: 'Ashe', rarity: 'Común' },
-            { id: 'Lux', name: 'Lux', rarity: 'Común' },
-            { id: 'MasterYi', name: 'Master Yi', rarity: 'Común' },
-            { id: 'Yasuo', name: 'Yasuo', rarity: 'Raro' },
-            { id: 'Zed', name: 'Zed', rarity: 'Raro' },
-            { id: 'LeeSin', name: 'Lee Sin', rarity: 'Raro' },
-            { id: 'Ezreal', name: 'Ezreal', rarity: 'Raro' },
-            { id: 'Thresh', name: 'Thresh', rarity: 'Épico' },
-            { id: 'Vayne', name: 'Vayne', rarity: 'Épico' },
-            { id: 'Jhin', name: 'Jhin', rarity: 'Épico' },
-            { id: 'Kaisa', name: 'Kai\'Sa', rarity: 'Épico' },
-            { id: 'Golden_Naafiri', name: 'Naafiri de Oro', rarity: 'Legendario' },
-            { id: 'Elemental_Lux', name: 'Lux Elementalista', rarity: 'Legendario' },
-            { id: 'God_King_Garen', name: 'Garen Rey de Dioses', rarity: 'Legendario' },
-            { id: 'Teemo', name: 'Teemo Satán', rarity: 'Legendario' }
-        ];
-
         async function loadProfile() {
             const pathParts = window.location.pathname.split('/');
             const discordId = pathParts[pathParts.length - 1];
             const content = document.getElementById('profile-content');
 
             try {
+                // Cargar items dinámicamente
+                const itemsRes = await fetch('/api/items');
+                const GACHA_ITEMS = await itemsRes.json();
+
                 const response = await fetch(`/api/profile/${discordId}`);
                 if (!response.ok) throw new Error('Perfil no encontrado');
                 const data = await response.json();

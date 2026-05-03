@@ -142,7 +142,12 @@
       if (!discordId) {
         discordId = prompt("Ingresa tu Discord ID para ver tu mochila (se guardará para la próxima vez):");
         if (discordId) {
-          localStorage.setItem('myDiscordId', discordId.trim());
+          discordId = discordId.trim();
+          if (!/^\d+$/.test(discordId)) {
+            alert("El Discord ID debe ser solo números.");
+            return;
+          }
+          localStorage.setItem('myDiscordId', discordId);
         }
       }
 

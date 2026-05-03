@@ -1,4 +1,4 @@
-let DDRAGON_VERSION = '14.21.1';
+let DDRAGON_VERSION = '15.8.1';
 const FALLBACK_ICON_URL = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/profileicon/29.png`;
 
 // Actualizar versión automáticamente al cargar

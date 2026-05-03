@@ -5,7 +5,7 @@ const path       = require('path');
 const { MongoClient } = require('mongodb');
 
 try { require('dotenv').config(); } catch(e) {}
-const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete } = require('./bot.js');
+const { initBot, notifyRankChange, notifyLiveGame, sendDailySummary, notifyBetResults, notifyRemake, notifyChallengeComplete, GACHA_ITEMS } = require('./bot.js');
 
 // ---- Configuración y Variables Globales ----
 let DDRAGON_VERSION = '15.8.1'; 
@@ -287,10 +287,14 @@ async function settleBets(acc) {
     // --- Cálculo de Estadísticas Extras con Reintentos ---
     const kda = `${p.kills}/${p.deaths}/${p.assists}`;
     let lpDataObj = null;
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
+    
+    // Solo calcular LP si es Clasificatoria
+    const isRanked = match.info.queueId === 420 || match.info.queueId === 440;
+    
+    if (isRanked) {
+      let attempts = 0;
+      const maxAttempts = 3;
+      while (attempts < maxAttempts) {
       try {
         const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}`;
         const leagueRes = await fetch(`${leagueUrl}?api_key=${API_KEY}`);
@@ -321,10 +325,11 @@ async function settleBets(acc) {
         console.error('[LP Retry Error]', e);
       }
 
-      attempts++;
-      if (attempts < maxAttempts && !lpDataObj) {
-        console.log(`[Bets] LP no actualizado para ${acc.gameName}. Reintento ${attempts}/${maxAttempts} en 45s...`);
-        await new Promise(r => setTimeout(r, 45000));
+        attempts++;
+        if (attempts < maxAttempts && !lpDataObj) {
+          console.log(`[Bets] LP no actualizado para ${acc.gameName}. Reintento ${attempts}/${maxAttempts} en 45s...`);
+          await new Promise(r => setTimeout(r, 45000));
+        }
       }
     }
 
@@ -449,6 +454,10 @@ app.get('/api/profile/:discordId', async (req, res) => {
 
 app.get('/perfil/:discordId', (req, res) => {
   res.sendFile(path.join(__dirname, 'perfil.html'));
+});
+
+app.get('/api/items', (req, res) => {
+  res.json(GACHA_ITEMS || []);
 });
 
 // ---- Middleware de verificación de DB ----
