@@ -250,7 +250,7 @@ async function settleBets(acc) {
 
     // --- Cálculo de Estadísticas Extras con Reintentos ---
     const kda = `${p.kills}/${p.deaths}/${p.assists}`;
-    let lpDisplay = null;
+    let lpDataObj = null;
     let attempts = 0;
     const maxAttempts = 3;
 
@@ -259,7 +259,7 @@ async function settleBets(acc) {
         const leagueUrl = `https://la1.api.riotgames.com/lol/league/v4/entries/by-puuid/${acc.puuid}`;
         const leagueRes = await fetch(`${leagueUrl}?api_key=${API_KEY}`);
         const leagues = await leagueRes.json();
-        const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5');
+        const soloQ = leagues.find(l => l.queueType === 'RANKED_SOLO_5x5' || l.queueType === 'RANKED_FLEX_SR');
         
         if (soloQ) {
           // ACTUALIZACIÓN: Guardar el nuevo rango en la DB
@@ -270,19 +270,12 @@ async function settleBets(acc) {
           const oldRank = acc.soloQ?.rank || '';
           
           const diff = soloQ.leaguePoints - oldLp;
-          let prefix = diff >= 0 ? '+' : '';
           
+          lpDataObj = { tier: soloQ.tier, rank: soloQ.rank, lp: soloQ.leaguePoints, diff: diff };
+
           // Si el LP o el Rango ha cambiado
           if (soloQ.leaguePoints !== oldLp || soloQ.tier !== oldTier || soloQ.rank !== oldRank) {
-            lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [${prefix}${diff} LP]`;
-            
-            if (oldTier !== soloQ.tier || oldRank !== soloQ.rank) {
-              lpDisplay = `🚀 **${soloQ.tier} ${soloQ.rank}** (${prefix}${diff} LP)`;
-            }
             break; 
-          } else if (attempts === maxAttempts - 1) {
-            // Si es el último intento y no varió, mostrar el actual en lugar de "Actualizando..."
-            lpDisplay = `${soloQ.tier} ${soloQ.rank} (${soloQ.leaguePoints} LP) [+0 LP]`;
           }
         }
       } catch (e) {
@@ -290,14 +283,14 @@ async function settleBets(acc) {
       }
 
       attempts++;
-      if (attempts < maxAttempts) {
+      if (attempts < maxAttempts && !lpDataObj) {
         console.log(`[Bets] LP no actualizado para ${acc.gameName}. Reintento ${attempts}/${maxAttempts} en 45s...`);
         await new Promise(r => setTimeout(r, 45000));
       }
     }
 
     // 4. Notificar en Discord con toda la info
-    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDisplay, kda, DDRAGON_VERSION);
+    notifyBetResults(`${acc.gameName}#${acc.tagLine}`, gameResult, winners, p.profileIcon, p.championName, lpDataObj, kda, DDRAGON_VERSION, openBets.length, match.info.queueId);
     
     // IMPORTANTE: Limpiar cache para permitir nueva partida
     clearCache();

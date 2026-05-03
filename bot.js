@@ -664,7 +664,8 @@ function initBot(db) {
         const testWinners = [
           { discordId: msg.author.id, amount: 50, multiplier: 2.0, choice: 'gana', anonymous: false }
         ];
-        await notifyBetResults('Jugador de Prueba', 'gana', testWinners, 0, 'Naafiri', '+25 LP (Platino I)', '15/2/8');
+        const testLp = { tier: 'EMERALD', rank: 'II', lp: 74, diff: 38 };
+        await notifyBetResults('BODKIN ARROW#BHR', 'gana', testWinners, 0, 'Vi', testLp, '18/1/9', DDRAGON_VERSION, 1, 420);
         return msg.reply('✅ Notificación de apuesta de prueba enviada.');
       }
 
@@ -916,8 +917,19 @@ async function sendDailySummary(db) {
   channel.send({ embeds: [embed] });
 }
 
+const QUEUE_NAMES = {
+  420: 'SoloQ',
+  440: 'Flex'
+};
+
+const TIER_SHORT = {
+  IRON: 'I', BRONZE: 'B', SILVER: 'S', GOLD: 'G',
+  PLATINUM: 'P', EMERALD: 'E', DIAMOND: 'D', MASTER: 'M',
+  GRANDMASTER: 'GM', CHALLENGER: 'C'
+};
+
 // Notificación de resultados de apuestas
-async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version) {
+async function notifyBetResults(targetName, result, winners, profileIconId, championId, lpData, kda, version, totalBets = 0, queueId = 420) {
   if (!client || !targetChannelId) return;
   const channel = client.channels.cache.get(targetChannelId);
   if (!channel) return;
@@ -926,27 +938,45 @@ async function notifyBetResults(targetName, result, winners, profileIconId, cham
   const playerIcon = `https://ddragon.leagueoflegends.com/cdn/${v}/img/profileicon/${profileIconId || 0}.png`;
   const champIcon = championId ? `https://ddragon.leagueoflegends.com/cdn/${v}/img/champion/${championId}.png` : null;
 
-  const description = winners.length > 0 
-    ? `**Ganadores:**\n${winners.map(w => {
-        const userStr = w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`;
-        const prize = Math.floor(w.amount * (w.multiplier || 2));
-        return `${userStr} (Elección: **${w.choice.toUpperCase()}**) - Ganó **${prize} 💰**`;
-      }).join('\n')}`
-    : 'No hubo ganadores esta vez.';
+  const queueName = QUEUE_NAMES[queueId] || 'Partida';
+  const resultText = result === 'gana' ? 'Victory' : 'Defeat';
+  const title = `${queueName} ${resultText} for ${targetName}`;
 
-  const emoji = result === 'gana' ? '🏆' : '💀';
-  const actionText = result === 'gana' ? 'GANADO' : 'PERDIDO';
-  
-  const lpDisplay = lpData ? `\n**Puntos:** ${lpData}` : '\n**Puntos:** *Actualizando...*';
-  const kdaDisplay = kda ? `\n**KDA:** ${kda}` : '';
+  let rankStr = 'N/A';
+  let lpChangeStr = '+0 LP';
+
+  if (lpData && typeof lpData === 'object') {
+    const shortTier = TIER_SHORT[lpData.tier] || lpData.tier || '';
+    const div = lpData.rank || '';
+    rankStr = `${shortTier}${div} ${lpData.lp}LP`;
+    const prefix = lpData.diff >= 0 ? '+' : '';
+    lpChangeStr = `${prefix}${lpData.diff} LP`;
+  } else if (typeof lpData === 'string') {
+    rankStr = lpData;
+  }
 
   const embedBet = new EmbedBuilder()
-    .setAuthor({ name: targetName, iconURL: playerIcon })
-    .setTitle(`${emoji} Resultados de Apuestas`)
-    .setDescription(`El jugador ha **${actionText}** la partida.${kdaDisplay}${lpDisplay}\n\n${description}`)
+    .setTitle(title)
     .setThumbnail(champIcon)
-    .setColor(winners.length > 0 ? 0xf1c40f : 0x95a5a6)
+    .addFields(
+      { name: 'K/D/A', value: kda || '0/0/0', inline: true },
+      { name: 'Rank', value: rankStr, inline: true },
+      { name: 'LP Win', value: lpChangeStr, inline: true }
+    )
+    .setColor(result === 'gana' ? 0x576bce : 0xd93f3f)
     .setTimestamp();
+
+  // Lógica de ganadores: solo si hubo apuestas
+  if (totalBets > 0) {
+    const description = winners.length > 0 
+      ? `**Ganadores:**\n${winners.map(w => {
+          const userStr = w.anonymous ? '👤 *Anónimo*' : `<@${w.discordId}>`;
+          const prize = Math.floor(w.amount * (w.multiplier || 2));
+          return `${userStr} (Elección: **${w.choice.toUpperCase()}**) - Ganó **${prize} 💰**`;
+        }).join('\n')}`
+      : 'No hubo ganadores esta vez.';
+    embedBet.setDescription(description);
+  }
 
   channel.send({ embeds: [embedBet] });
 }
