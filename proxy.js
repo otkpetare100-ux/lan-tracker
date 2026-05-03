@@ -106,8 +106,15 @@ async function connectDB() {
           
           if (res.ok) {
             const game = await res.json();
+            
+            // FILTRO: Solo Ranked SoloQ (420) y Ranked Flex (440)
+            const allowedQueues = [420, 440];
+            if (!allowedQueues.includes(game.gameQueueConfigId)) {
+              continue; // Ignorar partidas que no sean Ranked
+            }
+
             if (!liveCache.has(acc.puuid) && acc.lastLiveGameId !== game.gameId) {
-              liveCache.add(acc.puuid);
+              liveCache.add(acc.puuid); 
               
               const me = game.participants.find(p => p.puuid === acc.puuid);
               const champKey = Object.keys(champData.data).find(key => champData.data[key].key == me.championId);
@@ -175,6 +182,13 @@ async function settleBets(acc) {
       headers: { "X-Riot-Token": process.env.RIOT_API_KEY.trim() }
     });
     const match = await detailRes.json();
+    
+    // FILTRO: Solo liquidar apuestas y retos en Ranked SoloQ (420) y Ranked Flex (440)
+    const allowedQueues = [420, 440];
+    if (!allowedQueues.includes(match.info.queueId)) {
+      console.log(`[Bets] Partida ignorada (Queue ID: ${match.info.queueId}) para ${acc.gameName}`);
+      return;
+    }
     
     const p = match.info.participants.find(x => x.puuid === acc.puuid);
     if (!p) return;
