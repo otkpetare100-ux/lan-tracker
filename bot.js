@@ -98,9 +98,6 @@ function initBot(db) {
   client.on('messageCreate', async (msg) => {
     if (msg.author.bot || !msg.content.startsWith('!')) return;
     
-    // Auto-eliminar el comando del usuario para mantener el chat limpio
-    msg.delete().catch(() => {});
-
     const args = msg.content.slice(1).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
@@ -979,23 +976,25 @@ function initBot(db) {
         }
 
         const [act, choice, puuid] = interaction.customId.split('_');
-        if (act !== 'bet') return;
 
-        const modal = new ModalBuilder()
-          .setCustomId(`modal_bet_${choice}_${puuid}`)
-          .setTitle(`Apuesta: ${choice.toUpperCase()}`);
+        if (act === 'bet') {
+          const modal = new ModalBuilder()
+            .setCustomId(`modal_bet_${choice}_${puuid}`)
+            .setTitle(`Apuesta: ${choice.toUpperCase()}`);
 
-        const amountInput = new TextInputBuilder()
-          .setCustomId('bet_amount')
-          .setLabel('¿Cuánto quieres apostar?')
-          .setStyle(TextInputStyle.Short)
-          .setPlaceholder('Ingresa la cantidad de Naafiri Coins')
-          .setRequired(true);
+          const amountInput = new TextInputBuilder()
+            .setCustomId('bet_amount')
+            .setLabel('¿Cuánto quieres apostar?')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Ingresa la cantidad de Naafiri Coins')
+            .setRequired(true);
 
-        const firstActionRow = new ActionRowBuilder().addComponents(amountInput);
-        modal.addComponents(firstActionRow);
+          const firstActionRow = new ActionRowBuilder().addComponents(amountInput);
+          modal.addComponents(firstActionRow);
 
-        await interaction.showModal(modal);
+          await interaction.showModal(modal);
+          return;
+        }
       }
 
       if (interaction.isModalSubmit()) {
