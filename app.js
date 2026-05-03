@@ -505,7 +505,7 @@ async function saveNote(puuid) {
 }
 
 /* ---- Feed de Actividad: Inicialización ---- */
-document.addEventListener('DOMContentLoaded', () => {
+(function initActivityFeed() {
   const toggleBtn = document.getElementById('activity-toggle');
   const pinBtn    = document.getElementById('activity-pin');
 
@@ -533,4 +533,4 @@ document.addEventListener('DOMContentLoaded', () => {
     renderActivityFeed();
     setInterval(renderActivityFeed, 30000);
   }
-});
+})();
