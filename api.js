@@ -39,7 +39,11 @@ async function riotFetch(url) {
     }
     return data;
   } catch (err) {
-    console.error("Error en riotFetch:", err.message);
+    if (err.status !== 404) {
+      console.error(`Error en riotFetch [${url}]:`, err.message);
+    } else {
+      console.warn(`Riot API 404: No se encontró el recurso en [${url}]`);
+    }
     throw err;
   }
 }
@@ -222,7 +226,7 @@ async function fetchAccountSnapshot(gameName, tagLine) {
       try {
         const matchIds = await getMatchIds(account.puuid);
         if (matchIds && matchIds.length > 0) {
-          const lastMatch = await getMatchDetails(matchIds[0]);
+          const lastMatch = await getMatchDetail(matchIds[0]);
           const p = lastMatch.info.participants.find(x => x.puuid === account.puuid);
           if (p && p.summonerId) {
             rescueId = p.summonerId;
