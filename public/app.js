@@ -211,20 +211,7 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     updateGlobalRef();
     
-    const wasOpen = card && document.getElementById('history-' + puuid) &&
-                    document.getElementById('history-' + puuid).style.display !== 'none';
-
     applyFilters();
-
-    if (wasOpen) {
-      const newContent = document.getElementById('history-' + puuid);
-      const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
-      if (newContent) newContent.style.display = 'block';
-      if (newBtn) {
-        newBtn.querySelector('.history-arrow').textContent = '▴';
-        newBtn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
-      }
-    }
 
   } catch (err) {
     if (!silent) {
@@ -238,60 +225,6 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
   }
 }
 
-/* ---- History toggle ---- */
-async function handleHistoryToggle(puuid) {
-  const content = document.getElementById('history-' + puuid);
-  const btn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
-  if (!content || !btn) return;
-
-  const isOpen = content.style.display !== 'none';
-
-  if (isOpen) {
-    content.style.display = 'none';
-    btn.querySelector('.history-arrow').textContent = '▾';
-    btn.querySelector('.history-btn-text').textContent = 'Ver historial';
-    return;
-  }
-
-  const acc = accounts.find(a => a.puuid === puuid);
-  if (!acc) return;
-
-  if (!acc.matches || acc.matches.length === 0) {
-    btn.classList.add('loading-history');
-    btn.querySelector('.history-btn-text').textContent = 'Cargando...';
-    btn.disabled = true;
-
-    try {
-      const history = await fetchMatchHistory(puuid);
-      acc.matches      = history.matches;
-      acc.streak       = history.streak;
-      acc.mainPosition = history.mainPosition;
-      const champs = championsFromMatches(history.matches);
-      if (champs) acc.recentChampions = champs;
-      accounts = accounts.map(a => a.puuid === puuid ? acc : a);
-      updateGlobalRef();
-      await updateAccount(acc);
-      applyFilters();
-      const newContent = document.getElementById('history-' + puuid);
-      const newBtn     = document.querySelector('.history-toggle-btn[data-puuid="' + puuid + '"]');
-      if (newContent) newContent.style.display = 'block';
-      if (newBtn) {
-        newBtn.querySelector('.history-arrow').textContent = '▴';
-        newBtn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
-      }
-    } catch(e) {
-      btn.classList.remove('loading-history');
-      btn.querySelector('.history-btn-text').textContent = 'Ver historial';
-      btn.disabled = false;
-      showError('Error cargando historial: ' + e.message);
-    }
-    return;
-  }
-
-  content.style.display = 'block';
-  btn.querySelector('.history-arrow').textContent = '▴';
-  btn.querySelector('.history-btn-text').textContent = 'Ocultar historial';
-}
 
 /* ---- Event delegation ---- */
 if (accountsGrid) {
@@ -346,13 +279,6 @@ if (accountsGrid) {
     e.preventDefault(); e.stopPropagation();
     const puuid = refreshBtn.dataset.puuid;
     handleRefresh(puuid);
-    return;
-  }
-
-  if (historyBtn) {
-    e.preventDefault(); e.stopPropagation();
-    const puuid = historyBtn.dataset.puuid;
-    handleHistoryToggle(puuid);
     return;
   }
   

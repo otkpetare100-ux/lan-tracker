@@ -360,7 +360,7 @@ function buildCardHTML(acc, position) {
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
-          <button class="history-btn-mini" data-puuid="${acc.puuid}">⚔ Historial</button>
+          <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
           <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
           <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" data-puuid="${acc.puuid}">📝</button>
           <button class="remove-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar" data-puuid="${acc.puuid}">✕</button>
@@ -876,9 +876,15 @@ function buildPlayerModalHTML(acc) {
         
         <div class="rank-history-section" style="width: 100%; margin-top: 20px;">
           <div style="color:var(--gold-primary); margin-bottom:10px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Historial de Divisiones</div>
-          <div id="rank-history-${acc.puuid}" class="rank-history-container" style="background: rgba(0,0,0,0.3); border-radius:12px; padding:15px; border: 1px solid rgba(255,255,255,0.05);">
+          <div id="rank-history-${acc.puuid}" class="rank-history-container" style="background: rgba(0,0,0,0.3); border-radius:12px; padding:15px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;">
             <div class="empty-stats">Cargando historial...</div>
           </div>
+        </div>
+
+        <!-- Nueva Sección: Historial de Partidas -->
+        <div class="history-section-modal" style="width: 100%; margin-top: 20px;">
+          <div style="color:var(--gold-primary); margin-bottom:15px; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:800;">Partidas Recientes (Match History)</div>
+          ${buildMatchHistoryHTML(acc.matches, acc.puuid)}
         </div>
 
       </div>
