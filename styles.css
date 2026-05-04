@@ -275,7 +275,7 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
-  flex: 2;
+  flex: 1;
   min-width: 200px;
 }
 
@@ -395,8 +395,8 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1.5;
-  min-width: 180px;
+  flex: 0 0 220px;
+  justify-content: flex-start;
 }
 
 .score-tier-icon {
@@ -428,7 +428,7 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
-  flex: 1;
+  flex: 0 0 320px;
   justify-content: flex-end;
 }
 
