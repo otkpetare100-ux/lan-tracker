@@ -467,12 +467,12 @@ function getCollection() {
 // --- CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS ---
 app.use(express.json({ limit: '10mb' }));
 
-// Sirve los archivos de la raíz
-app.use(express.static(path.join(__dirname)));
+// Sirve los archivos de la carpeta public
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Sirve carpetas específicas
-app.use('/ranks', express.static(path.join(__dirname, 'ranks')));
-app.use('/pic', express.static(path.join(__dirname, 'pic')));
+// Sirve carpetas específicas dentro de public
+app.use('/ranks', express.static(path.join(__dirname, 'public', 'ranks')));
+app.use('/pic', express.static(path.join(__dirname, 'public', 'pic')));
 
 // -------------------------------------------
 
@@ -502,7 +502,7 @@ app.get('/api/profile/:discordId', async (req, res) => {
 });
 
 app.get('/perfil/:discordId', (req, res) => {
-  res.sendFile(path.join(__dirname, 'perfil.html'));
+  res.sendFile(path.join(__dirname, 'public', 'perfil.html'));
 });
 
 app.get('/api/items', (req, res) => {
