@@ -176,7 +176,9 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     // Items - Reordenar para poner Trinket (index 6) en la posición 4 (fin de primera fila)
     let itm = m.items || [0,0,0,0,0,0,0];
     const pos = (m.position || m.individualPosition || '').toUpperCase();
-    const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || m.role === 'DUO' || m.role === 'SUPPORT';
+    const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO';
+    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
+    const isBotlane = isADC || isSupp || pos === 'BOTTOM' || pos === 'UTILITY';
 
     // Lista exhaustiva de IDs de botas
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110, 2422];
@@ -201,8 +203,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
       }
     }
 
-    const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO' || m.role === 'CARRY';
-    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
+    // Logic already handled above
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       const nid = Number(id);
@@ -2034,7 +2035,9 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     // En la API de Riot el campo puede ser teamPosition o individualPosition
     const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
-    const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || p.role === 'DUO' || p.role === 'SUPPORT';
+    const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
+    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
+    const isBotlane = isADC || isSupp || pos === 'BOTTOM' || pos === 'UTILITY';
 
     // Lista exhaustiva de IDs de botas
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110, 2422];
@@ -2058,8 +2061,7 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
       }
     }
 
-    const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
-    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
+    // Logic already handled above
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       const nid = Number(id);
