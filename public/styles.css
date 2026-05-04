@@ -1473,17 +1473,18 @@ body {
 .mv2-item.empty { background: rgba(255, 255, 255, 0.02); }
 
 .m-row-participants {
-  width: 160px;
+  width: 120px; /* Ajustamos ancho para filas */
 }
 
 .mv2-participants {
   display: flex;
-  gap: 8px;
+  flex-direction: column; /* Un equipo sobre otro */
+  gap: 4px;
 }
 
 .mv2-p-col {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Campeones de lado a lado */
   gap: 2px;
 }
 
