@@ -178,12 +178,12 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     // Queremos: [0, 1, 2, 6, 3, 4, 5, (vacío)]
     const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
     
-    const isADC = m.position === 'BOTTOM';
+    const hasExtraSlot = m.position === 'BOTTOM' || m.position === 'UTILITY';
 
     const itemsHTML = reordered.map((id, idx) => {
-      // El último slot (idx 7) es el "cuadrado" que solo se ve en ADC
+      // El último slot (idx 7) es el "cuadrado" que solo se ve en ADC y SUP
       if (idx === 7) {
-        return isADC ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
+        return hasExtraSlot ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
       }
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
       return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
