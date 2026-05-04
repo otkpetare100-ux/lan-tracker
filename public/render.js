@@ -2013,6 +2013,7 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110];
     const PINK_WARD_ID = 2055;
     
+    const itm = p.items || [0,0,0,0,0,0,0];
     let extraItem = 0;
     const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY';
     const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT';
