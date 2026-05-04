@@ -340,7 +340,10 @@ function buildCardHTML(acc, position) {
           <div class="score-level">${acc.summonerLevel || '?'}</div>
         </div>
         <div class="score-names">
-          <span class="score-name">${escapeHTML(acc.gameName)}</span>
+          <div class="score-name-row">
+            <span class="score-name">${escapeHTML(acc.gameName)}</span>
+            ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
+          </div>
           <span class="score-tag">#${escapeHTML(acc.tagLine)}</span>
         </div>
       </div>
