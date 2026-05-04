@@ -1050,7 +1050,7 @@ body {
   border: var(--border-gold);
   border-radius: 16px;
   padding: 30px;
-  max-width: 800px;
+  max-width: 950px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
@@ -1142,12 +1142,87 @@ body {
 .blue-team th { border-bottom: 2px solid #00b4ff; }
 .red-team th { border-bottom: 2px solid #ff4b4b; }
 
-.table-p-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  margin-right: 10px;
-  vertical-align: middle;
+.player-champ-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #000;
+}
+
+.champ-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.spells-runes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.spell-icon {
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.5);
+}
+
+.player-info-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-name-link {
+  font-weight: 700;
+  color: #fff;
+}
+
+.player-level-text {
+  font-size: 0.7rem;
+  color: #657099;
+}
+
+.kda-block, .cs-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.score-kda {
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.score-sub {
+  font-size: 0.7rem;
+  color: #657099;
+}
+
+.item-list {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  max-width: 120px;
+}
+
+.item-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.3);
+}
+
+.empty-item {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.02);
 }
 
 .table-kda { font-weight: 800; font-size: 0.9rem; }
