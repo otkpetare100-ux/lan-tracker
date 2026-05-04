@@ -360,8 +360,8 @@ function buildCardHTML(acc, position) {
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
-          <button class="history-btn-mini" onclick="event.stopPropagation(); handleHistoryToggle('${acc.puuid}')">
-            <span class="history-icon">⚔</span> <span class="history-btn-text">Historial</span> <span class="history-arrow">▾</span>
+          <button class="history-btn-mini" onclick="event.stopPropagation(); handleHistoryModal('${acc.puuid}')">
+            <span class="history-icon">⚔</span> Historial
           </button>
           <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" onclick="event.stopPropagation(); handleRefresh('${acc.puuid}')">↻</button>
           <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" onclick="event.stopPropagation(); if(typeof openNoteModal==='function') openNoteModal('${acc.puuid}')">📝</button>
@@ -381,9 +381,7 @@ function renderAccounts(accounts) {
     grid.innerHTML = '<div class="empty-state"><p>Sin cuentas aún</p></div>';
     return;
   }
-  grid.innerHTML = accounts.map((acc, idx) => {
-    return buildCardHTML(acc, idx) + `<div id="history-${acc.puuid}" class="history-collapse" style="display:none; overflow: hidden; animation: slideDown 0.3s ease-out;"></div>`;
-  }).join('');
+  grid.innerHTML = accounts.map((acc, idx) => buildCardHTML(acc, idx)).join('');
 }
 
 function showError(msg) {

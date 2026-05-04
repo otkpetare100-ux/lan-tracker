@@ -211,25 +211,11 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     updateGlobalRef();
     
-    // Si el historial estaba abierto, forzamos su actualización en el DOM
-    const wasOpen = document.getElementById('history-' + puuid) && 
-                    document.getElementById('history-' + puuid).style.display !== 'none';
-
-    applyFilters();
-
-    if (wasOpen) {
-      const content = document.getElementById('history-' + puuid);
-      if (content) {
-        content.innerHTML = buildMatchHistoryHTML(updated.matches, updated.puuid);
-        content.style.display = 'block';
-        const btn = document.querySelector(`.history-btn-mini[onclick*="${puuid}"]`);
-        if (btn) {
-          const arrow = btn.querySelector('.history-arrow');
-          const txt = btn.querySelector('.history-btn-text');
-          if (arrow) arrow.textContent = '▴';
-          if (txt) txt.textContent = 'Ocultar';
-        }
-      }
+    // Si el modal de historial está abierto para esta cuenta, lo actualizamos
+    if (document.getElementById('history-modal')) {
+      // Re-abrimos para refrescar contenido (el modal detectará si es el mismo puuid si quisiéramos ser finos, 
+      // pero por ahora simplemente lo llamamos de nuevo)
+      openHistoryModal(puuid);
     }
 
   } catch (err) {
@@ -245,33 +231,16 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
 }
 
 
-/* ---- History toggle ---- */
-window.handleHistoryToggle = async function(puuid) {
-  const content = document.getElementById('history-' + puuid);
-  const btn     = document.querySelector(`.history-btn-mini[onclick*="${puuid}"]`);
-  if (!content) return;
-
-  const isOpen = content.style.display !== 'none';
-
-  if (isOpen) {
-    content.style.display = 'none';
-    if (btn) {
-      const arrow = btn.querySelector('.history-arrow');
-      const txt = btn.querySelector('.history-btn-text');
-      if (arrow) arrow.textContent = '▾';
-      if (txt) txt.textContent = 'Historial';
-    }
-    return;
-  }
-
+/* ---- History Modal Action ---- */
+window.handleHistoryModal = async function(puuid) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
+  // Si no hay partidas o están vacías, cargamos primero
   if (!acc.matches || acc.matches.length === 0) {
-    if (btn) {
-      const txt = btn.querySelector('.history-btn-text');
-      if (txt) txt.textContent = 'Cargando...';
-    }
+    const btn = document.querySelector(`.history-btn-mini[onclick*="${puuid}"]`);
+    const originalHTML = btn ? btn.innerHTML : '';
+    if (btn) btn.innerHTML = '⚔ Cargando...';
 
     try {
       const history = await fetchMatchHistory(puuid);
@@ -280,36 +249,22 @@ window.handleHistoryToggle = async function(puuid) {
       acc.mainPosition = history.mainPosition;
       const champs = championsFromMatches(history.matches);
       if (champs) acc.recentChampions = champs;
+      
       accounts = accounts.map(a => a.puuid === puuid ? acc : a);
       updateGlobalRef();
       await updateAccount(acc);
       
-      content.innerHTML = buildMatchHistoryHTML(acc.matches, acc.puuid);
-      content.style.display = 'block';
-      if (btn) {
-        const arrow = btn.querySelector('.history-arrow');
-        const txt = btn.querySelector('.history-btn-text');
-        if (arrow) arrow.textContent = '▴';
-        if (txt) txt.textContent = 'Ocultar';
-      }
+      if (btn) btn.innerHTML = originalHTML;
+      openHistoryModal(puuid);
     } catch(e) {
-      if (btn) {
-        const txt = btn.querySelector('.history-btn-text');
-        if (txt) txt.textContent = 'Historial';
-      }
+      if (btn) btn.innerHTML = originalHTML;
       showError('Error cargando historial: ' + e.message);
     }
     return;
   }
 
-  content.innerHTML = buildMatchHistoryHTML(acc.matches, acc.puuid);
-  content.style.display = 'block';
-  if (btn) {
-    const arrow = btn.querySelector('.history-arrow');
-    const txt = btn.querySelector('.history-btn-text');
-    if (arrow) arrow.textContent = '▴';
-    if (txt) txt.textContent = 'Ocultar';
-  }
+  // Si ya tenemos partidas, abrir modal directamente
+  openHistoryModal(puuid);
 }
 
 /* ---- Event delegation y Global Actions ---- */
