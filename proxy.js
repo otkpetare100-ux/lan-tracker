@@ -1368,7 +1368,7 @@ app.get('/player/:slug', async (req, res) => {
           const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
           // Items - Organización Inteligente (Trinket 4, Botas/Pink 8)
-          const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110];
+          const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110, 2422];
           const PINK_WARD_ID = 2055;
           const itmArr = m.items || [0,0,0,0,0,0,0];
           const pos = (m.position || m.individualPosition || '').toUpperCase();
@@ -1379,15 +1379,20 @@ app.get('/player/:slug', async (req, res) => {
 
           let extraItem = 0;
           let itemsOnly = itmArr.slice(0, 6).filter(id => {
-            if (isADC && BOOT_IDS.includes(id) && extraItem === 0) {
-              extraItem = id;
-              return false;
+            const nid = Number(id);
+            if (nid === 0) return false;
+
+            if (isBotlane && extraItem === 0) {
+              if (isSupp && nid === PINK_WARD_ID) {
+                extraItem = nid;
+                return false;
+              }
+              if (BOOT_IDS.includes(nid)) {
+                extraItem = nid;
+                return false;
+              }
             }
-            if (isSupp && id === PINK_WARD_ID && extraItem === 0) {
-              extraItem = id;
-              return false;
-            }
-            return id > 0;
+            return true;
           });
           while(itemsOnly.length < 6) itemsOnly.push(0);
 
