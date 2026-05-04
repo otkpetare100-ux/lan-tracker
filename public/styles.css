@@ -1472,6 +1472,16 @@ body {
 
 .mv2-item.empty { background: rgba(255, 255, 255, 0.02); }
 
+.mv2-item.hidden-slot {
+  background: transparent;
+  border: none;
+}
+
+.mv2-item.adc-slot {
+  border: 1px solid rgba(200, 155, 60, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .m-row-participants {
   width: 150px; /* Un poco más ancho para iconos más grandes */
 }

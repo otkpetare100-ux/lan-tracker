@@ -173,15 +173,21 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const queue = QUEUE_TYPES[m.queueId] || 'Partida';
     const champImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(m.champion);
     
-    // Items - Asegurar 8 slots
-    let itmArr = m.items || [];
-    if (itmArr.length === 0) itmArr = [0,0,0,0,0,0,0,0];
-    const itemsHTML = itmArr.slice(0, 8).map(id => {
+    // Items - Reordenar para poner Trinket (index 6) en la posición 4 (fin de primera fila)
+    let itm = m.items || [0,0,0,0,0,0,0];
+    // Queremos: [0, 1, 2, 6, 3, 4, 5, (vacío)]
+    const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
+    
+    const isADC = m.position === 'BOTTOM';
+
+    const itemsHTML = reordered.map((id, idx) => {
+      // El último slot (idx 7) es el "cuadrado" que solo se ve en ADC
+      if (idx === 7) {
+        return isADC ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
+      }
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
       return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
     }).join('');
-    // Rellenar si faltan slots hasta 8
-    const extraItemsHTML = itmArr.length < 8 ? Array(8 - itmArr.length).fill('<div class="mv2-item empty"></div>').join('') : '';
 
     // Participants
     const parts = m.participants || [];
@@ -217,7 +223,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
         '<div class="m-cs">' + (m.cs || 0) + ' CS</div>' +
       '</div>' +
       '<div class="m-row-items">' +
-        itemsHTML + extraItemsHTML +
+        itemsHTML +
       '</div>' +
       '<div class="m-row-participants">' +
         participantsHTML +
