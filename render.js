@@ -75,9 +75,13 @@ function winrateClass(wr) {
 
 function wrColor(wr) {
   if (wr === null) return '#888';
-  if (wr > 50)   return '#27a170';
-  if (wr === 50) return '#ffffff';
-  return '#d93f3f';
+  // Hue: 0=rojo → 120=verde (lineal con el WR)
+  const hue = Math.round(wr * 1.2);
+  // Saturación: máxima en los extremos (0% y 100%), mínima en el 50% (blanco)
+  const sat = Math.round(Math.abs(wr - 50) * 1.8);
+  // Luminosidad: un poco más clara en el centro para que el blanco se vea bien
+  const lit = wr === 50 ? 92 : 52;
+  return `hsl(${hue}, ${sat}%, ${lit}%)`;
 }
 
 function getStreakInfo(streak) {
