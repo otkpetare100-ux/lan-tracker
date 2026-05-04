@@ -1473,28 +1473,56 @@ body {
 .mv2-item.empty { background: rgba(255, 255, 255, 0.02); }
 
 .m-row-participants {
-  width: 120px; /* Ajustamos ancho para filas */
+  width: 150px; /* Un poco más ancho para iconos más grandes */
 }
 
 .mv2-participants {
   display: flex;
-  flex-direction: column; /* Un equipo sobre otro */
-  gap: 4px;
+  flex-direction: column;
+  gap: 8px; /* Más espacio entre filas */
 }
 
 .mv2-p-col {
   display: flex;
-  flex-direction: row; /* Campeones de lado a lado */
-  gap: 2px;
+  flex-direction: row;
+  gap: 4px;
+  position: relative;
+  padding: 2px 0;
+  align-items: center;
+}
+
+/* La línea que pasa por atrás */
+.mv2-p-col::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  z-index: 0;
+}
+
+.team-blue::before {
+  background: linear-gradient(90deg, rgba(0, 180, 255, 0.2) 0%, transparent 100%);
+  border-left: 2px solid #00b4ff;
+}
+
+.team-red::before {
+  background: linear-gradient(90deg, rgba(255, 75, 75, 0.2) 0%, transparent 100%);
+  border-left: 2px solid #ff4b4b;
 }
 
 .mv2-p-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 3px;
+  width: 24px; /* Más grandes */
+  height: 24px;
+  border-radius: 4px;
   overflow: hidden;
-  opacity: 0.7;
-  border: 1px solid transparent;
+  opacity: 0.9;
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  z-index: 1; /* Por encima de la línea */
+  background: #000;
 }
 
 .mv2-p-icon img {

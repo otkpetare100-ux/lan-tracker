@@ -194,7 +194,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
         const pImg = 'https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/champion/' + getChampImageName(p.champion);
         return '<div class="mv2-p-icon ' + (isMe ? 'me' : '') + '"><img src="' + pImg + '" title="' + escapeHTML(p.champion) + '" /></div>';
       };
-      participantsHTML = '<div class="mv2-participants"><div class="mv2-p-col">' + team1.map(renderPart).join('') + '</div><div class="mv2-p-col">' + team2.map(renderPart).join('') + '</div></div>';
+      participantsHTML = '<div class="mv2-participants"><div class="mv2-p-col team-blue">' + team1.map(renderPart).join('') + '</div><div class="mv2-p-col team-red">' + team2.map(renderPart).join('') + '</div></div>';
     }
 
     const shortQueue = queue.replace('Clasificatoria ', '').replace('Normal (Recluta)', 'Draft').replace('Normal (Oculta)', 'Blind');
