@@ -209,22 +209,18 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
       const nid = Number(id);
       if (nid === 0) return false;
 
-      // Si ya tenemos un objeto en el slot 7, no extraemos nada más
-      if (extraItem > 0) return true;
-
-      // Prioridad para el 8vo slot en botlane (Fallback si el slot 7 está vacío)
-      if (isBotlane && extraItem === 0) {
-        // Si es Supp, prioridad al Pink
-        if (isSupp && nid === PINK_WARD_ID) {
-          extraItem = nid;
-          return false;
-        }
-        // Si es ADC (o Supp sin pink), buscamos botas
-        if (BOOT_IDS.includes(nid)) {
-          extraItem = nid;
-          return false;
-        }
+      // Si es ADC, siempre filtramos las botas de los slots normales para moverlas al 8vo
+      if (isADC && BOOT_IDS.includes(nid)) {
+        if (extraItem === 0) extraItem = nid;
+        return false;
       }
+      
+      // Si es Supp, siempre filtramos el Pink Ward de los slots normales
+      if (isSupp && nid === PINK_WARD_ID) {
+        if (extraItem === 0) extraItem = nid;
+        return false;
+      }
+
       return true;
     });
     while(itemsOnly.length < 6) itemsOnly.push(0);
@@ -2067,18 +2063,16 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
       const nid = Number(id);
       if (nid === 0) return false;
 
-      if (extraItem > 0) return true;
-
-      if (isBotlane && extraItem === 0) {
-        if (isSupp && nid === PINK_WARD_ID) {
-          extraItem = nid;
-          return false;
-        }
-        if (BOOT_IDS.includes(nid)) {
-          extraItem = nid;
-          return false;
-        }
+      if (isADC && BOOT_IDS.includes(nid)) {
+        if (extraItem === 0) extraItem = nid;
+        return false;
       }
+      
+      if (isSupp && nid === PINK_WARD_ID) {
+        if (extraItem === 0) extraItem = nid;
+        return false;
+      }
+
       return true;
     });
     while(itemsOnly.length < 6) itemsOnly.push(0);
