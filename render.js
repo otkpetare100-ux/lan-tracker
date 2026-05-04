@@ -338,6 +338,7 @@ function buildCardHTML(acc, position) {
         <div class="score-avatar-wrap">
           <img class="score-avatar" src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" />
           <div class="score-level">${acc.summonerLevel || '?'}</div>
+          <div class="status-dot ${acc.liveGameStartedAt ? 'ingame' : 'offline'}" title="${acc.liveGameStartedAt ? 'En partida' : 'Offline'}"></div>
         </div>
         <div class="score-names">
           <span class="score-name">${escapeHTML(acc.gameName)}</span>
