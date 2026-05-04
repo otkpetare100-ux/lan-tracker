@@ -1986,3 +1986,56 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
   html += '</tbody></table></div>';
   return html;
 }
+
+// --- Lógica del Modal de Historial (Solo Partidas) ---
+window.openHistoryModal = function(puuid) {
+  const acc = window._accounts_ref?.find(a => a.puuid === puuid);
+  if (!acc) return;
+
+  // Evitar duplicados
+  if (document.getElementById('history-modal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'history-modal';
+  modal.className = 'player-modal'; // Reutilizamos clase para consistencia
+  
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <img src="${getProfileIconUrl(acc.profileIconId)}" onerror="this.src='${FALLBACK_ICON_URL}'" style="width: 50px; height: 50px;" />
+        <div class="names-wrap" style="flex: 1;">
+          <h2 style="font-size: 1.2rem;">Historial de ${escapeHTML(acc.gameName)}</h2>
+          <p style="margin:0; font-size:0.8rem; opacity:0.7;">Últimas partidas registradas</p>
+        </div>
+        <button class="modal-close" onclick="closeHistoryModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="history-section-modal">
+          ${buildMatchHistoryHTML(acc.matches, acc.puuid)}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  document.body.classList.add('modal-open');
+  requestAnimationFrame(() => modal.classList.add('player-modal--open'));
+
+  // Cerrar con Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeHistoryModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+};
+
+window.closeHistoryModal = function() {
+  const modal = document.getElementById('history-modal');
+  if (modal) {
+    modal.classList.remove('player-modal--open');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => modal.remove(), 300);
+  }
+};
