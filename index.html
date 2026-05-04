@@ -31,6 +31,7 @@
         <button onclick="openLeaderboard()">🏆 Récords</button>
         <button onclick="openBackpackPrompt()">🎒 Mochila</button>
         <button onclick="window.location.href='hall-of-fame.html'">👑 HOF</button>
+        <button onclick="openAddAccountModal()">+ Agregar</button>
       </div>
     </div>
   </nav>
@@ -38,20 +39,10 @@
   <!-- CONTENIDO -->
   <main class="tracker-wrap">
 
-    <!-- Botón Agregar Cuenta -->
-    <section class="search-section">
-      <div class="search-hero">
-        <button class="add-account-btn" id="add-account-btn" onclick="openAddAccountModal()">
-          <span class="add-icon">+</span>
-          Agregar cuenta
-        </button>
-        <div id="error-msg" class="error-msg" style="display:none;"></div>
-      </div>
-    </section>
-
     <!-- Cuentas -->
     <section class="accounts-section">
       <h2 class="section-title">Invocadores en Seguimiento</h2>
+      <div id="error-msg" class="error-msg" style="display:none;"></div>
       <div class="accounts-grid" id="accounts-grid">
         <!-- Generado por render.js -->
       </div>
