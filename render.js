@@ -67,8 +67,17 @@ function computeWinrate(wins, losses) {
 function winrateClass(wr) {
   if (wr === null) return 'empty';
   if (wr >= 55) return 'good';
+  if (wr > 50)  return 'good';
+  if (wr === 50) return 'neutral';
   if (wr >= 48) return 'ok';
   return 'bad';
+}
+
+function wrColor(wr) {
+  if (wr === null) return '#888';
+  if (wr > 50)   return '#27a170';
+  if (wr === 50) return '#ffffff';
+  return '#d93f3f';
 }
 
 function getStreakInfo(streak) {
@@ -332,7 +341,7 @@ function buildCardHTML(acc, position) {
         <img class="score-tier-icon" src="${rankIcon}" alt="${r.tier}" />
         <div class="score-tier-text">
           <span class="score-tier-name">${rankName}</span>
-          <span class="score-lp-text">${r.lp} LP · ${wr !== null ? wr + '%' : '--'} WR</span>
+          <span class="score-lp-text">${r.lp} LP · <span style="color:${wrColor(wr)};font-weight:700;">${wr !== null ? wr + '%' : '--'}</span> WR</span>
         </div>
       </div>
       
