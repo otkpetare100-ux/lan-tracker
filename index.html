@@ -120,7 +120,7 @@
     }
 
     async function openAddAccountModal() {
-      const raw = await showCustomPrompt('➕ Agregar Cuenta', 'Ingresa el nombre del invocador en formato Nombre#TAG');
+      const raw = await showCustomPrompt('Agregar Cuenta', 'Ingresa el nombre del invocador en formato Nombre#TAG');
       if (!raw) return;
       const input = document.getElementById('search-input');
       if (input) {
