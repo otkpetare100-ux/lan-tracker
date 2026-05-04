@@ -1367,14 +1367,43 @@ app.get('/player/:slug', async (req, res) => {
           const dur = Math.floor(m.gameDuration / 60) + 'm ' + (m.gameDuration % 60) + 's';
           const champImg = `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${getChampImg({image: m.champion})}`;
           
-          // Items - Asegurar 8 slots
-          let itmArr = m.items || [];
-          if (itmArr.length === 0) itmArr = [0,0,0,0,0,0,0,0];
-          const itemsHTML = itmArr.slice(0, 8).map(id => {
+          // Items - Organización Inteligente (Trinket 4, Botas/Pink 8)
+          const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110];
+          const PINK_WARD_ID = 2055;
+          const itmArr = m.items || [0,0,0,0,0,0,0];
+          const pos = (m.position || m.individualPosition || '').toUpperCase();
+          const role = (m.role || '').toUpperCase();
+          const isADC = pos === 'BOTTOM' || role === 'DUO_CARRY' || role === 'CARRY' || role === 'DUO';
+          const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || role === 'DUO_SUPPORT' || role === 'SUPPORT';
+          const isBotlane = isADC || isSupp;
+
+          let extraItem = 0;
+          let itemsOnly = itmArr.slice(0, 6).filter(id => {
+            if (isADC && BOOT_IDS.includes(id) && extraItem === 0) {
+              extraItem = id;
+              return false;
+            }
+            if (isSupp && id === PINK_WARD_ID && extraItem === 0) {
+              extraItem = id;
+              return false;
+            }
+            return id > 0;
+          });
+          while(itemsOnly.length < 6) itemsOnly.push(0);
+
+          const reordered = [
+            itemsOnly[0], itemsOnly[1], itemsOnly[2], itmArr[6],
+            itemsOnly[3], itemsOnly[4], itemsOnly[5], extraItem
+          ];
+
+          const itemsHTML = reordered.map((id, idx) => {
+            if (idx === 7) {
+              if (id > 0) return `<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png">`;
+              return isBotlane ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
+            }
             if (!id || id === 0) return '<div class="mv2-item empty"></div>';
             return `<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${id}.png">`;
           }).join('');
-          const extraItemsHTML = itmArr.length < 8 ? Array(8 - itmArr.length).fill('<div class="mv2-item empty"></div>').join('') : '';
 
           // Participants
           const parts = m.participants || [];

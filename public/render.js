@@ -183,8 +183,8 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const PINK_WARD_ID = 2055;
     
     let extraItem = 0;
-    const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY';
-    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT';
+    const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO';
+    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       // Si es ADC, buscamos botas para el 8vo slot
@@ -2015,8 +2015,8 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     const itm = p.items || [0,0,0,0,0,0,0];
     let extraItem = 0;
-    const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY';
-    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT';
+    const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
+    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       if (isADC && BOOT_IDS.includes(id) && extraItem === 0) {
