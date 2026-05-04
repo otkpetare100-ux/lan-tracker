@@ -330,7 +330,7 @@ function buildCardHTML(acc, position) {
   const rankClass = rankNum <= 3 ? `rank-${rankNum}` : '';
 
   return `
-    <div class="scoreboard-row" id="card-${acc.puuid}" onclick="window.location.href='${profileUrl}'">
+    <div class="scoreboard-row" id="card-${acc.puuid}" data-url="${profileUrl}">
       
       <div class="score-rank ${rankClass}">#${rankNum}</div>
       
@@ -356,11 +356,11 @@ function buildCardHTML(acc, position) {
         </div>
       </div>
       
-      <div class="score-actions" onclick="event.stopPropagation()">
+      <div class="score-actions">
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
-          <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
+          <button class="history-btn-mini" data-puuid="${acc.puuid}">⚔ Historial</button>
           <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
           <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" data-puuid="${acc.puuid}">📝</button>
           <button class="remove-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar" data-puuid="${acc.puuid}">✕</button>

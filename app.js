@@ -296,24 +296,29 @@ accountsGrid.addEventListener('click', async (e) => {
   const shareBtn   = e.target.closest('.share-btn');
 
   if (noteBtn) {
+    e.preventDefault(); e.stopPropagation();
     const puuid = noteBtn.dataset.puuid;
     if (typeof openNoteModal === 'function') openNoteModal(puuid);
+    return;
   }
 
   if (shareBtn) {
+    e.preventDefault(); e.stopPropagation();
     const puuid = shareBtn.dataset.puuid;
     const acc = accounts.find(a => a.puuid === puuid);
     if (acc) {
       const url = `https://lan-tracker-production.up.railway.app/player/${encodeURIComponent(acc.gameName)}-${encodeURIComponent(acc.tagLine)}`;
       navigator.clipboard.writeText(url).then(() => {
-        showToast('🔗 ¡Link copiado al portapapeles!', 'toast-up');
+        showToast('📋 ¡Link copiado al portapapeles!', 'toast-up');
       }).catch(err => {
         showError('No se pudo copiar el link');
       });
     }
+    return;
   }
 
   if (removeBtn) {
+    e.preventDefault(); e.stopPropagation();
     const puuid = removeBtn.dataset.puuid;
     const ok = await showCustomConfirm('Eliminar Cuenta', '¿Estás seguro de que deseas dejar de rastrear a este jugador?');
     if (ok) {
@@ -331,13 +336,24 @@ accountsGrid.addEventListener('click', async (e) => {
   }
 
   if (refreshBtn) {
+    e.preventDefault(); e.stopPropagation();
     const puuid = refreshBtn.dataset.puuid;
     handleRefresh(puuid);
+    return;
   }
 
   if (historyBtn) {
+    e.preventDefault(); e.stopPropagation();
     const puuid = historyBtn.dataset.puuid;
     handleHistoryToggle(puuid);
+    return;
+  }
+  
+  // Handle row click for profile redirect
+  const row = e.target.closest('.scoreboard-row');
+  if (row) {
+    const url = row.dataset.url;
+    if (url) window.location.href = url;
   }
 });
 
