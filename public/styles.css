@@ -179,6 +179,11 @@ body {
   transform: translateY(-2px);
 }
 
+.topnav-actions .add-account-btn:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
+}
+
 .add-icon {
   font-size: 1.4rem;
   font-weight: 300;
@@ -596,6 +601,11 @@ body {
   box-shadow: 0 4px 15px rgba(200,155,60,0.3);
 }
 
+.cd-btn-confirm:active, .cd-btn-cancel:active {
+  transform: scale(0.95);
+  filter: brightness(0.8);
+}
+
 
 .profile-container {
   max-width: 1200px;
@@ -913,6 +923,15 @@ body {
   background: var(--gold-primary);
   color: #000;
   box-shadow: 0 0 10px rgba(200, 155, 60, 0.4);
+}
+
+.history-btn-mini:active, 
+.refresh-btn:active, 
+.note-btn:active, 
+.remove-btn:active {
+  transform: scale(0.92);
+  filter: brightness(0.8);
+  transition: transform 0.1s ease;
 }
 
 /* --- Leaderboard Internals --- */
