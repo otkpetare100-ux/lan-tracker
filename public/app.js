@@ -211,7 +211,26 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
     accounts = accounts.map(a => a.puuid === puuid ? updated : a);
     updateGlobalRef();
     
+    // Si el historial estaba abierto, forzamos su actualización en el DOM
+    const wasOpen = document.getElementById('history-' + puuid) && 
+                    document.getElementById('history-' + puuid).style.display !== 'none';
+
     applyFilters();
+
+    if (wasOpen) {
+      const content = document.getElementById('history-' + puuid);
+      if (content) {
+        content.innerHTML = buildMatchHistoryHTML(updated.matches, updated.puuid);
+        content.style.display = 'block';
+        const btn = document.querySelector(`.history-btn-mini[onclick*="${puuid}"]`);
+        if (btn) {
+          const arrow = btn.querySelector('.history-arrow');
+          const txt = btn.querySelector('.history-btn-text');
+          if (arrow) arrow.textContent = '▴';
+          if (txt) txt.textContent = 'Ocultar';
+        }
+      }
+    }
 
   } catch (err) {
     if (!silent) {
@@ -225,6 +244,73 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
   }
 }
 
+
+/* ---- History toggle ---- */
+window.handleHistoryToggle = async function(puuid) {
+  const content = document.getElementById('history-' + puuid);
+  const btn     = document.querySelector(`.history-btn-mini[onclick*="${puuid}"]`);
+  if (!content) return;
+
+  const isOpen = content.style.display !== 'none';
+
+  if (isOpen) {
+    content.style.display = 'none';
+    if (btn) {
+      const arrow = btn.querySelector('.history-arrow');
+      const txt = btn.querySelector('.history-btn-text');
+      if (arrow) arrow.textContent = '▾';
+      if (txt) txt.textContent = 'Historial';
+    }
+    return;
+  }
+
+  const acc = accounts.find(a => a.puuid === puuid);
+  if (!acc) return;
+
+  if (!acc.matches || acc.matches.length === 0) {
+    if (btn) {
+      const txt = btn.querySelector('.history-btn-text');
+      if (txt) txt.textContent = 'Cargando...';
+    }
+
+    try {
+      const history = await fetchMatchHistory(puuid);
+      acc.matches      = history.matches;
+      acc.streak       = history.streak;
+      acc.mainPosition = history.mainPosition;
+      const champs = championsFromMatches(history.matches);
+      if (champs) acc.recentChampions = champs;
+      accounts = accounts.map(a => a.puuid === puuid ? acc : a);
+      updateGlobalRef();
+      await updateAccount(acc);
+      
+      content.innerHTML = buildMatchHistoryHTML(acc.matches, acc.puuid);
+      content.style.display = 'block';
+      if (btn) {
+        const arrow = btn.querySelector('.history-arrow');
+        const txt = btn.querySelector('.history-btn-text');
+        if (arrow) arrow.textContent = '▴';
+        if (txt) txt.textContent = 'Ocultar';
+      }
+    } catch(e) {
+      if (btn) {
+        const txt = btn.querySelector('.history-btn-text');
+        if (txt) txt.textContent = 'Historial';
+      }
+      showError('Error cargando historial: ' + e.message);
+    }
+    return;
+  }
+
+  content.innerHTML = buildMatchHistoryHTML(acc.matches, acc.puuid);
+  content.style.display = 'block';
+  if (btn) {
+    const arrow = btn.querySelector('.history-arrow');
+    const txt = btn.querySelector('.history-btn-text');
+    if (arrow) arrow.textContent = '▴';
+    if (txt) txt.textContent = 'Ocultar';
+  }
+}
 
 /* ---- Event delegation y Global Actions ---- */
 window.handleRemoveAccount = async function(puuid) {
