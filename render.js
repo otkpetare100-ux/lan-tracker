@@ -75,12 +75,16 @@ function winrateClass(wr) {
 
 function wrColor(wr) {
   if (wr === null) return '#888';
-  // Hue: 0=rojo → 120=verde (lineal con el WR)
-  const hue = Math.round(wr * 1.2);
-  // Saturación: máxima en los extremos (0% y 100%), mínima en el 50% (blanco)
-  const sat = Math.round(Math.abs(wr - 50) * 1.8);
-  // Luminosidad: un poco más clara en el centro para que el blanco se vea bien
-  const lit = wr === 50 ? 92 : 52;
+  // Normalizar: 40% → 0 (rojo pleno), 60% → 1 (verde pleno)
+  // Fuera de ese rango se clampea al extremo
+  const t = Math.max(0, Math.min(1, (wr - 40) / 20));
+  // Hue: 0=rojo, 120=verde
+  const hue = Math.round(t * 120);
+  // Saturación: máxima en extremos (t=0 ó t=1), cero en el centro (t=0.5 → blanco)
+  const distFromMid = Math.abs(t - 0.5) * 2; // 0 en centro, 1 en extremos
+  const sat = Math.round(distFromMid * 90);
+  // Luminosidad: más clara en el centro para que el blanco se vea bien
+  const lit = sat < 5 ? 92 : 52;
   return `hsl(${hue}, ${sat}%, ${lit}%)`;
 }
 
