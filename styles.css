@@ -331,25 +331,19 @@ body {
 }
 
 .streak-badge {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
 }
 
 .streak-badge.win {
-  background: rgba(39, 161, 112, 0.15);
   color: #27a170;
-  border: 1px solid rgba(39, 161, 112, 0.4);
 }
 
 .streak-badge.loss {
-  background: rgba(217, 63, 63, 0.15);
   color: #d93f3f;
-  border: 1px solid rgba(217, 63, 63, 0.4);
 }
 
 .score-stats {
