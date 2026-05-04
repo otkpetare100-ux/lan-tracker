@@ -154,7 +154,7 @@ body {
 }
 
 /* --- Botón Agregar Cuenta --- */
-.add-account-btn {
+.topnav-actions .add-account-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -172,7 +172,7 @@ body {
   backdrop-filter: blur(8px);
 }
 
-.add-account-btn:hover {
+.topnav-actions .add-account-btn:hover {
   background: var(--gold-primary);
   color: #000;
   box-shadow: 0 0 20px rgba(200, 155, 60, 0.4);
