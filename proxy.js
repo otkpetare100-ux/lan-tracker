@@ -1561,7 +1561,11 @@ async function backendFetchMatchHistory(puuid) {
           gold: p.goldEarned || 0,
           kp: p.challenges?.killParticipation ? Math.round(p.challenges.killParticipation * 100) : 0,
           dmgObj: p.totalDamageDealtToObjectives || 0,
-          position: p.teamPosition || ''
+          position: p.teamPosition || '',
+          individualPosition: p.individualPosition || '',
+          role: p.role || '',
+          items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6],
+          questItemSlot: p.questItemSlot || 0
         });
       } catch(e) {
         console.error('Error fetching match detail backend:', e);
@@ -1676,6 +1680,7 @@ app.get('/api/match/:matchId', async (req, res) => {
       perks: p.perks, // Para las runas
       champLevel: p.champLevel,
       individualPosition: p.individualPosition,
+      questItemSlot: p.questItemSlot,
       challenges: p.challenges
     }));
 
