@@ -182,7 +182,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110, 2422];
     const PINK_WARD_ID = 2055;
     
-    let extraItem = 0;
+    let extraItem = m.questItemSlot || 0;
     const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO' || m.role === 'CARRY';
     const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
 
@@ -190,7 +190,10 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
       const nid = Number(id);
       if (nid === 0) return false;
 
-      // Prioridad para el 8vo slot en botlane
+      // Si ya tenemos un objeto de misión, no extraemos nada más para el 8vo slot
+      if (extraItem > 0) return true;
+
+      // Prioridad para el 8vo slot en botlane (Fallback si no hay questItemSlot)
       if (isBotlane && extraItem === 0) {
         // Si es Supp, prioridad al Pink
         if (isSupp && nid === PINK_WARD_ID) {
@@ -2020,13 +2023,15 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     const PINK_WARD_ID = 2055;
     
     const itm = p.items || [0,0,0,0,0,0,0];
-    let extraItem = 0;
+    let extraItem = p.questItemSlot || 0;
     const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
     const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       const nid = Number(id);
       if (nid === 0) return false;
+
+      if (extraItem > 0) return true;
 
       if (isBotlane && extraItem === 0) {
         if (isSupp && nid === PINK_WARD_ID) {

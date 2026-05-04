@@ -1377,10 +1377,12 @@ app.get('/player/:slug', async (req, res) => {
           const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || role === 'DUO_SUPPORT' || role === 'SUPPORT';
           const isBotlane = isADC || isSupp;
 
-          let extraItem = 0;
+          let extraItem = m.questItemSlot || 0;
           let itemsOnly = itmArr.slice(0, 6).filter(id => {
             const nid = Number(id);
             if (nid === 0) return false;
+
+            if (extraItem > 0) return true;
 
             if (isBotlane && extraItem === 0) {
               if (isSupp && nid === PINK_WARD_ID) {
