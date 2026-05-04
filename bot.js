@@ -987,7 +987,7 @@ function initBot(db) {
               .setTitle('🐾 Guía de Comandos - LAN Tracker')
               .setDescription('¡Bienvenido a la perrera! Aquí tienes todo lo que puedes hacer:')
               .addFields(
-                { name: '👤 Perfil y Rango', value: '`!perfil [N#T]` - Mira tu rango.\n`!stats [N#T]` - Estadísticas.\n`!ladder` - Top 10 Jugadores.\n`!shame` - Muro de la vergüenza.' },
+                { name: '👤 Perfil y Rango', value: '`!perfil [N#T]` - Mira tu rango.\n`!stats [N#T]` - Estadísticas.\n`!ladder` - Top 10 Jugadores.\n`!shame` - Muro de la vergüenza.\n`!web` - Tu perfil privado.' },
                 { name: '💰 Economía', value: '`!monedas` - Tu saldo.\n`!diario` - 100 coins gratis.\n`!pagar @u cant` - Enviar coins.\n`!top_ricos` - Top 10 Ricos.' },
                 { name: '🎮 Diversión y Colección', value: '`!apostar` - Apuesta en vivo.\n`!ludopata` - Mira tus apuestas.\n`!gacha` - Nuevo campeón.\n`!mochila` - Tu colección.\n`!reroll` - Fusiona 3 repetidos.\n`!reciclar` - Desencanta repetidos.' }
               )
@@ -999,10 +999,11 @@ function initBot(db) {
             const adminEmbed = new EmbedBuilder()
               .setTitle('🛠️ Panel de Administración')
               .addFields(
-                { name: '💰 Economía', value: '`!admin_dar @u cant` - Dar.\n`!admin_quitar @u cant` - Quitar.\n`!admin_setcoins @u cant` - Setear.\n`!admin_resetdiario @u` - Reset cooldown diario.' },
-                { name: '🎒 Items', value: '`!admin_daritem @u id` - Dar item.\n`!admin_clearinv @u` - Vaciar mochila.' },
-                { name: '🎭 Sistema y Diagnóstico', value: '`!admin_stats` - Stats globales.\n`!admin_debug_key` - Estado API Key.\n`!admin_anuncio [msg]` - Anuncio.\n`!admin_purge [n]` - Limpiar chat.' },
-                { name: '🧪 Pruebas', value: '`!test_notif` - Test notificaciones.\n`!admin_syncroles` - Sincronizar roles.' }
+                { name: '💰 Economía', value: '`!admin_dar @u cant`\n`!admin_quitar @u cant`\n`!admin_setcoins @u cant`\n`!admin_resetdiario @u`\n`!admin_resetall CONFIRMAR`' },
+                { name: '🎒 Items e Inventario', value: '`!admin_daritem @u id`\n`!admin_clearinv @u`' },
+                { name: '📡 Monitoreo y Dashboard', value: '`!admin_scan` - Scan en vivo.\n`!admin_check N#T` - Forzar notif.\n`!admin_cancelarapuestas N#T`\n`!admin_syncroles` - Sincronizar roles.' },
+                { name: '🎭 Sistema y Diagnóstico', value: '`!admin_stats` - Estadísticas.\n`!admin_debug_key` - Riot API.\n`!admin_anuncio [msg]`\n`!admin_purge [n]` - Borrar mensajes.' },
+                { name: '🧪 Comandos de Prueba', value: '`!admin_testnotif`, `!admin_testsummary`, `!admin_testbet`' }
               )
               .setColor(0xd93f3f)
               .setFooter({ text: 'Naafiri Admin' });

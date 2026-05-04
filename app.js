@@ -81,8 +81,11 @@ async function handleSearch() {
 
   const gameName = parts[0].trim();
   const tagLine = parts[1].trim();
-  searchBtn.disabled = true;
-  searchBtn.textContent = '...';
+  
+  if (searchBtn) {
+    searchBtn.disabled = true;
+    searchBtn.textContent = '...';
+  }
 
   try {
     const entry  = await fetchAccountSnapshot(gameName, tagLine);
@@ -98,8 +101,10 @@ async function handleSearch() {
   } catch (err) {
     showError(err.status ? getApiErrorMessage(err.status) : 'Error de red: ' + err.message);
   } finally {
-    searchBtn.disabled = false;
-    searchBtn.textContent = 'Buscar';
+    if (searchBtn) {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Buscar';
+    }
   }
 }
 
@@ -357,10 +362,14 @@ accountsGrid.addEventListener('click', async (e) => {
   }
 });
 
-searchBtn.addEventListener('click', handleSearch);
-searchInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') handleSearch();
-});
+if (searchBtn) {
+  searchBtn.addEventListener('click', handleSearch);
+}
+if (searchInput) {
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSearch();
+  });
+}
 
 // Forzar actualización desde link público
 window.addEventListener('DOMContentLoaded', () => {
