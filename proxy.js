@@ -1564,8 +1564,9 @@ async function backendFetchMatchHistory(puuid) {
           position: p.teamPosition || '',
           individualPosition: p.individualPosition || '',
           role: p.role || '',
-          items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6],
-          questItemSlot: p.questItemSlot || 0
+          items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6, p.item7 || 0],
+          perks: p.perks,
+          challenges: p.challenges
         });
       } catch(e) {
         console.error('Error fetching match detail backend:', e);
@@ -1674,7 +1675,7 @@ app.get('/api/match/:matchId', async (req, res) => {
       goldEarned: p.goldEarned,
       visionScore: p.visionScore,
       totalMinionsKilled: p.totalMinionsKilled + (p.neutralMinionsKilled || 0),
-      items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6],
+      items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6, p.item7 || 0],
       summoner1Id: p.summoner1Id,
       summoner2Id: p.summoner2Id,
       perks: p.perks, // Para las runas
