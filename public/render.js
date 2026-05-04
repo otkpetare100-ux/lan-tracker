@@ -178,13 +178,13 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const pos = (m.position || m.individualPosition || '').toUpperCase();
     const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || m.role === 'DUO' || m.role === 'SUPPORT';
 
-    // Lista de IDs de botas y pink wards
-    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
+    // Lista exhaustiva de IDs de botas
+    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110];
     const PINK_WARD_ID = 2055;
     
     let extraItem = 0;
-    const isADC = pos === 'BOTTOM';
-    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT';
+    const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY';
+    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT';
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       // Si es ADC, buscamos botas para el 8vo slot
@@ -2009,13 +2009,13 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
     const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || p.role === 'DUO' || p.role === 'SUPPORT';
 
-    const itm = p.items || [0,0,0,0,0,0,0];
-    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
+    // Lista exhaustiva de IDs de botas
+    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010, 3001, 3003, 3042, 3110];
     const PINK_WARD_ID = 2055;
     
     let extraItem = 0;
-    const isADC = pos === 'BOTTOM';
-    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT';
+    const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY';
+    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT';
 
     let itemsOnly = itm.slice(0, 6).filter(id => {
       if (isADC && BOOT_IDS.includes(id) && extraItem === 0) {
