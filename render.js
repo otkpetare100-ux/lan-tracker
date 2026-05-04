@@ -316,7 +316,7 @@ function buildCardHTML(acc, position) {
   const wr = computeWinrate(r.wins, r.losses);
   
   const streakClass = acc.streak >= 3 ? 'streak-win' : acc.streak <= -3 ? 'streak-loss' : '';
-  const streakText = acc.streak > 0 ? `🔥 ${acc.streak} Wins` : acc.streak < 0 ? `❄️ ${Math.abs(acc.streak)} Loss` : '';
+  const streakText = acc.streak >= 2 ? `🔥 ${acc.streak}` : acc.streak <= -2 ? `❄️ ${Math.abs(acc.streak)}` : '';
   
   const rankIcon = RANK_ICONS[r.tier] || RANK_ICONS.UNRANKED;
   const noDivisionTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER', 'UNRANKED'];
