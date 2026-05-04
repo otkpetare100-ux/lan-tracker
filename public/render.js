@@ -360,12 +360,12 @@ function buildCardHTML(acc, position) {
         ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
-          <button class="history-btn-mini" onclick="event.stopPropagation(); handleHistoryModal('${acc.puuid}')">
+          <button class="history-btn-mini" data-puuid="${acc.puuid}">
             <span class="history-icon">⚔</span> Historial
           </button>
-          <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" onclick="event.stopPropagation(); handleRefresh('${acc.puuid}')">↻</button>
-          <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" onclick="event.stopPropagation(); if(typeof openNoteModal==='function') openNoteModal('${acc.puuid}')">📝</button>
-          <button class="remove-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar" onclick="event.stopPropagation(); handleRemoveAccount('${acc.puuid}')">✕</button>
+          <button class="refresh-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar">↻</button>
+          <button class="note-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas">📝</button>
+          <button class="remove-btn" data-puuid="${acc.puuid}" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar">✕</button>
         </div>
       </div>
       

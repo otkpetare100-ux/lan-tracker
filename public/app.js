@@ -231,14 +231,13 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
 }
 
 
-/* ---- History Modal Action ---- */
-window.handleHistoryModal = async function(puuid) {
+/* ---- Global Actions ---- */
+async function handleHistoryModal(puuid) {
   const acc = accounts.find(a => a.puuid === puuid);
   if (!acc) return;
 
-  // Si no hay partidas o están vacías, cargamos primero
   if (!acc.matches || acc.matches.length === 0) {
-    const btn = document.querySelector(`.history-btn-mini[onclick*="${puuid}"]`);
+    const btn = document.querySelector(`.history-btn-mini[data-puuid="${puuid}"]`);
     const originalHTML = btn ? btn.innerHTML : '';
     if (btn) btn.innerHTML = '⚔ Cargando...';
 
@@ -262,13 +261,10 @@ window.handleHistoryModal = async function(puuid) {
     }
     return;
   }
-
-  // Si ya tenemos partidas, abrir modal directamente
   openHistoryModal(puuid);
 }
 
-/* ---- Event delegation y Global Actions ---- */
-window.handleRemoveAccount = async function(puuid) {
+async function handleRemoveAccount(puuid) {
   const ok = await showCustomConfirm('Eliminar Cuenta', '¿Estás seguro de que deseas dejar de rastrear a este jugador?');
   if (ok) {
     await deleteAccount(puuid);
@@ -280,12 +276,39 @@ window.handleRemoveAccount = async function(puuid) {
     applyFilters();
     showToast('Cuenta eliminada', 'toast-neutral');
   }
-};
+}
 
+/* ---- Event delegation ---- */
 if (accountsGrid) {
   accountsGrid.addEventListener('click', async (e) => {
-    // Solo manejamos el clic en la fila para ir al perfil
-    const row = e.target.closest('.scoreboard-row');
+    const historyBtn = e.target.closest('.history-btn-mini');
+    const refreshBtn = e.target.closest('.refresh-btn');
+    const noteBtn    = e.target.closest('.note-btn');
+    const removeBtn  = e.target.closest('.remove-btn');
+    const row        = e.target.closest('.scoreboard-row');
+
+    if (historyBtn) {
+      e.preventDefault(); e.stopPropagation();
+      handleHistoryModal(historyBtn.dataset.puuid);
+      return;
+    }
+    if (refreshBtn) {
+      e.preventDefault(); e.stopPropagation();
+      handleRefresh(refreshBtn.dataset.puuid);
+      return;
+    }
+    if (noteBtn) {
+      e.preventDefault(); e.stopPropagation();
+      if (typeof openNoteModal === 'function') openNoteModal(noteBtn.dataset.puuid);
+      return;
+    }
+    if (removeBtn) {
+      e.preventDefault(); e.stopPropagation();
+      handleRemoveAccount(removeBtn.dataset.puuid);
+      return;
+    }
+
+    // Navegación de la fila
     if (row && !e.target.closest('button')) {
       const url = row.dataset.url;
       if (url) window.location.href = url;
