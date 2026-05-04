@@ -69,8 +69,9 @@ setInterval(async () => {
 
 /* ---- Search ---- */
 async function handleSearch() {
+  if (!searchInput) return;
   const raw = searchInput.value.trim();
-  showError('');
+  if (typeof showError === 'function') showError('');
   if (!raw) return;
 
   const parts = raw.split('#');
@@ -293,7 +294,8 @@ async function handleHistoryToggle(puuid) {
 }
 
 /* ---- Event delegation ---- */
-accountsGrid.addEventListener('click', async (e) => {
+if (accountsGrid) {
+  accountsGrid.addEventListener('click', async (e) => {
   const removeBtn  = e.target.closest('.remove-btn');
   const refreshBtn = e.target.closest('.refresh-btn');
   const historyBtn = e.target.closest('.history-toggle-btn');
@@ -361,6 +363,7 @@ accountsGrid.addEventListener('click', async (e) => {
     if (url) window.location.href = url;
   }
 });
+}
 
 if (searchBtn) {
   searchBtn.addEventListener('click', handleSearch);

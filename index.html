@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3.0.1" />
+  <link rel="stylesheet" href="styles.css?v=3.0.2" />
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -41,7 +41,12 @@
 
     <!-- Cuentas -->
     <section class="accounts-section">
-      <h2 class="section-title">🏆 Leaderboard</h2>
+      <div class="section-header-flex">
+        <h2 class="section-title">🏆 Leaderboard</h2>
+        <div class="search-filter-wrap">
+          <input type="text" id="filter-input" placeholder="Buscar jugador..." autocomplete="off" />
+        </div>
+      </div>
       <div id="error-msg" class="error-msg" style="display:none;"></div>
       <div class="accounts-grid" id="accounts-grid">
         <!-- Generado por render.js -->
@@ -67,11 +72,11 @@
 
   <!-- Scripts -->
   <script src="chart.min.js"></script>
-  <script src="render.js?v=3.0.1"></script>
-  <script src="storage.js?v=3.0.1"></script>
-  <script src="api.js?v=3.0.1"></script>
-  <script src="app.js?v=3.0.1"></script>
-  <script src="compare.js?v=3.0.1"></script>
+  <script src="render.js?v=3.0.2"></script>
+  <script src="storage.js?v=3.0.2"></script>
+  <script src="api.js?v=3.0.2"></script>
+  <script src="app.js?v=3.0.2"></script>
+  <script src="compare.js?v=3.0.2"></script>
 
   <!-- Modal de Detalles -->
   <div id="matchModal" class="modal-overlay" onclick="closeMatchModal(event)">

@@ -210,6 +210,42 @@ body {
   background: linear-gradient(to right, rgba(200, 155, 60, 0.4), transparent);
 }
 
+.section-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 20px;
+}
+
+.section-header-flex .section-title {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.search-filter-wrap {
+  position: relative;
+  min-width: 250px;
+}
+
+.search-filter-wrap input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  padding: 10px 15px;
+  font-family: var(--font-main);
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-filter-wrap input:focus {
+  border-color: var(--gold-primary);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 15px rgba(200, 155, 60, 0.2);
+}
+
 /* --- Scoreboard Row (Reemplazo de Player Card) --- */
 .scoreboard-row {
   background: var(--bg-card);
