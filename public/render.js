@@ -184,10 +184,21 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     
     let extraItem = itm[7] || 0;
     
-    // Nueva lógica Temporada 2026: Buscar en Augments
-    if (extraItem === 0 && m.augments && Array.isArray(m.augments)) {
-      const bootInAugments = m.augments.find(id => BOOT_IDS.includes(Number(id)));
-      if (bootInAugments) extraItem = Number(bootInAugments);
+    // Nueva lógica Temporada 2026: Buscar en Augments y Pasivas (Buffs)
+    if (extraItem === 0) {
+      // Buscar en Augments
+      if (m.augments && Array.isArray(m.augments)) {
+        const bootInAugments = m.augments.find(id => BOOT_IDS.includes(Number(id)));
+        if (bootInAugments) extraItem = Number(bootInAugments);
+      }
+      
+      // Buscar por nombre de pasiva en Challenges (Rastro de misión)
+      if (extraItem === 0 && m.challenges) {
+        const hasMissionBuff = Object.keys(m.challenges).some(key => 
+          key.includes('AdcMissionSpeed') || key.includes('RoleBootsMovement')
+        );
+        if (hasMissionBuff) extraItem = 3006; // Berserker's por defecto para la misión
+      }
     }
 
     const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO' || m.role === 'CARRY';
@@ -2032,10 +2043,19 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     const itm = p.items || [0,0,0,0,0,0,0,0];
     let extraItem = itm[7] || 0;
 
-    // Nueva lógica Temporada 2026: Buscar en Augments
-    if (extraItem === 0 && p.augments && Array.isArray(p.augments)) {
-      const bootInAugments = p.augments.find(id => BOOT_IDS.includes(Number(id)));
-      if (bootInAugments) extraItem = Number(bootInAugments);
+    // Nueva lógica Temporada 2026: Buscar en Augments y Pasivas (Buffs)
+    if (extraItem === 0) {
+      if (p.augments && Array.isArray(p.augments)) {
+        const bootInAugments = p.augments.find(id => BOOT_IDS.includes(Number(id)));
+        if (bootInAugments) extraItem = Number(bootInAugments);
+      }
+
+      if (extraItem === 0 && p.challenges) {
+        const hasMissionBuff = Object.keys(p.challenges).some(key => 
+          key.includes('AdcMissionSpeed') || key.includes('RoleBootsMovement')
+        );
+        if (hasMissionBuff) extraItem = 3006;
+      }
     }
 
     const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
