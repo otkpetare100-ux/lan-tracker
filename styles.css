@@ -226,13 +226,6 @@ body {
   cursor: pointer;
 }
 
-.scoreboard-row:hover {
-  transform: translateX(6px);
-  border-color: var(--gold-primary);
-  background: linear-gradient(90deg, rgba(200, 155, 60, 0.08) 0%, var(--bg-card) 60%);
-  box-shadow: 0 0 20px rgba(200, 155, 60, 0.2);
-}
-
 .score-rank {
   font-family: var(--font-title);
   font-size: 1.5rem;
@@ -270,6 +263,13 @@ body {
   0%   { box-shadow: 0 0 14px rgba(255, 215, 0, 0.12), inset 0 0 30px rgba(255, 215, 0, 0.03); }
   50%  { box-shadow: 0 0 28px rgba(255, 215, 0, 0.28), inset 0 0 40px rgba(255, 215, 0, 0.07); }
   100% { box-shadow: 0 0 14px rgba(255, 215, 0, 0.12), inset 0 0 30px rgba(255, 215, 0, 0.03); }
+}
+
+.scoreboard-row:hover {
+  transform: translateX(8px);
+  border-color: rgba(255, 215, 0, 0.6);
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, var(--bg-card) 60%);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.05);
 }
 
 .score-player {
