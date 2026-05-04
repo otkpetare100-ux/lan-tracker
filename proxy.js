@@ -1565,6 +1565,7 @@ async function backendFetchMatchHistory(puuid) {
           individualPosition: p.individualPosition || '',
           role: p.role || '',
           items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6, p.item7 || 0],
+          augments: p.augments || [],
           perks: p.perks,
           challenges: p.challenges
         });
@@ -1682,6 +1683,7 @@ app.get('/api/match/:matchId', async (req, res) => {
       champLevel: p.champLevel,
       individualPosition: p.individualPosition,
       questItemSlot: p.questItemSlot,
+      augments: p.augments || [],
       challenges: p.challenges
     }));
 

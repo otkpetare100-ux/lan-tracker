@@ -183,6 +183,13 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const PINK_WARD_ID = 2055;
     
     let extraItem = itm[7] || 0;
+    
+    // Nueva lógica Temporada 2026: Buscar en Augments
+    if (extraItem === 0 && m.augments && Array.isArray(m.augments)) {
+      const bootInAugments = m.augments.find(id => BOOT_IDS.includes(Number(id)));
+      if (bootInAugments) extraItem = Number(bootInAugments);
+    }
+
     const isADC = pos === 'BOTTOM' || m.role === 'DUO_CARRY' || m.role === 'CARRY' || m.role === 'DUO' || m.role === 'CARRY';
     const isSupp = pos === 'UTILITY' || pos === 'SUPPORT' || m.role === 'DUO_SUPPORT' || m.role === 'SUPPORT';
 
@@ -2024,6 +2031,13 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     const itm = p.items || [0,0,0,0,0,0,0,0];
     let extraItem = itm[7] || 0;
+
+    // Nueva lógica Temporada 2026: Buscar en Augments
+    if (extraItem === 0 && p.augments && Array.isArray(p.augments)) {
+      const bootInAugments = p.augments.find(id => BOOT_IDS.includes(Number(id)));
+      if (bootInAugments) extraItem = Number(bootInAugments);
+    }
+
     const isADC = pos === 'BOTTOM' || p.role === 'DUO_CARRY' || p.role === 'CARRY' || p.role === 'DUO';
     const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT' || p.role === 'DUO_SUPPORT' || p.role === 'SUPPORT';
 
