@@ -92,13 +92,13 @@
 
   <!-- Diálogo Personalizado (Premium Alert/Confirm/Prompt) -->
   <div id="customDialog" class="modal-overlay" style="z-index: 10000;">
-    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 40px 30px;">
-      <h3 id="cd-title" style="margin-top: 0; color: var(--gold-primary);"></h3>
-      <p id="cd-message" style="margin-bottom: 25px; color: #ccc;"></p>
-      <input type="text" id="cd-input" class="search-input" style="display:none; width:100%; margin-bottom: 25px; text-align:center;" autocomplete="off" />
-      <div style="display: flex; gap: 15px; justify-content: center;">
-        <button id="cd-cancel" style="background:transparent; border:1px solid #d93f3f; color:#d93f3f; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; display:none;">Cancelar</button>
-        <button id="cd-confirm" style="background:var(--gold-primary); border:none; color:#000; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:800;">Aceptar</button>
+    <div class="custom-dialog-box">
+      <h3 id="cd-title" class="cd-title"></h3>
+      <p id="cd-message" class="cd-message"></p>
+      <input type="text" id="cd-input" class="cd-input" style="display:none;" placeholder="Nombre#TAG" autocomplete="off" />
+      <div class="cd-actions">
+        <button id="cd-cancel" class="cd-btn-cancel" style="display:none;">Cancelar</button>
+        <button id="cd-confirm" class="cd-btn-confirm">Aceptar</button>
       </div>
     </div>
   </div>
@@ -120,9 +120,9 @@
     }
 
     async function openAddAccountModal() {
-      const raw = await showCustomPrompt('➕ Agregar Cuenta', 'Ingresa el nombre del invocador en formato Nombre#TAG\n(ej: Pepitoflow#LAN1)');
+      const raw = await showCustomPrompt('➕ Agregar Cuenta', 'Ingresa el nombre del invocador en formato
+Nombre#TAG');
       if (!raw) return;
-      // Reutilizar lógica de búsqueda existente
       const input = document.getElementById('search-input');
       if (input) {
         input.value = raw.trim();

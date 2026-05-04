@@ -399,7 +399,102 @@ body {
   justify-content: center;
 }
 
-/* --- Perfil de Usuario --- */
+/* --- Custom Dialog Box --- */
+.custom-dialog-box {
+  background: linear-gradient(145deg, rgba(10,14,19,0.98), rgba(1,10,19,0.95));
+  border: 1px solid var(--gold-dark);
+  border-radius: 18px;
+  padding: 44px 36px 36px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(200,155,60,0.15), 0 20px 60px rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  position: relative;
+}
+
+.cd-title {
+  margin: 0 0 12px;
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  color: var(--gold-primary);
+  letter-spacing: 0.5px;
+}
+
+.cd-message {
+  margin: 0 0 24px;
+  color: #aaa;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.cd-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--gold-dark);
+  border-radius: 10px;
+  color: #fff;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-family: var(--font-main);
+  outline: none;
+  margin-bottom: 24px;
+  text-align: center;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.cd-input:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 10px rgba(200,155,60,0.2);
+}
+
+.cd-input::placeholder {
+  color: #444;
+  letter-spacing: 1px;
+}
+
+.cd-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.cd-btn-cancel {
+  background: transparent;
+  border: 1px solid #d93f3f;
+  color: #d93f3f;
+  padding: 11px 24px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.cd-btn-cancel:hover {
+  background: rgba(217,63,63,0.1);
+}
+
+.cd-btn-confirm {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+  border: none;
+  color: #000;
+  padding: 11px 28px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.cd-btn-confirm:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(200,155,60,0.3);
+}
+
+
 .profile-container {
   max-width: 1200px;
   margin: 40px auto;
