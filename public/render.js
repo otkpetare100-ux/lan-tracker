@@ -361,9 +361,9 @@ function buildCardHTML(acc, position) {
         ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
           <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
-          <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" data-puuid="${acc.puuid}">↻</button>
-          <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" data-puuid="${acc.puuid}">📝</button>
-          <button class="remove-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar" data-puuid="${acc.puuid}">✕</button>
+          <button class="refresh-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Actualizar" onclick="event.stopPropagation(); handleRefresh('${acc.puuid}')">↻</button>
+          <button class="note-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--gold-primary); cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Notas" onclick="event.stopPropagation(); if(typeof openNoteModal==='function') openNoteModal('${acc.puuid}')">📝</button>
+          <button class="remove-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); color:#d93f3f; cursor:pointer; padding:5px 8px; border-radius:6px; transition:var(--transition);" title="Eliminar" onclick="event.stopPropagation(); handleRemoveAccount('${acc.puuid}')">✕</button>
         </div>
       </div>
       
@@ -690,7 +690,8 @@ function calculateChampStats(matches) {
 // --- Lógica del Modal de Jugador (Perfil Detallado) ---
 window.openPlayerModal = function(puuid, event) {
   // Si el clic fue en un botón o en un icono de campeón, no abrimos este modal
-  if (event && (event.target.closest('button') || event.target.closest('.top-champ') || event.target.closest('.top-champ-icon'))) {
+  // Permitir que el botón de historial abra el modal, pero bloquear otros botones
+  if (event && (event.target.closest('.refresh-btn') || event.target.closest('.note-btn') || event.target.closest('.remove-btn') || event.target.closest('.top-champ') || event.target.closest('.top-champ-icon'))) {
     return;
   }
 

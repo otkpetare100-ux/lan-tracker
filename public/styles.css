@@ -1207,7 +1207,7 @@ body {
   margin-bottom: 15px;
 }
 
-.spinning {
+.spinning, .refresh-btn--loading {
   animation: spin 1s linear infinite !important;
   display: inline-block;
   pointer-events: none;

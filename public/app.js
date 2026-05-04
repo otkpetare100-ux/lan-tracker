@@ -226,69 +226,30 @@ async function handleRefresh(puuid, silent = false, bypassCooldown = false) {
 }
 
 
-/* ---- Event delegation ---- */
+/* ---- Event delegation y Global Actions ---- */
+window.handleRemoveAccount = async function(puuid) {
+  const ok = await showCustomConfirm('Eliminar Cuenta', '¿Estás seguro de que deseas dejar de rastrear a este jugador?');
+  if (ok) {
+    await deleteAccount(puuid);
+    accounts = accounts.filter(a => a.puuid !== puuid);
+    updateGlobalRef();
+    if (window.selectedToCompare) {
+      window.selectedToCompare = window.selectedToCompare.filter(p => p !== puuid);
+    }
+    applyFilters();
+    showToast('Cuenta eliminada', 'toast-neutral');
+  }
+};
+
 if (accountsGrid) {
   accountsGrid.addEventListener('click', async (e) => {
-  const removeBtn  = e.target.closest('.remove-btn');
-  const refreshBtn = e.target.closest('.refresh-btn');
-  const historyBtn = e.target.closest('.history-toggle-btn');
-  const noteBtn    = e.target.closest('.note-btn');
-  const shareBtn   = e.target.closest('.share-btn');
-
-  if (noteBtn) {
-    e.preventDefault(); e.stopPropagation();
-    const puuid = noteBtn.dataset.puuid;
-    if (typeof openNoteModal === 'function') openNoteModal(puuid);
-    return;
-  }
-
-  if (shareBtn) {
-    e.preventDefault(); e.stopPropagation();
-    const puuid = shareBtn.dataset.puuid;
-    const acc = accounts.find(a => a.puuid === puuid);
-    if (acc) {
-      const url = `https://lan-tracker-production.up.railway.app/player/${encodeURIComponent(acc.gameName)}-${encodeURIComponent(acc.tagLine)}`;
-      navigator.clipboard.writeText(url).then(() => {
-        showToast('📋 ¡Link copiado al portapapeles!', 'toast-up');
-      }).catch(err => {
-        showError('No se pudo copiar el link');
-      });
+    // Solo manejamos el clic en la fila para ir al perfil
+    const row = e.target.closest('.scoreboard-row');
+    if (row && !e.target.closest('button')) {
+      const url = row.dataset.url;
+      if (url) window.location.href = url;
     }
-    return;
-  }
-
-  if (removeBtn) {
-    e.preventDefault(); e.stopPropagation();
-    const puuid = removeBtn.dataset.puuid;
-    const ok = await showCustomConfirm('Eliminar Cuenta', '¿Estás seguro de que deseas dejar de rastrear a este jugador?');
-    if (ok) {
-      await deleteAccount(puuid);
-      accounts = accounts.filter(a => a.puuid !== puuid);
-      updateGlobalRef();
-      // Limpiar comparación si la cuenta eliminada estaba seleccionada
-      if (window.selectedToCompare) {
-        window.selectedToCompare = window.selectedToCompare.filter(p => p !== puuid);
-      }
-      applyFilters();
-      showToast('Cuenta eliminada', 'toast-neutral');
-    }
-    return;
-  }
-
-  if (refreshBtn) {
-    e.preventDefault(); e.stopPropagation();
-    const puuid = refreshBtn.dataset.puuid;
-    handleRefresh(puuid);
-    return;
-  }
-  
-  // Handle row click for profile redirect
-  const row = e.target.closest('.scoreboard-row');
-  if (row) {
-    const url = row.dataset.url;
-    if (url) window.location.href = url;
-  }
-});
+  });
 }
 
 if (searchBtn) {
