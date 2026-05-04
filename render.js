@@ -340,10 +340,7 @@ function buildCardHTML(acc, position) {
           <div class="score-level">${acc.summonerLevel || '?'}</div>
         </div>
         <div class="score-names">
-          <div class="score-name-row">
-            <span class="score-name">${escapeHTML(acc.gameName)}</span>
-            ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
-          </div>
+          <span class="score-name">${escapeHTML(acc.gameName)}</span>
           <span class="score-tag">#${escapeHTML(acc.tagLine)}</span>
         </div>
       </div>
@@ -357,6 +354,7 @@ function buildCardHTML(acc, position) {
       </div>
       
       <div class="score-actions" onclick="event.stopPropagation()">
+        ${streakText ? `<span class="streak-badge ${acc.streak > 0 ? 'win' : 'loss'}">${streakText}</span>` : ''}
         ${buildMatchDots(acc.matches)}
         <div class="score-btn-group" style="margin-left: 10px;">
           <button class="history-btn-mini" onclick="openPlayerModal('${acc.puuid}', event)">⚔ Historial</button>
