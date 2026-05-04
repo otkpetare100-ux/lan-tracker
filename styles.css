@@ -296,14 +296,11 @@ body {
 }
 
 .status-dot {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  border: 2px solid var(--bg-card);
-  z-index: 2;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .status-dot.ingame {
