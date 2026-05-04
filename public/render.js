@@ -178,11 +178,12 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const pos = (m.position || m.individualPosition || '').toUpperCase();
     const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || m.role === 'DUO' || m.role === 'SUPPORT';
 
-    // Lista de IDs de botas para moverlas al octavo slot
+    // Lista de IDs de botas
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
     let boots = 0;
     let itemsOnly = itm.slice(0, 6).filter(id => {
-      if (BOOT_IDS.includes(id) && boots === 0) {
+      // Solo extraemos las botas para el 8vo slot si es botlane
+      if (isBotlane && BOOT_IDS.includes(id) && boots === 0) {
         boots = id;
         return false;
       }
@@ -190,7 +191,7 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     });
     while(itemsOnly.length < 6) itemsOnly.push(0);
 
-    // Mapeo inteligente: [Item, Item, Item, Trinket(6), Item, Item, Item, Botas]
+    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Botas(solo si es botlane)]
     const reordered = [
       itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
       itemsOnly[3], itemsOnly[4], itemsOnly[5], boots
@@ -2002,7 +2003,7 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
     let boots = 0;
     let itemsOnly = itm.slice(0, 6).filter(id => {
-      if (BOOT_IDS.includes(id) && boots === 0) {
+      if (isBotlane && BOOT_IDS.includes(id) && boots === 0) {
         boots = id;
         return false;
       }
@@ -2010,7 +2011,7 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     });
     while(itemsOnly.length < 6) itemsOnly.push(0);
 
-    // Mapeo inteligente: [Item, Item, Item, Trinket(6), Item, Item, Item, Botas]
+    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Botas]
     const reordered = [
       itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
       itemsOnly[3], itemsOnly[4], itemsOnly[5], boots
