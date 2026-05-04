@@ -38,16 +38,13 @@
   <!-- CONTENIDO -->
   <main class="tracker-wrap">
 
-    <!-- Hero Search -->
+    <!-- Botón Agregar Cuenta -->
     <section class="search-section">
       <div class="search-hero">
-        <p class="search-hint">Rastreador de Invocadores</p>
-        <div class="search-bar">
-          <div class="search-input-wrap">
-            <input type="text" id="search-input" placeholder="Nombre#TAG" autocomplete="off" />
-          </div>
-          <button id="search-btn">Rastrear</button>
-        </div>
+        <button class="add-account-btn" id="add-account-btn" onclick="openAddAccountModal()">
+          <span class="add-icon">+</span>
+          Agregar cuenta
+        </button>
         <div id="error-msg" class="error-msg" style="display:none;"></div>
       </div>
     </section>
@@ -61,6 +58,9 @@
     </section>
 
   </main>
+
+  <!-- Input oculto para compatibilidad con handleSearch -->
+  <input type="text" id="search-input" style="display:none;" autocomplete="off" />
 
   <!-- Sidebar de Actividad -->
   <aside class="activity-sidebar collapsed" id="activity-sidebar">
@@ -117,6 +117,17 @@
         if (discordId) localStorage.setItem('myDiscordId', discordId.trim());
       }
       if (discordId) window.location.href = `/perfil/${discordId.trim()}`;
+    }
+
+    async function openAddAccountModal() {
+      const raw = await showCustomPrompt('➕ Agregar Cuenta', 'Ingresa el nombre del invocador en formato Nombre#TAG\n(ej: Pepitoflow#LAN1)');
+      if (!raw) return;
+      // Reutilizar lógica de búsqueda existente
+      const input = document.getElementById('search-input');
+      if (input) {
+        input.value = raw.trim();
+        if (typeof handleSearch === 'function') handleSearch();
+      }
     }
   </script>
 </body>

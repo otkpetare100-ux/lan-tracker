@@ -142,63 +142,47 @@ body {
 /* --- Hero Search --- */
 .search-section {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
 }
 
 .search-hero {
-  max-width: 600px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
-.search-hint {
-  font-size: 0.9rem;
-  color: var(--gold-primary);
-  margin-bottom: 15px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.search-bar {
-  display: flex;
-  gap: 10px;
-  background: var(--bg-card);
-  padding: 10px;
-  border-radius: 12px;
-  border: var(--border-gold);
-  box-shadow: var(--shadow-premium);
-}
-
-.search-input-wrap {
-  flex: 1;
-  display: flex;
+/* --- Botón Agregar Cuenta --- */
+.add-account-btn {
+  display: inline-flex;
   align-items: center;
-  padding: 0 15px;
-}
-
-.search-bar input {
-  background: transparent;
-  border: none;
-  color: white;
-  width: 100%;
-  padding: 10px;
-  font-size: 1.1rem;
-  outline: none;
-}
-
-.search-bar button {
-  background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
-  color: #000;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 8px;
-  font-weight: 800;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(200,155,60,0.15), rgba(200,155,60,0.05));
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-primary);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
 }
 
-.search-bar button:hover {
-  filter: brightness(1.2);
-  transform: scale(1.05);
+.add-account-btn:hover {
+  background: var(--gold-primary);
+  color: #000;
+  box-shadow: 0 0 20px rgba(200, 155, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+.add-icon {
+  font-size: 1.4rem;
+  font-weight: 300;
+  line-height: 1;
 }
 
 /* --- Grilla de Cuentas --- */
