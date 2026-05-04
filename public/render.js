@@ -175,15 +175,30 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     
     // Items - Reordenar para poner Trinket (index 6) en la posición 4 (fin de primera fila)
     let itm = m.items || [0,0,0,0,0,0,0];
-    // Queremos: [0, 1, 2, 6, 3, 4, 5, (vacío)]
-    const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
-    
     const pos = (m.position || m.individualPosition || '').toUpperCase();
     const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || m.role === 'DUO' || m.role === 'SUPPORT';
 
+    // Lista de IDs de botas para moverlas al octavo slot
+    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
+    let boots = 0;
+    let itemsOnly = itm.slice(0, 6).filter(id => {
+      if (BOOT_IDS.includes(id) && boots === 0) {
+        boots = id;
+        return false;
+      }
+      return id > 0;
+    });
+    while(itemsOnly.length < 6) itemsOnly.push(0);
+
+    // Mapeo inteligente: [Item, Item, Item, Trinket(6), Item, Item, Item, Botas]
+    const reordered = [
+      itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
+      itemsOnly[3], itemsOnly[4], itemsOnly[5], boots
+    ];
+
     const itemsHTML = reordered.map((id, idx) => {
-      // El último slot (idx 7) es el "cuadrado" que solo se ve en ADC y SUP
       if (idx === 7) {
+        if (id > 0) return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" />';
         return isBotlane ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
       }
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
@@ -1979,21 +1994,39 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     
     html += '<td><div class="item-list">';
     
-    // Reordenar items: [0, 1, 2, 6, 3, 4, 5, (vacío)]
-    const itm = p.items || [0,0,0,0,0,0,0];
-    const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
-    
     // En la API de Riot el campo puede ser teamPosition o individualPosition
     const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
     const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || p.role === 'DUO' || p.role === 'SUPPORT';
 
-    reordered.forEach((itemId, idx) => {
+    const itm = p.items || [0,0,0,0,0,0,0];
+    const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
+    let boots = 0;
+    let itemsOnly = itm.slice(0, 6).filter(id => {
+      if (BOOT_IDS.includes(id) && boots === 0) {
+        boots = id;
+        return false;
+      }
+      return id > 0;
+    });
+    while(itemsOnly.length < 6) itemsOnly.push(0);
+
+    // Mapeo inteligente: [Item, Item, Item, Trinket(6), Item, Item, Item, Botas]
+    const reordered = [
+      itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
+      itemsOnly[3], itemsOnly[4], itemsOnly[5], boots
+    ];
+
+    reordered.forEach((id, idx) => {
       if (idx === 7) {
-        if (isBotlane) html += '<div class="empty-item adc-slot"></div>';
+        if (id > 0) {
+          html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" class="item-icon">';
+        } else if (isBotlane) {
+          html += '<div class="empty-item adc-slot"></div>';
+        }
         return;
       }
-      if (itemId > 0) {
-        html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + itemId + '.png" class="item-icon">';
+      if (id > 0) {
+        html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" class="item-icon">';
       } else {
         html += '<div class="empty-item"></div>';
       }
