@@ -178,23 +178,33 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     const pos = (m.position || m.individualPosition || '').toUpperCase();
     const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || m.role === 'DUO' || m.role === 'SUPPORT';
 
-    // Lista de IDs de botas
+    // Lista de IDs de botas y pink wards
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
-    let boots = 0;
+    const PINK_WARD_ID = 2055;
+    
+    let extraItem = 0;
+    const isADC = pos === 'BOTTOM';
+    const isSupp = pos === 'UTILITY' || pos === 'SUPPORT';
+
     let itemsOnly = itm.slice(0, 6).filter(id => {
-      // Solo extraemos las botas para el 8vo slot si es botlane
-      if (isBotlane && BOOT_IDS.includes(id) && boots === 0) {
-        boots = id;
+      // Si es ADC, buscamos botas para el 8vo slot
+      if (isADC && BOOT_IDS.includes(id) && extraItem === 0) {
+        extraItem = id;
+        return false;
+      }
+      // Si es SUPP, buscamos Pink Ward para el 8vo slot
+      if (isSupp && id === PINK_WARD_ID && extraItem === 0) {
+        extraItem = id;
         return false;
       }
       return id > 0;
     });
     while(itemsOnly.length < 6) itemsOnly.push(0);
 
-    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Botas(solo si es botlane)]
+    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Extra(Botas o Pink)]
     const reordered = [
       itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
-      itemsOnly[3], itemsOnly[4], itemsOnly[5], boots
+      itemsOnly[3], itemsOnly[4], itemsOnly[5], extraItem
     ];
 
     const itemsHTML = reordered.map((id, idx) => {
@@ -2001,20 +2011,29 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
 
     const itm = p.items || [0,0,0,0,0,0,0];
     const BOOT_IDS = [1001, 3006, 3009, 3020, 3047, 3111, 3117, 3158, 3005, 3010];
-    let boots = 0;
+    const PINK_WARD_ID = 2055;
+    
+    let extraItem = 0;
+    const isADC = pos === 'BOTTOM';
+    const isSupp = pos === 'UTILITY' || p.role === 'SUPPORT';
+
     let itemsOnly = itm.slice(0, 6).filter(id => {
-      if (isBotlane && BOOT_IDS.includes(id) && boots === 0) {
-        boots = id;
+      if (isADC && BOOT_IDS.includes(id) && extraItem === 0) {
+        extraItem = id;
+        return false;
+      }
+      if (isSupp && id === PINK_WARD_ID && extraItem === 0) {
+        extraItem = id;
         return false;
       }
       return id > 0;
     });
     while(itemsOnly.length < 6) itemsOnly.push(0);
 
-    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Botas]
+    // Mapeo: [0, 1, 2, Trinket(6), 3, 4, 5, Extra]
     const reordered = [
       itemsOnly[0], itemsOnly[1], itemsOnly[2], itm[6],
-      itemsOnly[3], itemsOnly[4], itemsOnly[5], boots
+      itemsOnly[3], itemsOnly[4], itemsOnly[5], extraItem
     ];
 
     reordered.forEach((id, idx) => {
