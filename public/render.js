@@ -1977,7 +1977,20 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     html += '<td><span class="score-kda">' + (p.goldEarned/1000).toFixed(1) + 'k</span></td>';
     
     html += '<td><div class="item-list">';
-    (p.items || [0,0,0,0,0,0,0]).forEach(itemId => {
+    
+    // Reordenar items: [0, 1, 2, 6, 3, 4, 5, (vacío)]
+    const itm = p.items || [0,0,0,0,0,0,0];
+    const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
+    
+    // En la API de Riot el campo es teamPosition
+    const pos = p.teamPosition || '';
+    const hasExtraSlot = pos === 'BOTTOM' || pos === 'UTILITY';
+
+    reordered.forEach((itemId, idx) => {
+      if (idx === 7) {
+        if (hasExtraSlot) html += '<div class="empty-item" style="border:1px solid rgba(200,155,60,0.1); background:rgba(0,0,0,0.2);"></div>';
+        return;
+      }
       if (itemId > 0) {
         html += '<img src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + itemId + '.png" class="item-icon">';
       } else {
