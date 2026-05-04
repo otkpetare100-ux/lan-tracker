@@ -178,12 +178,13 @@ function buildMatchHistoryHTML(matches, playerPuuid) {
     // Queremos: [0, 1, 2, 6, 3, 4, 5, (vacío)]
     const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
     
-    const hasExtraSlot = m.position === 'BOTTOM' || m.position === 'UTILITY';
+    const pos = (m.position || m.individualPosition || '').toUpperCase();
+    const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || m.role === 'DUO' || m.role === 'SUPPORT';
 
     const itemsHTML = reordered.map((id, idx) => {
       // El último slot (idx 7) es el "cuadrado" que solo se ve en ADC y SUP
       if (idx === 7) {
-        return hasExtraSlot ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
+        return isBotlane ? '<div class="mv2-item empty adc-slot"></div>' : '<div class="mv2-item hidden-slot"></div>';
       }
       if (!id || id === 0) return '<div class="mv2-item empty"></div>';
       return '<img class="mv2-item" src="https://ddragon.leagueoflegends.com/cdn/' + DDRAGON_VERSION + '/img/item/' + id + '.png" onerror="this.style.visibility=\'hidden\'" />';
@@ -1982,13 +1983,13 @@ function renderTeamTable(title, players, teamClass, teamData, maxDmg, gameDurati
     const itm = p.items || [0,0,0,0,0,0,0];
     const reordered = [itm[0], itm[1], itm[2], itm[6], itm[3], itm[4], itm[5], 0];
     
-    // En la API de Riot el campo es teamPosition
-    const pos = p.teamPosition || '';
-    const hasExtraSlot = pos === 'BOTTOM' || pos === 'UTILITY';
+    // En la API de Riot el campo puede ser teamPosition o individualPosition
+    const pos = (p.teamPosition || p.individualPosition || '').toUpperCase();
+    const isBotlane = pos === 'BOTTOM' || pos === 'UTILITY' || p.role === 'DUO' || p.role === 'SUPPORT';
 
     reordered.forEach((itemId, idx) => {
       if (idx === 7) {
-        if (hasExtraSlot) html += '<div class="empty-item" style="border:1px solid rgba(200,155,60,0.1); background:rgba(0,0,0,0.2);"></div>';
+        if (isBotlane) html += '<div class="empty-item adc-slot"></div>';
         return;
       }
       if (itemId > 0) {
