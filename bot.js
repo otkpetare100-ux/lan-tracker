@@ -249,7 +249,7 @@ function initBot(db) {
     ];
 
     if (command === 'gacha' || command === 'tiro') {
-      const COST = 300;
+      const COST = 10;
       const userEco = await db.collection('economy').findOne({ discordId: msg.author.id });
 
       if (!userEco || userEco.coins < COST) {
